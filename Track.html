@@ -4,253 +4,85 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="dark">
-<title>TRACK — daily log</title>
+<title>Track — Daily Task List</title>
 <style>
   :root {
-    --bg: #0c1015;
-    --bg-panel: #11161d;
-    --bg-inset: #0a0e13;
-    --ink: #d3dae3;
-    --ink-dim: #8a95a3;
-    --ink-faint: #505c6b;
-    --line: #1c232d;
-    --line-strong: #2a3542;
-    --accent: #3ce6a6;
-    --accent-dim: #22a06e;
-    --accent-ghost: rgba(60, 230, 166, 0.07);
-    --danger: #e06c6c;
+    --bg: #202327;
+    --side: #24272b;
+    --card: #2d3136;
+    --card-2: #34383e;
+    --field: #3a3f46;
+    --text: #e9ebee;
+    --muted: #a6adb6;
+    --faint: #6d747e;
+    --line: rgba(255, 255, 255, 0.07);
+    --line-soft: rgba(255, 255, 255, 0.045);
+    --teal: #2fb5a3;
+    --teal-strong: #29a392;
+    --teal-ghost: rgba(47, 181, 163, 0.12);
+    --green: #4fc17a;
+    --danger: #e07070;
+    --radius: 10px;
+    --shadow: 0 2px 10px rgba(0, 0, 0, 0.28);
   }
   * { box-sizing: border-box; }
   html { color-scheme: dark; }
   body {
     margin: 0;
     min-height: 100vh;
-    font-family: "Cascadia Code", "Cascadia Mono", Consolas, "JetBrains Mono", "Fira Code", monospace;
+    font-family: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", sans-serif;
     font-size: 14px;
-    background:
-      repeating-linear-gradient(0deg, transparent 0 2px, rgba(255,255,255,0.006) 2px 4px),
-      var(--bg);
-    color: var(--ink);
-    line-height: 1.6;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
   }
-  ::selection { background: var(--accent); color: #06120c; }
+  ::selection { background: var(--teal); color: #10201c; }
+  button { font: inherit; cursor: pointer; transition: background .12s, border-color .12s, color .12s, filter .12s; }
+  button:focus-visible, input:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
 
-  .frame {
-    max-width: 980px;
-    margin: 0 auto;
-    padding: 30px 20px 80px;
-  }
+  .app { display: flex; min-height: 100vh; }
 
-  /* ---------- top bar ---------- */
-  .topbar {
+  /* ================= sidebar ================= */
+  .side {
+    width: 248px;
+    flex-shrink: 0;
+    background: var(--side);
+    border-right: 1px solid var(--line-soft);
     display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 14px;
-    border: 1px solid var(--line-strong);
-    background: var(--bg-panel);
-    padding: 10px 16px;
-    margin-bottom: 22px;
+    flex-direction: column;
+    padding: 18px 14px;
+    gap: 18px;
   }
   .brand {
     display: flex;
-    align-items: baseline;
-    gap: 10px;
-    margin-right: auto;
-    user-select: none;
-  }
-  .brand .mark {
-    color: var(--accent);
-    font-weight: 700;
-    letter-spacing: 3px;
-    font-size: 16px;
-  }
-  .brand .mark::before { content: "▮ "; animation: blink 1.2s steps(1) infinite; }
-  @keyframes blink { 50% { opacity: 0; } }
-  .brand .tag {
-    color: var(--ink-faint);
-    font-size: 11px;
-    letter-spacing: 1px;
-  }
-  .datebar { display: flex; align-items: center; gap: 8px; }
-
-  /* ---------- controls ---------- */
-  button, input[type="date"] {
-    font: inherit;
-    font-size: 12.5px;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    color: var(--ink);
-    background: var(--bg-inset);
-    border: 1px solid var(--line-strong);
-    border-radius: 0;
-    padding: 6px 12px;
-    cursor: pointer;
-    transition: background .1s, color .1s, border-color .1s;
-  }
-  input[type="date"] { cursor: auto; text-transform: none; }
-  input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(.65); cursor: pointer; }
-  button:hover { border-color: var(--accent-dim); color: var(--accent); }
-  button:active { background: var(--accent-ghost); }
-  button:focus-visible, input:focus-visible { outline: 1px solid var(--accent); outline-offset: 2px; }
-  button.primary {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: #071410;
-    font-weight: 700;
-  }
-  button.primary:hover { background: #5cf0b8; border-color: #5cf0b8; color: #071410; }
-  button.danger:hover { border-color: var(--danger); color: var(--danger); }
-
-  /* ---------- layout ---------- */
-  .cols {
-    display: grid;
-    grid-template-columns: 1fr 250px;
-    gap: 22px;
-    align-items: start;
-  }
-  @media (max-width: 780px) { .cols { grid-template-columns: 1fr; } }
-
-  .panel {
-    border: 1px solid var(--line-strong);
-    background: var(--bg-panel);
-  }
-  .panel-head {
-    display: flex;
-    align-items: baseline;
-    gap: 10px;
-    padding: 12px 18px;
-    border-bottom: 1px dashed var(--line-strong);
-    color: var(--ink-dim);
-    font-size: 12px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    user-select: none;
-  }
-  .panel-head .rule { flex: 1; border-top: 1px dashed var(--line); align-self: center; }
-  .panel-head .hl { color: var(--accent); }
-  .panel-body { padding: 18px; }
-
-  .day-title {
-    margin: 0 0 2px;
-    font-size: 17px;
-    font-weight: 700;
-    color: var(--ink);
-    letter-spacing: 1px;
-  }
-  .day-title .dow { color: var(--accent); }
-  .day-sub {
-    margin: 0 0 18px;
-    color: var(--ink-faint);
-    font-size: 12px;
-    letter-spacing: 1px;
-    min-height: 1.2em;
-  }
-
-  /* ---------- add row ---------- */
-  .addrow { display: flex; gap: 0; margin-bottom: 18px; }
-  .addrow .prompt {
-    display: flex;
     align-items: center;
-    padding: 0 10px;
-    border: 1px solid var(--line-strong);
-    border-right: none;
-    background: var(--bg-inset);
-    color: var(--accent);
-    user-select: none;
-  }
-  .addrow input[type="text"] {
-    flex: 1;
-    font: inherit;
-    font-size: 14px;
-    color: var(--ink);
-    background: var(--bg-inset);
-    border: 1px solid var(--line-strong);
-    border-left: none;
-    border-right: none;
-    border-radius: 0;
-    padding: 9px 4px 9px 0;
-    caret-color: var(--accent);
-  }
-  .addrow input[type="text"]::placeholder { color: var(--ink-faint); }
-  .addrow input[type="text"]:focus { outline: none; }
-  .addrow:focus-within .prompt,
-  .addrow:focus-within input[type="text"],
-  .addrow:focus-within button { border-color: var(--accent-dim); }
-  .addrow button { border-left: none; }
-
-  /* ---------- log lines ---------- */
-  ol.items { list-style: none; margin: 0; padding: 0; counter-reset: line; }
-  ol.items li {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    padding: 7px 8px 7px 4px;
-    border-bottom: 1px solid var(--line);
-  }
-  ol.items li:hover { background: var(--accent-ghost); }
-  ol.items li .num {
-    counter-increment: line;
-    color: var(--ink-faint);
-    user-select: none;
-    min-width: 26px;
-    text-align: right;
-  }
-  ol.items li .num::before { content: counter(line, decimal-leading-zero); }
-  ol.items li .num::after { content: " ▸"; color: var(--accent-dim); }
-  ol.items li .txt {
-    flex: 1;
-    white-space: pre-wrap;
-    word-break: break-word;
-    padding: 0 4px;
-  }
-  ol.items li .txt:focus {
-    outline: none;
-    background: var(--accent-ghost);
-    box-shadow: inset 0 -1px 0 var(--accent);
-  }
-  ol.items li .del {
-    border: none;
-    background: none;
-    color: var(--ink-faint);
-    padding: 0 6px;
-    font-size: 13px;
-    text-transform: none;
-    letter-spacing: 0;
-    opacity: 0;
-    transition: opacity .1s, color .1s;
-  }
-  ol.items li:hover .del, ol.items li .del:focus-visible { opacity: 1; }
-  ol.items li .del:hover { color: var(--danger); border-color: transparent; background: none; }
-
-  .empty {
-    color: var(--ink-faint);
-    padding: 30px 10px;
-    text-align: center;
-    font-size: 13px;
-    letter-spacing: 1px;
-  }
-  .empty .glyph { display: block; color: var(--line-strong); font-size: 15px; margin-bottom: 8px; letter-spacing: 4px; }
-
-  .actions {
-    display: flex;
-    flex-wrap: wrap;
     gap: 10px;
-    margin-top: 20px;
-    padding-top: 16px;
-    border-top: 1px dashed var(--line-strong);
+    padding: 2px 8px 4px;
+    user-select: none;
   }
-  .actions .spacer { flex: 1; }
+  .brand .glyph { color: var(--teal); font-size: 17px; }
+  .brand .name { font-size: 17px; font-weight: 650; letter-spacing: .2px; }
 
-  /* ---------- sidebar ---------- */
+  .side h2 {
+    margin: 0 0 8px;
+    padding: 0 8px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    color: var(--faint);
+    user-select: none;
+  }
+  .side section { min-height: 0; }
+  .side .grow { flex: 1 1 auto; overflow: hidden; display: flex; flex-direction: column; }
+
   .daylist {
     list-style: none;
     margin: 0;
-    padding: 6px;
-    max-height: 380px;
+    padding: 0;
     overflow-y: auto;
     scrollbar-width: thin;
-    scrollbar-color: var(--line-strong) transparent;
+    scrollbar-color: var(--line) transparent;
   }
   .daylist li + li { margin-top: 2px; }
   .daylist button {
@@ -259,148 +91,477 @@
     justify-content: space-between;
     align-items: center;
     gap: 8px;
-    padding: 6px 10px;
-    font-size: 12.5px;
-    letter-spacing: 1px;
-    border: 1px solid transparent;
+    padding: 7px 10px;
+    font-size: 13.5px;
+    border: none;
+    border-radius: 8px;
     background: none;
     text-align: left;
-    color: var(--ink-dim);
-    text-transform: none;
+    color: var(--muted);
   }
-  .daylist button:hover { color: var(--accent); border-color: transparent; }
+  .daylist button:hover { background: rgba(255, 255, 255, 0.05); color: var(--text); }
   .daylist button.current {
-    color: var(--accent);
-    border: 1px solid var(--accent-dim);
-    background: var(--accent-ghost);
+    background: rgba(255, 255, 255, 0.09);
+    color: var(--text);
+    font-weight: 600;
   }
-  .daylist .count { color: var(--ink-faint); font-size: 12px; }
-  .daylist button.current .count { color: var(--accent-dim); }
-  .nothing { color: var(--ink-faint); font-size: 12.5px; padding: 6px 10px; }
+  .daylist .count {
+    color: var(--faint);
+    font-size: 11.5px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 20px;
+    padding: 1px 8px;
+  }
+  .daylist button.current .count { color: var(--teal); background: var(--teal-ghost); }
+  .nothing { color: var(--faint); font-size: 13px; padding: 4px 10px; }
 
-  .backup {
+  /* wishlist */
+  .wish-add { display: flex; gap: 6px; padding: 0 2px 8px; }
+  .wish-add input {
+    flex: 1;
+    min-width: 0;
+    font: inherit;
+    font-size: 13px;
+    color: var(--text);
+    background: var(--field);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 6px 10px;
+  }
+  .wish-add input::placeholder { color: var(--faint); }
+  .wish-add input:focus { outline: none; border-color: var(--teal); }
+  .wish-add button {
+    width: 32px;
+    border: none;
+    border-radius: 8px;
+    background: var(--teal);
+    color: #0e1f1b;
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 1;
+  }
+  .wish-add button:hover { background: #3ac9b6; }
+
+  ul.wishlist {
+    list-style: none;
+    margin: 0;
+    padding: 0 2px;
+    max-height: 220px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--line) transparent;
+  }
+  ul.wishlist li {
     display: flex;
-    gap: 8px;
-    padding: 12px;
-    border-top: 1px dashed var(--line-strong);
+    align-items: flex-start;
+    gap: 7px;
+    padding: 6px 8px;
+    border-radius: 8px;
+    cursor: grab;
   }
-  .backup + .backup { border-top: none; padding-top: 0; }
-  .backup button { flex: 1; font-size: 11.5px; padding: 5px 6px; }
-  .backup-label {
-    padding: 10px 12px 0;
-    border-top: 1px dashed var(--line-strong);
-    color: var(--ink-faint);
-    font-size: 10.5px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    user-select: none;
+  ul.wishlist li:hover { background: rgba(255, 255, 255, 0.05); }
+  ul.wishlist li.dragging { opacity: .35; }
+  ul.wishlist .grip { color: var(--faint); font-size: 11px; padding-top: 3px; user-select: none; }
+  ul.wishlist .wtxt {
+    flex: 1;
+    font-size: 13px;
+    color: var(--muted);
+    white-space: pre-wrap;
+    word-break: break-word;
+    border-radius: 6px;
+    padding: 0 2px;
   }
-  .backup-label + .backup { border-top: none; }
+  ul.wishlist li:hover .wtxt { color: var(--text); }
+  ul.wishlist .wtxt:focus { outline: none; background: var(--teal-ghost); box-shadow: inset 0 -1px 0 var(--teal); }
+  ul.wishlist .wbtn {
+    border: none;
+    background: none;
+    color: var(--faint);
+    padding: 0 3px;
+    font-size: 13px;
+    border-radius: 6px;
+    opacity: 0;
+  }
+  ul.wishlist li:hover .wbtn, ul.wishlist .wbtn:focus-visible { opacity: 1; }
+  ul.wishlist .wbtn.send:hover { color: var(--teal); }
+  ul.wishlist .wbtn.kill:hover { color: var(--danger); }
+  .wish-hint { padding: 8px 10px 0; color: var(--faint); font-size: 11px; user-select: none; }
 
-  footer {
-    margin-top: 26px;
-    color: var(--ink-faint);
-    font-size: 11px;
-    letter-spacing: 1px;
+  /* sidebar bottom buttons */
+  .side .tools { display: flex; flex-direction: column; gap: 8px; }
+  .tools .row { display: flex; border-radius: 8px; overflow: hidden; box-shadow: var(--shadow); }
+  .tools .row button {
+    flex: 1;
+    border: none;
+    padding: 8px 6px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text);
+    background: var(--card-2);
+  }
+  .tools .row button + button { border-left: 1px solid rgba(0, 0, 0, 0.25); }
+  .tools .row button:hover { filter: brightness(1.15); }
+  .tools .row.accent button { background: var(--teal-strong); color: #0e1f1b; }
+  .tools .row.accent button:hover { filter: brightness(1.08); }
+
+  /* ================= main ================= */
+  .main {
+    flex: 1;
+    min-width: 0;
+    padding: 26px 34px 80px;
+    max-width: 880px;
+  }
+  .main-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  .main-head h1 { margin: 0; font-size: 20px; font-weight: 650; margin-right: auto; }
+  .saved-pill {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    background: var(--card);
+    border: 1px solid var(--line-soft);
+    border-radius: 999px;
+    padding: 5px 14px;
+    font-size: 12.5px;
+    color: var(--muted);
+    box-shadow: var(--shadow);
+    user-select: none;
+    transition: border-color .3s;
+  }
+  .saved-pill .dot { color: var(--green); font-size: 13px; }
+  .saved-pill.pulse { border-color: var(--green); }
+
+  /* date navigator row */
+  .nav-row {
+    display: flex;
+    gap: 14px;
+    align-items: stretch;
+    margin-bottom: 18px;
+  }
+  .datenav {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    background: var(--card);
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 10px 12px;
+  }
+  .datenav .arrow {
+    width: 38px;
+    height: 38px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--card-2);
+    color: var(--text);
+    font-size: 16px;
+  }
+  .datenav .arrow:hover { border-color: var(--teal); color: var(--teal); }
+  .datenav .datewrap {
+    position: relative;
+    flex: 1;
     text-align: center;
-    user-select: none;
+  }
+  .datenav .bigdate {
+    font-size: 21px;
+    font-weight: 600;
+    letter-spacing: .2px;
+    padding: 4px 0;
+    cursor: pointer;
+    border-radius: 8px;
+  }
+  .datenav .bigdate:hover { background: rgba(255, 255, 255, 0.04); }
+  .datenav input[type="date"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    border: none;
+  }
+  .side-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    justify-content: center;
+  }
+  .side-actions button {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--card);
+    color: var(--text);
+    padding: 7px 16px;
+    font-size: 13px;
+    box-shadow: var(--shadow);
+    white-space: nowrap;
+  }
+  .side-actions button:hover { border-color: var(--teal); color: var(--teal); }
+
+  /* entries */
+  .logzone { border-radius: var(--radius); }
+  .logzone.droptarget { outline: 2px dashed var(--teal); outline-offset: 4px; }
+  .daylist button.droptarget { outline: 2px dashed var(--teal); outline-offset: -2px; }
+
+  .day-sub { color: var(--faint); font-size: 12.5px; margin: 0 2px 10px; min-height: 1.2em; }
+
+  .addcard {
+    display: flex;
+    gap: 10px;
+    background: var(--card);
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 10px;
+    margin-bottom: 14px;
+  }
+  .addcard input {
+    flex: 1;
+    min-width: 0;
+    font: inherit;
+    color: var(--text);
+    background: var(--field);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 9px 13px;
+  }
+  .addcard input::placeholder { color: var(--faint); }
+  .addcard input:focus { outline: none; border-color: var(--teal); }
+  .addcard button {
+    border: none;
+    border-radius: 8px;
+    background: var(--teal);
+    color: #0e1f1b;
+    font-weight: 650;
+    padding: 0 22px;
+  }
+  .addcard button:hover { background: #3ac9b6; }
+
+  ol.items { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  ol.items li.entry {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--card-2);
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 11px 16px;
+  }
+  ol.items li.entry .txt {
+    flex: 1;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  ol.items li.entry .icon {
+    border: none;
+    background: none;
+    color: var(--faint);
+    font-size: 14px;
+    padding: 2px 5px;
+    border-radius: 6px;
+    opacity: 0;
+  }
+  ol.items li.entry:hover .icon, ol.items li.entry .icon:focus-visible { opacity: 1; }
+  ol.items li.entry .icon.edit:hover { color: var(--teal); }
+  ol.items li.entry .icon.del:hover { color: var(--danger); }
+
+  ol.items li.editing {
+    display: block;
+    background: var(--card-2);
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 12px;
+  }
+  ol.items li.editing input {
+    width: 100%;
+    font: inherit;
+    color: var(--text);
+    background: var(--field);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 8px;
+    padding: 9px 13px;
+    margin-bottom: 10px;
+  }
+  ol.items li.editing input:focus { outline: none; border-color: var(--teal); }
+  .editrow { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .editrow button {
+    border: none;
+    border-radius: 8px;
+    padding: 8px 0;
+    font-weight: 650;
+    font-size: 13px;
+    letter-spacing: .6px;
+    text-transform: uppercase;
+  }
+  .editrow .save { background: var(--teal-strong); color: #0e1f1b; }
+  .editrow .save:hover { filter: brightness(1.1); }
+  .editrow .cancel { background: #4a4f56; color: var(--text); }
+  .editrow .cancel:hover { filter: brightness(1.12); }
+
+  .empty {
+    color: var(--faint);
+    text-align: center;
+    padding: 34px 10px;
+    border: 1px dashed var(--line);
+    border-radius: var(--radius);
+    font-size: 13.5px;
   }
 
-  /* ---------- toast ---------- */
+  .foot-actions { display: flex; margin-top: 14px; }
+  .foot-actions .spacer { flex: 1; }
+  .clearday {
+    border: none;
+    background: none;
+    color: var(--faint);
+    font-size: 12.5px;
+    padding: 4px 8px;
+    border-radius: 6px;
+  }
+  .clearday:hover { color: var(--danger); background: rgba(224, 112, 112, 0.08); }
+
+  /* floating add */
+  .fab {
+    position: fixed;
+    right: 30px;
+    bottom: 30px;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    border: none;
+    background: var(--teal);
+    color: #0e1f1b;
+    font-size: 26px;
+    line-height: 1;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+  }
+  .fab:hover { background: #3ac9b6; transform: translateY(-1px); }
+
+  /* toast */
   #toast {
     position: fixed;
     left: 50%;
-    bottom: 28px;
-    transform: translateX(-50%) translateY(10px);
-    background: #0f1712;
-    border: 1px solid var(--accent-dim);
-    color: var(--accent);
-    padding: 8px 18px;
-    font-size: 12.5px;
-    letter-spacing: 1px;
+    bottom: 30px;
+    transform: translateX(-50%) translateY(12px);
+    background: var(--card-2);
+    border: 1px solid var(--line);
+    color: var(--text);
+    padding: 9px 20px;
+    border-radius: 999px;
+    font-size: 13px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
     opacity: 0;
     pointer-events: none;
     transition: opacity .18s, transform .18s;
+    z-index: 10;
   }
-  #toast::before { content: ":: "; color: var(--ink-faint); }
   #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  @media (max-width: 760px) {
+    .app { flex-direction: column; }
+    .side { width: 100%; border-right: none; border-bottom: 1px solid var(--line-soft); }
+    .main { padding: 20px 16px 90px; }
+    .nav-row { flex-direction: column; }
+    .side-actions { flex-direction: row; flex-wrap: wrap; }
+  }
 </style>
 </head>
 <body>
-<div class="frame">
+<div class="app">
 
-  <div class="topbar">
+  <aside class="side">
     <div class="brand">
-      <span class="mark">TRACK</span>
-      <span class="tag">daily log // local</span>
+      <span class="glyph">≡</span>
+      <span class="name">Track</span>
     </div>
-    <div class="datebar">
-      <button id="prevDay" title="Previous day">‹</button>
-      <input type="date" id="datePick">
-      <button id="nextDay" title="Next day">›</button>
-      <button id="todayBtn">Today</button>
-    </div>
-  </div>
 
-  <div class="cols">
-    <main class="panel">
-      <div class="panel-head">
-        <span>log</span><span class="rule"></span><span class="hl" id="headDate"></span>
-      </div>
-      <div class="panel-body">
-        <p class="day-title" id="dayTitle"></p>
-        <p class="day-sub" id="daySub"></p>
-
-        <div class="addrow">
-          <span class="prompt">&gt;</span>
-          <input type="text" id="newItem" placeholder="what did you do? [enter] to log it" autocomplete="off">
-          <button class="primary" id="addBtn">Add</button>
-        </div>
-
-        <ol class="items" id="itemList"></ol>
-        <div class="empty" id="emptyMsg">
-          <span class="glyph">·· ·· ··</span>
-          no entries for this day
-        </div>
-
-        <div class="actions">
-          <button class="primary" id="copyDay">Copy day</button>
-          <button id="copyPlain" title="Copies just the items, one per line, no date heading">Copy items only</button>
-          <span class="spacer"></span>
-          <button class="danger" id="clearDay">Clear day</button>
-        </div>
-      </div>
-    </main>
-
-    <aside class="panel">
-      <div class="panel-head"><span>index</span><span class="rule"></span></div>
+    <section class="grow">
+      <h2>Recent days</h2>
       <ul class="daylist" id="dayList"></ul>
-      <div class="backup-label">csv · excel</div>
-      <div class="backup">
-        <button id="csvImportBtn" title="Import entries from a CSV file (date, task)">Import CSV</button>
-        <button id="csvExportBtn" title="Export all entries as a CSV file">Export CSV</button>
-        <input type="file" id="csvFile" accept=".csv,text/csv,text/plain" hidden>
-      </div>
-      <div class="backup-label">backup · json</div>
-      <div class="backup">
-        <button id="exportBtn" title="Save all data to a JSON file">Export</button>
-        <button id="importBtn" title="Load data from a JSON backup file">Import</button>
-        <input type="file" id="importFile" accept=".json,application/json" hidden>
-      </div>
-    </aside>
-  </div>
+    </section>
 
-  <footer>── data stays on this machine ──</footer>
+    <section>
+      <h2>Wishlist <span id="wishCount" style="color:var(--teal)"></span></h2>
+      <div class="wish-add">
+        <input type="text" id="newWish" placeholder="Needs doing…" autocomplete="off">
+        <button id="addWishBtn" title="Add to wishlist">+</button>
+      </div>
+      <ul class="wishlist" id="wishList"></ul>
+      <div class="wish-hint">Drag onto the log or a day · ↳ sends to open day</div>
+    </section>
+
+    <section class="tools">
+      <div class="row accent">
+        <button id="exportBtn" title="Save all data to a JSON file">Export (JSON)</button>
+        <button id="importBtn" title="Load data from a JSON backup file">Import</button>
+      </div>
+      <div class="row">
+        <button id="csvImportBtn" title="Import entries from a CSV file (date, task)">CSV Import</button>
+        <button id="csvExportBtn" title="Export all entries as a CSV file">CSV Export</button>
+      </div>
+      <input type="file" id="importFile" accept=".json,application/json" hidden>
+      <input type="file" id="csvFile" accept=".csv,text/csv,text/plain" hidden>
+    </section>
+  </aside>
+
+  <main class="main">
+    <div class="main-head">
+      <h1 id="dayTitle"></h1>
+      <div class="saved-pill" id="savedPill"><span class="dot">●</span> Data auto-saved locally</div>
+    </div>
+
+    <div class="nav-row">
+      <div class="datenav">
+        <button class="arrow" id="prevDay" title="Previous day">‹</button>
+        <div class="datewrap">
+          <div class="bigdate" id="navDate" title="Pick a date"></div>
+          <input type="date" id="datePick" tabindex="-1">
+        </div>
+        <button class="arrow" id="nextDay" title="Next day">›</button>
+      </div>
+      <div class="side-actions">
+        <button id="copyDay">Copy Day to Clipboard</button>
+        <button id="copyPlain" title="Copies just the items, one per line, no date heading">Copy Items Only</button>
+        <button id="todayBtn">Jump to Today</button>
+      </div>
+    </div>
+
+    <div class="logzone" id="logPanel">
+      <p class="day-sub" id="daySub"></p>
+
+      <div class="addcard">
+        <input type="text" id="newItem" placeholder="What did you do? Press Enter to log it…" autocomplete="off">
+        <button id="addBtn">Add</button>
+      </div>
+
+      <ol class="items" id="itemList"></ol>
+      <div class="empty" id="emptyMsg">No entries for this day yet — add your first one above.</div>
+
+      <div class="foot-actions">
+        <span class="spacer"></span>
+        <button class="clearday" id="clearDay">Clear this day…</button>
+      </div>
+    </div>
+  </main>
 </div>
 
+<button class="fab" id="fab" title="Add an entry">+</button>
 <div id="toast"></div>
 
 <script>
 (function () {
   "use strict";
   var STORE_KEY = "track.tasks.v1";
+  var WISH_KEY = "track.wishlist.v1";
   var data = load();          // { "YYYY-MM-DD": [{id, text}, ...] }
+  var wishlist = loadWishlist(); // [{id, text}, ...]
   var currentDate = todayISO();
+  var editingId = null;
 
   // ---------- storage ----------
   function load() {
@@ -411,14 +572,35 @@
     } catch (e) { return {}; }
   }
   function save() {
-    // prune empty days so the index stays clean
+    // prune empty days so the sidebar stays clean
     Object.keys(data).forEach(function (d) {
       if (!data[d] || data[d].length === 0) delete data[d];
     });
     localStorage.setItem(STORE_KEY, JSON.stringify(data));
+    pulseSaved();
   }
   function newId() {
     return Date.now() + "-" + Math.random().toString(36).slice(2, 7);
+  }
+  function loadWishlist() {
+    try {
+      var raw = localStorage.getItem(WISH_KEY);
+      var parsed = raw ? JSON.parse(raw) : [];
+      return Array.isArray(parsed) ? parsed.filter(function (it) {
+        return it && typeof it.text === "string" && it.text !== "";
+      }) : [];
+    } catch (e) { return []; }
+  }
+  function saveWishlist() {
+    localStorage.setItem(WISH_KEY, JSON.stringify(wishlist));
+    pulseSaved();
+  }
+  var pulseTimer;
+  function pulseSaved() {
+    var p = document.getElementById("savedPill");
+    p.classList.add("pulse");
+    clearTimeout(pulseTimer);
+    pulseTimer = setTimeout(function () { p.classList.remove("pulse"); }, 900);
   }
 
   // ---------- date helpers ----------
@@ -444,7 +626,14 @@
       weekday: "long", day: "numeric", month: "long", year: "numeric"
     });
   }
-  var DOW = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+  var DOW = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  var MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  function shortLabel(iso) {
+    var d = dateObj(iso);
+    var label = DOW[d.getDay()] + " " + MON[d.getMonth()] + " " + d.getDate();
+    if (d.getFullYear() !== new Date().getFullYear()) label += " " + d.getFullYear();
+    return label;
+  }
   function shortDow(iso) { return DOW[dateObj(iso).getDay()]; }
 
   // Accepts 2026-07-05, 2026/07/05, 05/07/2026, 5-7-2026, 05.07.2026.
@@ -476,62 +665,98 @@
 
   function render() {
     $("datePick").value = currentDate;
-    $("headDate").textContent = currentDate;
-    $("dayTitle").innerHTML = "";
-    var dow = document.createElement("span");
-    dow.className = "dow";
-    dow.textContent = shortDow(currentDate) + " ";
-    $("dayTitle").appendChild(dow);
-    $("dayTitle").appendChild(document.createTextNode(prettyDate(currentDate)));
+    $("dayTitle").textContent = "Log for " + prettyDate(currentDate);
+    $("navDate").textContent = prettyDate(currentDate);
 
     var list = data[currentDate] || [];
     $("daySub").textContent = list.length === 0 ? "" :
-      list.length + (list.length === 1 ? " entry" : " entries") + " logged";
+      list.length + (list.length === 1 ? " entry" : " entries");
 
     var ol = $("itemList");
     ol.innerHTML = "";
     list.forEach(function (item) {
-      var li = document.createElement("li");
-
-      var num = document.createElement("span");
-      num.className = "num";
-
-      var txt = document.createElement("div");
-      txt.className = "txt";
-      txt.textContent = item.text;
-      txt.contentEditable = "plaintext-only"; // falls back below if unsupported
-      if (txt.contentEditable !== "plaintext-only") txt.contentEditable = "true";
-      txt.spellcheck = false;
-      txt.title = "Click to edit";
-      txt.addEventListener("blur", function () {
-        var v = txt.textContent.trim();
-        if (v === "") {
-          removeItem(item.id);
-        } else if (v !== item.text) {
-          item.text = v;
-          save();
-          renderSidebar();
-        }
-      });
-      txt.addEventListener("keydown", function (e) {
-        if (e.key === "Enter") { e.preventDefault(); txt.blur(); }
-        if (e.key === "Escape") { txt.textContent = item.text; txt.blur(); }
-      });
-
-      var del = document.createElement("button");
-      del.className = "del";
-      del.title = "Delete entry";
-      del.textContent = "[x]";
-      del.addEventListener("click", function () { removeItem(item.id); });
-
-      li.appendChild(num);
-      li.appendChild(txt);
-      li.appendChild(del);
-      ol.appendChild(li);
+      ol.appendChild(item.id === editingId ? buildEditor(item) : buildEntry(item));
     });
 
     $("emptyMsg").style.display = list.length === 0 ? "" : "none";
+    $("clearDay").style.display = list.length === 0 ? "none" : "";
     renderSidebar();
+    renderWishlist();
+  }
+
+  function buildEntry(item) {
+    var li = document.createElement("li");
+    li.className = "entry";
+
+    var txt = document.createElement("div");
+    txt.className = "txt";
+    txt.textContent = item.text;
+    txt.addEventListener("dblclick", function () { startEdit(item.id); });
+
+    var edit = document.createElement("button");
+    edit.className = "icon edit";
+    edit.title = "Edit entry";
+    edit.textContent = "✎";
+    edit.addEventListener("click", function () { startEdit(item.id); });
+
+    var del = document.createElement("button");
+    del.className = "icon del";
+    del.title = "Delete entry";
+    del.textContent = "✕";
+    del.addEventListener("click", function () { removeItem(item.id); });
+
+    li.appendChild(txt);
+    li.appendChild(edit);
+    li.appendChild(del);
+    return li;
+  }
+
+  function buildEditor(item) {
+    var li = document.createElement("li");
+    li.className = "editing";
+
+    var input = document.createElement("input");
+    input.type = "text";
+    input.value = item.text;
+
+    function commit() {
+      var v = input.value.trim();
+      editingId = null;
+      if (v === "") { removeItem(item.id); return; }
+      if (v !== item.text) { item.text = v; save(); }
+      render();
+    }
+    function cancel() {
+      editingId = null;
+      render();
+    }
+    input.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") commit();
+      if (e.key === "Escape") cancel();
+    });
+
+    var row = document.createElement("div");
+    row.className = "editrow";
+    var saveBtn = document.createElement("button");
+    saveBtn.className = "save";
+    saveBtn.textContent = "Save";
+    saveBtn.addEventListener("click", commit);
+    var cancelBtn = document.createElement("button");
+    cancelBtn.className = "cancel";
+    cancelBtn.textContent = "Cancel";
+    cancelBtn.addEventListener("click", cancel);
+    row.appendChild(saveBtn);
+    row.appendChild(cancelBtn);
+
+    li.appendChild(input);
+    li.appendChild(row);
+    setTimeout(function () { input.focus(); input.select(); }, 0);
+    return li;
+  }
+
+  function startEdit(id) {
+    editingId = id;
+    render();
   }
 
   function renderSidebar() {
@@ -539,33 +764,171 @@
     ul.innerHTML = "";
     var days = Object.keys(data).filter(function (d) {
       return data[d] && data[d].length > 0;
-    }).sort().reverse();
+    });
+    if (days.indexOf(currentDate) === -1) days.push(currentDate);
+    days.sort().reverse();
 
-    if (days.length === 0) {
-      var li = document.createElement("li");
-      var span = document.createElement("span");
-      span.className = "nothing";
-      span.textContent = "// nothing yet";
-      li.appendChild(span);
-      ul.appendChild(li);
-      return;
-    }
     days.forEach(function (d) {
       var li = document.createElement("li");
       var btn = document.createElement("button");
       if (d === currentDate) btn.className = "current";
       var label = document.createElement("span");
-      label.textContent = shortDow(d) + " " + d;
-      var count = document.createElement("span");
-      count.className = "count";
-      count.textContent = "×" + data[d].length;
+      label.textContent = shortLabel(d);
       btn.appendChild(label);
-      btn.appendChild(count);
+      var n = (data[d] || []).length;
+      if (n > 0) {
+        var count = document.createElement("span");
+        count.className = "count";
+        count.textContent = n;
+        btn.appendChild(count);
+      }
       btn.addEventListener("click", function () {
         currentDate = d;
+        editingId = null;
         render();
       });
+      makeDropTarget(btn, function () { return d; });
       li.appendChild(btn);
+      ul.appendChild(li);
+    });
+  }
+
+  // ---------- wishlist ----------
+  function makeDropTarget(el, getDay) {
+    el.addEventListener("dragover", function (e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "move";
+      el.classList.add("droptarget");
+    });
+    el.addEventListener("dragleave", function () {
+      el.classList.remove("droptarget");
+    });
+    el.addEventListener("drop", function (e) {
+      e.preventDefault();
+      el.classList.remove("droptarget");
+      var id = e.dataTransfer.getData("text/plain");
+      if (id) moveWishToDay(id, getDay());
+    });
+  }
+
+  function moveWishToDay(id, day) {
+    var i = wishlist.findIndex(function (it) { return it.id === id; });
+    if (i === -1) return;
+    var item = wishlist.splice(i, 1)[0];
+    if (!data[day]) data[day] = [];
+    data[day].push({ id: newId(), text: item.text });
+    saveWishlist();
+    save();
+    render();
+    toast("Moved to " + shortDow(day) + " " + day);
+  }
+
+  function addWish() {
+    var input = $("newWish");
+    var v = input.value.trim();
+    if (v === "") return;
+    wishlist.push({ id: newId(), text: v });
+    input.value = "";
+    saveWishlist();
+    renderWishlist();
+    input.focus();
+  }
+
+  function removeWish(id) {
+    var i = wishlist.findIndex(function (it) { return it.id === id; });
+    if (i !== -1) wishlist.splice(i, 1);
+    saveWishlist();
+    renderWishlist();
+  }
+
+  function renderWishlist() {
+    $("wishCount").textContent = wishlist.length ? "· " + wishlist.length : "";
+    var ul = $("wishList");
+    ul.innerHTML = "";
+
+    if (wishlist.length === 0) {
+      var li = document.createElement("li");
+      li.style.cursor = "default";
+      var span = document.createElement("span");
+      span.className = "nothing";
+      span.textContent = "Nothing queued";
+      li.appendChild(span);
+      ul.appendChild(li);
+      return;
+    }
+
+    wishlist.forEach(function (item) {
+      var li = document.createElement("li");
+      li.draggable = true;
+
+      var grip = document.createElement("span");
+      grip.className = "grip";
+      grip.textContent = "⣿";
+
+      var txt = document.createElement("div");
+      txt.className = "wtxt";
+      txt.textContent = item.text;
+      txt.spellcheck = false;
+      txt.title = "Click to edit · drag to a day";
+
+      li.addEventListener("dragstart", function (e) {
+        // an active edit means the user is typing, not dragging
+        if (txt.isContentEditable) { e.preventDefault(); return; }
+        e.dataTransfer.setData("text/plain", item.id);
+        e.dataTransfer.effectAllowed = "move";
+        li.classList.add("dragging");
+      });
+      li.addEventListener("dragend", function () {
+        li.classList.remove("dragging");
+      });
+
+      // Editable only on click: an always-on contenteditable hijacks
+      // mouse-drags into text selection and makes the li undraggable.
+      txt.addEventListener("click", function (e) {
+        if (txt.isContentEditable) return;
+        txt.contentEditable = "plaintext-only";
+        if (!txt.isContentEditable) txt.contentEditable = "true";
+        txt.focus();
+        if (document.caretRangeFromPoint) {
+          var r = document.caretRangeFromPoint(e.clientX, e.clientY);
+          if (r) {
+            var sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(r);
+          }
+        }
+      });
+      txt.addEventListener("blur", function () {
+        txt.contentEditable = "false";
+        var v = txt.textContent.trim();
+        if (v === "") {
+          removeWish(item.id);
+        } else if (v !== item.text) {
+          item.text = v;
+          saveWishlist();
+        }
+      });
+      txt.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") { e.preventDefault(); txt.blur(); }
+        if (e.key === "Escape") { txt.textContent = item.text; txt.blur(); }
+      });
+
+      var send = document.createElement("button");
+      send.className = "wbtn send";
+      send.textContent = "↳";
+      send.title = "Log on open day (" + currentDate + ")";
+      send.addEventListener("click", function () { moveWishToDay(item.id, currentDate); });
+
+      var kill = document.createElement("button");
+      kill.className = "wbtn kill";
+      kill.textContent = "✕";
+      kill.title = "Delete from wishlist";
+      kill.addEventListener("click", function () { removeWish(item.id); });
+
+      li.appendChild(grip);
+      li.appendChild(txt);
+      li.appendChild(send);
+      li.appendChild(kill);
       ul.appendChild(li);
     });
   }
@@ -586,6 +949,7 @@
     var list = items();
     var i = list.findIndex(function (it) { return it.id === id; });
     if (i !== -1) list.splice(i, 1);
+    if (editingId === id) editingId = null;
     save();
     render();
   }
@@ -598,7 +962,7 @@
   }
 
   function copyText(text, doneMsg) {
-    if (text.trim() === "") { toast("nothing to copy — day is empty"); return; }
+    if (text.trim() === "") { toast("Nothing to copy — the day is empty"); return; }
     function fallback() {
       var ta = document.createElement("textarea");
       ta.value = text;
@@ -607,7 +971,7 @@
       document.body.appendChild(ta);
       ta.select();
       try { document.execCommand("copy"); toast(doneMsg); }
-      catch (e) { toast("copy failed — select and copy manually"); }
+      catch (e) { toast("Copy failed — select and copy manually"); }
       document.body.removeChild(ta);
     }
     if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -677,7 +1041,7 @@
 
   function exportCSV() {
     var days = Object.keys(data).sort();
-    if (days.length === 0) { toast("nothing to export"); return; }
+    if (days.length === 0) { toast("Nothing to export"); return; }
     var lines = ["Date,Task"];
     days.forEach(function (d) {
       data[d].forEach(function (it) {
@@ -686,7 +1050,7 @@
     });
     // BOM so Excel opens it as UTF-8
     downloadFile("track-export-" + todayISO() + ".csv", "﻿" + lines.join("\r\n"), "text/csv");
-    toast("csv exported");
+    toast("CSV exported");
   }
 
   // Expected shape: one entry per row — date in the first column, task in the
@@ -695,7 +1059,7 @@
     var reader = new FileReader();
     reader.onload = function () {
       var rows = parseCSV(String(reader.result));
-      if (rows.length === 0) { toast("csv is empty"); return; }
+      if (rows.length === 0) { toast("CSV is empty"); return; }
       var start = parseDateFlexible(rows[0][0]) ? 0 : 1; // skip header row
       var added = 0, skipped = 0, daysTouched = {};
       for (var i = start; i < rows.length; i++) {
@@ -716,9 +1080,9 @@
       render();
       var dayCount = Object.keys(daysTouched).length;
       if (added === 0) {
-        toast("nothing imported — " + skipped + " row" + (skipped === 1 ? "" : "s") + " skipped (duplicate or unreadable)");
+        toast("Nothing imported — " + skipped + " row" + (skipped === 1 ? "" : "s") + " skipped (duplicate or unreadable)");
       } else {
-        toast("imported " + added + " entr" + (added === 1 ? "y" : "ies") +
+        toast("Imported " + added + " entr" + (added === 1 ? "y" : "ies") +
           " across " + dayCount + " day" + (dayCount === 1 ? "" : "s") +
           (skipped ? " — " + skipped + " skipped" : ""));
       }
@@ -728,9 +1092,12 @@
 
   // ---------- JSON backup ----------
   function exportData() {
+    var payload = {};
+    Object.keys(data).forEach(function (d) { payload[d] = data[d]; });
+    payload._wishlist = wishlist;
     downloadFile("track-backup-" + todayISO() + ".json",
-      JSON.stringify(data, null, 2), "application/json");
-    toast("backup exported");
+      JSON.stringify(payload, null, 2), "application/json");
+    toast("Backup exported");
   }
 
   function importData(file) {
@@ -742,6 +1109,19 @@
           throw new Error("bad format");
         }
         var added = 0;
+        if (Array.isArray(incoming._wishlist)) {
+          var wishTexts = wishlist.map(function (it) { return it.text; });
+          incoming._wishlist.forEach(function (it) {
+            var text = (it && typeof it.text === "string") ? it.text
+                     : (typeof it === "string") ? it : null;
+            if (text && wishTexts.indexOf(text) === -1) {
+              wishlist.push({ id: newId(), text: text });
+              wishTexts.push(text);
+              added++;
+            }
+          });
+          saveWishlist();
+        }
         Object.keys(incoming).forEach(function (day) {
           if (!/^\d{4}-\d{2}-\d{2}$/.test(day) || !Array.isArray(incoming[day])) return;
           if (!data[day]) data[day] = [];
@@ -758,45 +1138,60 @@
         });
         save();
         render();
-        toast("imported " + added + " entr" + (added === 1 ? "y" : "ies"));
+        toast("Imported " + added + " entr" + (added === 1 ? "y" : "ies"));
       } catch (e) {
-        toast("import failed — not a valid Track backup file");
+        toast("Import failed — not a valid Track backup file");
       }
     };
     reader.readAsText(file);
   }
 
   // ---------- wiring ----------
+  makeDropTarget($("logPanel"), function () { return currentDate; });
+  $("addWishBtn").addEventListener("click", addWish);
+  $("newWish").addEventListener("keydown", function (e) {
+    if (e.key === "Enter") addWish();
+  });
   $("addBtn").addEventListener("click", addItem);
   $("newItem").addEventListener("keydown", function (e) {
     if (e.key === "Enter") addItem();
   });
   $("datePick").addEventListener("change", function () {
-    if (this.value) { currentDate = this.value; render(); }
+    if (this.value) { currentDate = this.value; editingId = null; render(); }
+  });
+  $("navDate").addEventListener("click", function () {
+    var input = $("datePick");
+    if (input.showPicker) { try { input.showPicker(); return; } catch (e) {} }
+    input.click();
   });
   $("prevDay").addEventListener("click", function () {
-    currentDate = shiftDay(currentDate, -1); render();
+    currentDate = shiftDay(currentDate, -1); editingId = null; render();
   });
   $("nextDay").addEventListener("click", function () {
-    currentDate = shiftDay(currentDate, 1); render();
+    currentDate = shiftDay(currentDate, 1); editingId = null; render();
   });
   $("todayBtn").addEventListener("click", function () {
-    currentDate = todayISO(); render();
+    currentDate = todayISO(); editingId = null; render();
+  });
+  $("fab").addEventListener("click", function () {
+    $("newItem").focus();
+    $("newItem").scrollIntoView({ block: "center", behavior: "smooth" });
   });
   $("copyDay").addEventListener("click", function () {
-    copyText(dayAsText(true), "day copied to clipboard");
+    copyText(dayAsText(true), "Day copied to clipboard");
   });
   $("copyPlain").addEventListener("click", function () {
-    copyText(dayAsText(false), "entries copied to clipboard");
+    copyText(dayAsText(false), "Entries copied to clipboard");
   });
   $("clearDay").addEventListener("click", function () {
     var list = data[currentDate] || [];
-    if (list.length === 0) { toast("day is already empty"); return; }
+    if (list.length === 0) { toast("Day is already empty"); return; }
     if (confirm("Delete all " + list.length + " entr" + (list.length === 1 ? "y" : "ies") + " for " + prettyDate(currentDate) + "?")) {
       delete data[currentDate];
+      editingId = null;
       save();
       render();
-      toast("day cleared");
+      toast("Day cleared");
     }
   });
   $("csvExportBtn").addEventListener("click", exportCSV);
