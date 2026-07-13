@@ -7,19 +7,18 @@
 <title>TRACK — daily log</title>
 <style>
   :root {
-    --bg: #0b0b09;
-    --bg-panel: #111110;
-    --bg-inset: #0d0d0b;
-    --ink: #d8d2c3;
-    --ink-dim: #8a8474;
-    --ink-faint: #55503f;
-    --line: #26241c;
-    --line-strong: #38352a;
-    --amber: #ffb454;
-    --amber-dim: #b97f2e;
-    --amber-ghost: rgba(255, 180, 84, 0.08);
-    --green: #9fd962;
-    --red: #e06c5f;
+    --bg: #0c1015;
+    --bg-panel: #11161d;
+    --bg-inset: #0a0e13;
+    --ink: #d3dae3;
+    --ink-dim: #8a95a3;
+    --ink-faint: #505c6b;
+    --line: #1c232d;
+    --line-strong: #2a3542;
+    --accent: #3ce6a6;
+    --accent-dim: #22a06e;
+    --accent-ghost: rgba(60, 230, 166, 0.07);
+    --danger: #e06c6c;
   }
   * { box-sizing: border-box; }
   html { color-scheme: dark; }
@@ -34,7 +33,7 @@
     color: var(--ink);
     line-height: 1.6;
   }
-  ::selection { background: var(--amber); color: #14100a; }
+  ::selection { background: var(--accent); color: #06120c; }
 
   .frame {
     max-width: 980px;
@@ -61,7 +60,7 @@
     user-select: none;
   }
   .brand .mark {
-    color: var(--amber);
+    color: var(--accent);
     font-weight: 700;
     letter-spacing: 3px;
     font-size: 16px;
@@ -90,23 +89,23 @@
     transition: background .1s, color .1s, border-color .1s;
   }
   input[type="date"] { cursor: auto; text-transform: none; }
-  input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(.65) sepia(.4); cursor: pointer; }
-  button:hover { border-color: var(--amber-dim); color: var(--amber); }
-  button:active { background: var(--amber-ghost); }
-  button:focus-visible, input:focus-visible { outline: 1px solid var(--amber); outline-offset: 2px; }
+  input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(.65); cursor: pointer; }
+  button:hover { border-color: var(--accent-dim); color: var(--accent); }
+  button:active { background: var(--accent-ghost); }
+  button:focus-visible, input:focus-visible { outline: 1px solid var(--accent); outline-offset: 2px; }
   button.primary {
-    background: var(--amber);
-    border-color: var(--amber);
-    color: #17110a;
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #071410;
     font-weight: 700;
   }
-  button.primary:hover { background: #ffc470; border-color: #ffc470; color: #17110a; }
-  button.danger:hover { border-color: var(--red); color: var(--red); }
+  button.primary:hover { background: #5cf0b8; border-color: #5cf0b8; color: #071410; }
+  button.danger:hover { border-color: var(--danger); color: var(--danger); }
 
   /* ---------- layout ---------- */
   .cols {
     display: grid;
-    grid-template-columns: 1fr 240px;
+    grid-template-columns: 1fr 250px;
     gap: 22px;
     align-items: start;
   }
@@ -129,7 +128,7 @@
     user-select: none;
   }
   .panel-head .rule { flex: 1; border-top: 1px dashed var(--line); align-self: center; }
-  .panel-head .hl { color: var(--amber); }
+  .panel-head .hl { color: var(--accent); }
   .panel-body { padding: 18px; }
 
   .day-title {
@@ -139,7 +138,7 @@
     color: var(--ink);
     letter-spacing: 1px;
   }
-  .day-title .dow { color: var(--amber); }
+  .day-title .dow { color: var(--accent); }
   .day-sub {
     margin: 0 0 18px;
     color: var(--ink-faint);
@@ -157,7 +156,7 @@
     border: 1px solid var(--line-strong);
     border-right: none;
     background: var(--bg-inset);
-    color: var(--green);
+    color: var(--accent);
     user-select: none;
   }
   .addrow input[type="text"] {
@@ -171,13 +170,13 @@
     border-right: none;
     border-radius: 0;
     padding: 9px 4px 9px 0;
-    caret-color: var(--amber);
+    caret-color: var(--accent);
   }
   .addrow input[type="text"]::placeholder { color: var(--ink-faint); }
   .addrow input[type="text"]:focus { outline: none; }
   .addrow:focus-within .prompt,
   .addrow:focus-within input[type="text"],
-  .addrow:focus-within button { border-color: var(--amber-dim); }
+  .addrow:focus-within button { border-color: var(--accent-dim); }
   .addrow button { border-left: none; }
 
   /* ---------- log lines ---------- */
@@ -189,7 +188,7 @@
     padding: 7px 8px 7px 4px;
     border-bottom: 1px solid var(--line);
   }
-  ol.items li:hover { background: var(--amber-ghost); }
+  ol.items li:hover { background: var(--accent-ghost); }
   ol.items li .num {
     counter-increment: line;
     color: var(--ink-faint);
@@ -198,7 +197,7 @@
     text-align: right;
   }
   ol.items li .num::before { content: counter(line, decimal-leading-zero); }
-  ol.items li .num::after { content: " ▸"; color: var(--amber-dim); }
+  ol.items li .num::after { content: " ▸"; color: var(--accent-dim); }
   ol.items li .txt {
     flex: 1;
     white-space: pre-wrap;
@@ -207,8 +206,8 @@
   }
   ol.items li .txt:focus {
     outline: none;
-    background: var(--amber-ghost);
-    box-shadow: inset 0 -1px 0 var(--amber);
+    background: var(--accent-ghost);
+    box-shadow: inset 0 -1px 0 var(--accent);
   }
   ol.items li .del {
     border: none;
@@ -222,7 +221,7 @@
     transition: opacity .1s, color .1s;
   }
   ol.items li:hover .del, ol.items li .del:focus-visible { opacity: 1; }
-  ol.items li .del:hover { color: var(--red); border-color: transparent; background: none; }
+  ol.items li .del:hover { color: var(--danger); border-color: transparent; background: none; }
 
   .empty {
     color: var(--ink-faint);
@@ -248,7 +247,7 @@
     list-style: none;
     margin: 0;
     padding: 6px;
-    max-height: 420px;
+    max-height: 380px;
     overflow-y: auto;
     scrollbar-width: thin;
     scrollbar-color: var(--line-strong) transparent;
@@ -269,14 +268,14 @@
     color: var(--ink-dim);
     text-transform: none;
   }
-  .daylist button:hover { color: var(--amber); border-color: transparent; }
+  .daylist button:hover { color: var(--accent); border-color: transparent; }
   .daylist button.current {
-    color: var(--amber);
-    border: 1px solid var(--amber-dim);
-    background: var(--amber-ghost);
+    color: var(--accent);
+    border: 1px solid var(--accent-dim);
+    background: var(--accent-ghost);
   }
   .daylist .count { color: var(--ink-faint); font-size: 12px; }
-  .daylist button.current .count { color: var(--amber-dim); }
+  .daylist button.current .count { color: var(--accent-dim); }
   .nothing { color: var(--ink-faint); font-size: 12.5px; padding: 6px 10px; }
 
   .backup {
@@ -285,7 +284,18 @@
     padding: 12px;
     border-top: 1px dashed var(--line-strong);
   }
+  .backup + .backup { border-top: none; padding-top: 0; }
   .backup button { flex: 1; font-size: 11.5px; padding: 5px 6px; }
+  .backup-label {
+    padding: 10px 12px 0;
+    border-top: 1px dashed var(--line-strong);
+    color: var(--ink-faint);
+    font-size: 10.5px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    user-select: none;
+  }
+  .backup-label + .backup { border-top: none; }
 
   footer {
     margin-top: 26px;
@@ -302,9 +312,9 @@
     left: 50%;
     bottom: 28px;
     transform: translateX(-50%) translateY(10px);
-    background: #17150f;
-    border: 1px solid var(--amber-dim);
-    color: var(--amber);
+    background: #0f1712;
+    border: 1px solid var(--accent-dim);
+    color: var(--accent);
     padding: 8px 18px;
     font-size: 12.5px;
     letter-spacing: 1px;
@@ -365,6 +375,13 @@
     <aside class="panel">
       <div class="panel-head"><span>index</span><span class="rule"></span></div>
       <ul class="daylist" id="dayList"></ul>
+      <div class="backup-label">csv · excel</div>
+      <div class="backup">
+        <button id="csvImportBtn" title="Import entries from a CSV file (date, task)">Import CSV</button>
+        <button id="csvExportBtn" title="Export all entries as a CSV file">Export CSV</button>
+        <input type="file" id="csvFile" accept=".csv,text/csv,text/plain" hidden>
+      </div>
+      <div class="backup-label">backup · json</div>
       <div class="backup">
         <button id="exportBtn" title="Save all data to a JSON file">Export</button>
         <button id="importBtn" title="Load data from a JSON backup file">Import</button>
@@ -400,6 +417,9 @@
     });
     localStorage.setItem(STORE_KEY, JSON.stringify(data));
   }
+  function newId() {
+    return Date.now() + "-" + Math.random().toString(36).slice(2, 7);
+  }
 
   // ---------- date helpers ----------
   function todayISO() {
@@ -426,6 +446,25 @@
   }
   var DOW = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
   function shortDow(iso) { return DOW[dateObj(iso).getDay()]; }
+
+  // Accepts 2026-07-05, 2026/07/05, 05/07/2026, 5-7-2026, 05.07.2026.
+  // Day-first is assumed for d/m/y unless the first number can only be a month.
+  function parseDateFlexible(s) {
+    s = String(s || "").trim();
+    var m = s.match(/^(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})$/);
+    var y, mo, d;
+    if (m) { y = +m[1]; mo = +m[2]; d = +m[3]; }
+    else {
+      m = s.match(/^(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{4})$/);
+      if (!m) return null;
+      d = +m[1]; mo = +m[2]; y = +m[3];
+      if (mo > 12 && d <= 12) { var t = d; d = mo; mo = t; } // clearly month-first
+    }
+    if (mo < 1 || mo > 12 || d < 1 || d > 31) return null;
+    var check = new Date(y, mo - 1, d);
+    if (check.getFullYear() !== y || check.getMonth() !== mo - 1 || check.getDate() !== d) return null;
+    return y + "-" + String(mo).padStart(2, "0") + "-" + String(d).padStart(2, "0");
+  }
 
   // ---------- rendering ----------
   var $ = function (id) { return document.getElementById(id); };
@@ -536,7 +575,7 @@
     var input = $("newItem");
     var v = input.value.trim();
     if (v === "") return;
-    items().push({ id: Date.now() + "-" + Math.random().toString(36).slice(2, 7), text: v });
+    items().push({ id: newId(), text: v });
     input.value = "";
     save();
     render();
@@ -584,19 +623,113 @@
     t.textContent = msg;
     t.classList.add("show");
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(function () { t.classList.remove("show"); }, 2200);
+    toastTimer = setTimeout(function () { t.classList.remove("show"); }, 2600);
   }
 
-  // ---------- backup ----------
-  function exportData() {
-    var blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  function downloadFile(name, content, mime) {
+    var blob = new Blob([content], { type: mime });
     var a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = "track-backup-" + todayISO() + ".json";
+    a.download = name;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(a.href);
+  }
+
+  // ---------- CSV ----------
+  // Handles quoted fields, "" escapes, CRLF, and auto-detects , ; or tab.
+  function parseCSV(text) {
+    if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1); // strip BOM
+    var firstLine = text.slice(0, text.indexOf("\n") === -1 ? text.length : text.indexOf("\n"));
+    var delim = ",";
+    var best = (firstLine.match(/,/g) || []).length;
+    [[";", (firstLine.match(/;/g) || []).length], ["\t", (firstLine.match(/\t/g) || []).length]]
+      .forEach(function (c) { if (c[1] > best) { best = c[1]; delim = c[0]; } });
+
+    var rows = [], row = [], field = "", inQ = false;
+    for (var i = 0; i < text.length; i++) {
+      var c = text[i];
+      if (inQ) {
+        if (c === '"') {
+          if (text[i + 1] === '"') { field += '"'; i++; }
+          else inQ = false;
+        } else field += c;
+      } else if (c === '"') {
+        inQ = true;
+      } else if (c === delim) {
+        row.push(field); field = "";
+      } else if (c === "\n") {
+        row.push(field); rows.push(row); row = []; field = "";
+      } else if (c !== "\r") {
+        field += c;
+      }
+    }
+    if (field !== "" || row.length) { row.push(field); rows.push(row); }
+    return rows.filter(function (r) {
+      return r.some(function (f) { return f.trim() !== ""; });
+    });
+  }
+
+  function csvQuote(s) {
+    return /[",;\t\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  }
+
+  function exportCSV() {
+    var days = Object.keys(data).sort();
+    if (days.length === 0) { toast("nothing to export"); return; }
+    var lines = ["Date,Task"];
+    days.forEach(function (d) {
+      data[d].forEach(function (it) {
+        lines.push(d + "," + csvQuote(it.text));
+      });
+    });
+    // BOM so Excel opens it as UTF-8
+    downloadFile("track-export-" + todayISO() + ".csv", "﻿" + lines.join("\r\n"), "text/csv");
+    toast("csv exported");
+  }
+
+  // Expected shape: one entry per row — date in the first column, task in the
+  // second (extra columns are appended to the task). Merges, skips duplicates.
+  function importCSV(file) {
+    var reader = new FileReader();
+    reader.onload = function () {
+      var rows = parseCSV(String(reader.result));
+      if (rows.length === 0) { toast("csv is empty"); return; }
+      var start = parseDateFlexible(rows[0][0]) ? 0 : 1; // skip header row
+      var added = 0, skipped = 0, daysTouched = {};
+      for (var i = start; i < rows.length; i++) {
+        var day = parseDateFlexible(rows[i][0]);
+        var text = rows[i].slice(1)
+          .map(function (f) { return f.trim(); })
+          .filter(function (f) { return f !== ""; })
+          .join(", ");
+        if (!day || text === "") { skipped++; continue; }
+        if (!data[day]) data[day] = [];
+        var dup = data[day].some(function (it) { return it.text === text; });
+        if (dup) { skipped++; continue; }
+        data[day].push({ id: newId(), text: text });
+        daysTouched[day] = true;
+        added++;
+      }
+      save();
+      render();
+      var dayCount = Object.keys(daysTouched).length;
+      if (added === 0) {
+        toast("nothing imported — " + skipped + " row" + (skipped === 1 ? "" : "s") + " skipped (duplicate or unreadable)");
+      } else {
+        toast("imported " + added + " entr" + (added === 1 ? "y" : "ies") +
+          " across " + dayCount + " day" + (dayCount === 1 ? "" : "s") +
+          (skipped ? " — " + skipped + " skipped" : ""));
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  // ---------- JSON backup ----------
+  function exportData() {
+    downloadFile("track-backup-" + todayISO() + ".json",
+      JSON.stringify(data, null, 2), "application/json");
     toast("backup exported");
   }
 
@@ -617,7 +750,7 @@
             var text = (it && typeof it.text === "string") ? it.text
                      : (typeof it === "string") ? it : null;
             if (text && existing.indexOf(text) === -1) {
-              data[day].push({ id: Date.now() + "-" + Math.random().toString(36).slice(2, 7), text: text });
+              data[day].push({ id: newId(), text: text });
               existing.push(text);
               added++;
             }
@@ -665,6 +798,12 @@
       render();
       toast("day cleared");
     }
+  });
+  $("csvExportBtn").addEventListener("click", exportCSV);
+  $("csvImportBtn").addEventListener("click", function () { $("csvFile").click(); });
+  $("csvFile").addEventListener("change", function () {
+    if (this.files && this.files[0]) importCSV(this.files[0]);
+    this.value = "";
   });
   $("exportBtn").addEventListener("click", exportData);
   $("importBtn").addEventListener("click", function () { $("importFile").click(); });
