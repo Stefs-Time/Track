@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>Track — Daily Task List</title>
+<style>
+  :root {
+    --bg: #0c0e12;
+    --bg-glow-1: rgba(99, 102, 241, 0.14);
+    --bg-glow-2: rgba(14, 165, 183, 0.10);
+    --panel: #14171d;
+    --panel-2: #191d24;
+    --text: #e7eaf0;
+    --muted: #8b93a3;
+    --faint: #5c6373;
+    --border: #232936;
+    --border-soft: #1d222d;
+    --accent: #818cf8;
+    --accent-strong: #6366f1;
+    --accent-soft: rgba(99, 102, 241, 0.12);
+    --accent-glow: rgba(99, 102, 241, 0.35);
+    --teal: #2dd4bf;
+    --danger: #f87171;
+  }
+  * { box-sizing: border-box; }
+  html { color-scheme: dark; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+    background:
+      radial-gradient(900px 500px at 15% -10%, var(--bg-glow-1), transparent 60%),
+      radial-gradient(800px 500px at 100% 0%, var(--bg-glow-2), transparent 55%),
+      var(--bg);
+    background-attachment: fixed;
+    color: var(--text);
+    line-height: 1.5;
+  }
+  ::selection { background: var(--accent-strong); color: #fff; }
+
+  .wrap {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 36px 20px 70px;
+    display: grid;
+    grid-template-columns: 1fr 232px;
+    gap: 22px;
+  }
+  @media (max-width: 760px) {
+    .wrap { grid-template-columns: 1fr; padding-top: 24px; }
+  }
+
+  /* ---------- header ---------- */
+  header {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 6px;
+  }
+  .logo {
+    margin-right: auto;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+  .logo h1 {
+    font-size: 26px;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: .5px;
+    background: linear-gradient(120deg, #c7d2fe 10%, var(--accent) 45%, var(--teal) 95%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .logo small {
+    color: var(--faint);
+    font-size: 12px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+  .datebar { display: flex; align-items: center; gap: 8px; }
+
+  /* ---------- controls ---------- */
+  button, input[type="date"] {
+    font: inherit;
+    font-size: 14px;
+    color: var(--text);
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 8px 13px;
+    cursor: pointer;
+    transition: border-color .15s, background .15s, box-shadow .15s, transform .05s;
+  }
+  input[type="date"] { cursor: auto; }
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(0.7);
+    cursor: pointer;
+  }
+  button:hover { border-color: var(--accent); background: #1d222c; }
+  button:active { transform: translateY(1px); }
+  button:focus-visible, input:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  button.primary {
+    background: linear-gradient(135deg, var(--accent-strong), #4f46e5);
+    border-color: transparent;
+    color: #fff;
+    font-weight: 600;
+    box-shadow: 0 2px 14px var(--accent-glow);
+  }
+  button.primary:hover {
+    filter: brightness(1.12);
+    box-shadow: 0 3px 20px var(--accent-glow);
+  }
+  button.ghost {
+    background: transparent;
+    border-color: var(--border);
+    color: var(--muted);
+  }
+  button.ghost:hover { color: var(--text); border-color: var(--accent); }
+
+  /* ---------- panels ---------- */
+  .panel {
+    background: linear-gradient(180deg, var(--panel-2), var(--panel));
+    border: 1px solid var(--border-soft);
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .35), inset 0 1px 0 rgba(255, 255, 255, .03);
+    padding: 22px;
+  }
+
+  .day-title { font-size: 19px; font-weight: 650; margin: 0; }
+  .day-sub {
+    color: var(--muted);
+    font-size: 13px;
+    margin: 2px 0 18px;
+    min-height: 1.2em;
+  }
+
+  .addrow { display: flex; gap: 10px; margin-bottom: 16px; }
+  .addrow input[type="text"] {
+    flex: 1;
+    font: inherit;
+    font-size: 14px;
+    color: var(--text);
+    background: #0f1217;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .addrow input[type="text"]::placeholder { color: var(--faint); }
+  .addrow input[type="text"]:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+
+  /* ---------- items ---------- */
+  ul.items { list-style: none; margin: 0; padding: 0; }
+  ul.items li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 9px 8px;
+    border-radius: 10px;
+    border-bottom: 1px solid var(--border-soft);
+    transition: background .12s;
+  }
+  ul.items li:hover { background: rgba(255, 255, 255, .025); }
+  ul.items li:last-child { border-bottom: none; }
+  ul.items li .bullet {
+    color: var(--teal);
+    font-size: 15px;
+    line-height: 1.5;
+    user-select: none;
+  }
+  ul.items li .txt {
+    flex: 1;
+    white-space: pre-wrap;
+    word-break: break-word;
+    border-radius: 8px;
+    padding: 1px 6px;
+    font-size: 14.5px;
+  }
+  ul.items li .txt:focus {
+    outline: 1px solid var(--accent);
+    background: var(--accent-soft);
+  }
+  ul.items li .del {
+    border: none;
+    background: none;
+    color: var(--faint);
+    font-size: 15px;
+    padding: 1px 7px;
+    line-height: 1.4;
+    border-radius: 8px;
+    opacity: 0;
+    transition: opacity .12s, color .12s;
+  }
+  ul.items li:hover .del, ul.items li .del:focus-visible { opacity: 1; }
+  ul.items li .del:hover { color: var(--danger); background: rgba(248, 113, 113, .1); border-color: transparent; }
+
+  .empty {
+    color: var(--faint);
+    font-size: 14px;
+    padding: 26px 4px;
+    text-align: center;
+    border: 1px dashed var(--border);
+    border-radius: 12px;
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 20px;
+    padding-top: 18px;
+    border-top: 1px solid var(--border-soft);
+  }
+  .actions .spacer { flex: 1; }
+
+  /* ---------- sidebar ---------- */
+  aside .panel { padding: 18px; }
+  aside h2 {
+    font-size: 11.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--faint);
+    margin: 0 0 12px;
+  }
+  .daylist {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    max-height: 430px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+  .daylist li { margin-bottom: 3px; }
+  .daylist button {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 11px;
+    font-size: 13px;
+    border: 1px solid transparent;
+    background: none;
+    text-align: left;
+    color: var(--muted);
+  }
+  .daylist button:hover { background: rgba(255, 255, 255, .04); color: var(--text); }
+  .daylist button.current {
+    background: var(--accent-soft);
+    color: var(--text);
+    font-weight: 600;
+    border-color: rgba(99, 102, 241, .25);
+  }
+  .daylist .count {
+    color: var(--faint);
+    font-size: 12px;
+    background: rgba(255, 255, 255, .05);
+    border-radius: 20px;
+    padding: 0 8px;
+    min-width: 24px;
+    text-align: center;
+  }
+  .daylist button.current .count { color: var(--accent); background: rgba(99, 102, 241, .18); }
+  .nothing { color: var(--faint); font-size: 13px; padding: 4px 10px; }
+
+  .backup {
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border-soft);
+    display: flex;
+    gap: 8px;
+  }
+  .backup button { flex: 1; font-size: 13px; padding: 6px 8px; }
+
+  /* ---------- toast ---------- */
+  #toast {
+    position: fixed;
+    left: 50%;
+    bottom: 30px;
+    transform: translateX(-50%) translateY(14px);
+    background: #1c212b;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 9px 20px;
+    border-radius: 24px;
+    font-size: 13px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, .45);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s, transform .2s;
+  }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">
+      <h1>Track</h1>
+      <small>daily task list</small>
+    </div>
+    <div class="datebar">
+      <button id="prevDay" class="ghost" title="Previous day">‹</button>
+      <input type="date" id="datePick">
+      <button id="nextDay" class="ghost" title="Next day">›</button>
+      <button id="todayBtn">Today</button>
+    </div>
+  </header>
+
+  <main class="panel">
+    <p class="day-title" id="dayTitle"></p>
+    <p class="day-sub" id="daySub"></p>
+
+    <div class="addrow">
+      <input type="text" id="newItem" placeholder="What did you do? Press Enter to add…" autocomplete="off">
+      <button class="primary" id="addBtn">Add</button>
+    </div>
+
+    <ul class="items" id="itemList"></ul>
+    <div class="empty" id="emptyMsg">No items for this day yet — add your first one above.</div>
+
+    <div class="actions">
+      <button class="primary" id="copyDay">Copy day to clipboard</button>
+      <button id="copyPlain" title="Copies just the items, one per line, no date heading">Copy items only</button>
+      <span class="spacer"></span>
+      <button class="ghost" id="clearDay">Clear day</button>
+    </div>
+  </main>
+
+  <aside>
+    <div class="panel">
+      <h2>Days with entries</h2>
+      <ul class="daylist" id="dayList"></ul>
+      <div class="backup">
+        <button id="exportBtn" title="Save all data to a JSON file">Export</button>
+        <button id="importBtn" title="Load data from a JSON backup file">Import</button>
+        <input type="file" id="importFile" accept=".json,application/json" hidden>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<div id="toast"></div>
+
+<script>
+(function () {
+  "use strict";
+  var STORE_KEY = "track.tasks.v1";
+  var data = load();          // { "YYYY-MM-DD": [{id, text}, ...] }
+  var currentDate = todayISO();
+
+  // ---------- storage ----------
+  function load() {
+    try {
+      var raw = localStorage.getItem(STORE_KEY);
+      var parsed = raw ? JSON.parse(raw) : {};
+      return (parsed && typeof parsed === "object" && !Array.isArray(parsed)) ? parsed : {};
+    } catch (e) { return {}; }
+  }
+  function save() {
+    // prune empty days so the sidebar stays clean
+    Object.keys(data).forEach(function (d) {
+      if (!data[d] || data[d].length === 0) delete data[d];
+    });
+    localStorage.setItem(STORE_KEY, JSON.stringify(data));
+  }
+
+  // ---------- date helpers ----------
+  function todayISO() {
+    var d = new Date();
+    return d.getFullYear() + "-" +
+      String(d.getMonth() + 1).padStart(2, "0") + "-" +
+      String(d.getDate()).padStart(2, "0");
+  }
+  function shiftDay(iso, delta) {
+    var p = iso.split("-");
+    var d = new Date(+p[0], +p[1] - 1, +p[2] + delta);
+    return d.getFullYear() + "-" +
+      String(d.getMonth() + 1).padStart(2, "0") + "-" +
+      String(d.getDate()).padStart(2, "0");
+  }
+  function prettyDate(iso) {
+    var p = iso.split("-");
+    var d = new Date(+p[0], +p[1] - 1, +p[2]);
+    return d.toLocaleDateString(undefined, {
+      weekday: "long", day: "numeric", month: "long", year: "numeric"
+    });
+  }
+
+  // ---------- rendering ----------
+  var $ = function (id) { return document.getElementById(id); };
+
+  function items() {
+    if (!data[currentDate]) data[currentDate] = [];
+    return data[currentDate];
+  }
+
+  function render() {
+    $("datePick").value = currentDate;
+    $("dayTitle").textContent = prettyDate(currentDate);
+    var list = data[currentDate] || [];
+    $("daySub").textContent = list.length === 0 ? "" :
+      list.length + (list.length === 1 ? " item" : " items");
+
+    var ul = $("itemList");
+    ul.innerHTML = "";
+    list.forEach(function (item) {
+      var li = document.createElement("li");
+
+      var bullet = document.createElement("span");
+      bullet.className = "bullet";
+      bullet.textContent = "•";
+
+      var txt = document.createElement("div");
+      txt.className = "txt";
+      txt.textContent = item.text;
+      txt.contentEditable = "plaintext-only"; // falls back below if unsupported
+      if (txt.contentEditable !== "plaintext-only") txt.contentEditable = "true";
+      txt.spellcheck = false;
+      txt.title = "Click to edit";
+      txt.addEventListener("blur", function () {
+        var v = txt.textContent.trim();
+        if (v === "") {
+          removeItem(item.id);
+        } else if (v !== item.text) {
+          item.text = v;
+          save();
+          renderSidebar();
+        }
+      });
+      txt.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") { e.preventDefault(); txt.blur(); }
+        if (e.key === "Escape") { txt.textContent = item.text; txt.blur(); }
+      });
+
+      var del = document.createElement("button");
+      del.className = "del";
+      del.title = "Delete item";
+      del.textContent = "✕";
+      del.addEventListener("click", function () { removeItem(item.id); });
+
+      li.appendChild(bullet);
+      li.appendChild(txt);
+      li.appendChild(del);
+      ul.appendChild(li);
+    });
+
+    $("emptyMsg").style.display = list.length === 0 ? "" : "none";
+    renderSidebar();
+  }
+
+  function renderSidebar() {
+    var ul = $("dayList");
+    ul.innerHTML = "";
+    var days = Object.keys(data).filter(function (d) {
+      return data[d] && data[d].length > 0;
+    }).sort().reverse();
+
+    if (days.length === 0) {
+      var li = document.createElement("li");
+      var span = document.createElement("span");
+      span.className = "nothing";
+      span.textContent = "Nothing yet";
+      li.appendChild(span);
+      ul.appendChild(li);
+      return;
+    }
+    days.forEach(function (d) {
+      var li = document.createElement("li");
+      var btn = document.createElement("button");
+      if (d === currentDate) btn.className = "current";
+      var label = document.createElement("span");
+      label.textContent = d;
+      var count = document.createElement("span");
+      count.className = "count";
+      count.textContent = data[d].length;
+      btn.appendChild(label);
+      btn.appendChild(count);
+      btn.addEventListener("click", function () {
+        currentDate = d;
+        render();
+      });
+      li.appendChild(btn);
+      ul.appendChild(li);
+    });
+  }
+
+  // ---------- actions ----------
+  function addItem() {
+    var input = $("newItem");
+    var v = input.value.trim();
+    if (v === "") return;
+    items().push({ id: Date.now() + "-" + Math.random().toString(36).slice(2, 7), text: v });
+    input.value = "";
+    save();
+    render();
+    input.focus();
+  }
+
+  function removeItem(id) {
+    var list = items();
+    var i = list.findIndex(function (it) { return it.id === id; });
+    if (i !== -1) list.splice(i, 1);
+    save();
+    render();
+  }
+
+  function dayAsText(withHeading) {
+    var list = data[currentDate] || [];
+    var lines = list.map(function (it) { return (withHeading ? "- " : "") + it.text; });
+    if (withHeading) lines.unshift(prettyDate(currentDate), "");
+    return lines.join("\n");
+  }
+
+  function copyText(text, doneMsg) {
+    if (text.trim() === "") { toast("Nothing to copy — the day is empty"); return; }
+    function fallback() {
+      var ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand("copy"); toast(doneMsg); }
+      catch (e) { toast("Copy failed — select and copy manually"); }
+      document.body.removeChild(ta);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () { toast(doneMsg); }, fallback);
+    } else {
+      fallback();
+    }
+  }
+
+  var toastTimer;
+  function toast(msg) {
+    var t = $("toast");
+    t.textContent = msg;
+    t.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.classList.remove("show"); }, 2200);
+  }
+
+  // ---------- backup ----------
+  function exportData() {
+    var blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "track-backup-" + todayISO() + ".json";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
+    toast("Backup exported");
+  }
+
+  function importData(file) {
+    var reader = new FileReader();
+    reader.onload = function () {
+      try {
+        var incoming = JSON.parse(reader.result);
+        if (!incoming || typeof incoming !== "object" || Array.isArray(incoming)) {
+          throw new Error("bad format");
+        }
+        var added = 0;
+        Object.keys(incoming).forEach(function (day) {
+          if (!/^\d{4}-\d{2}-\d{2}$/.test(day) || !Array.isArray(incoming[day])) return;
+          if (!data[day]) data[day] = [];
+          var existing = data[day].map(function (it) { return it.text; });
+          incoming[day].forEach(function (it) {
+            var text = (it && typeof it.text === "string") ? it.text
+                     : (typeof it === "string") ? it : null;
+            if (text && existing.indexOf(text) === -1) {
+              data[day].push({ id: Date.now() + "-" + Math.random().toString(36).slice(2, 7), text: text });
+              existing.push(text);
+              added++;
+            }
+          });
+        });
+        save();
+        render();
+        toast("Imported " + added + " item" + (added === 1 ? "" : "s"));
+      } catch (e) {
+        toast("Import failed — not a valid Track backup file");
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  // ---------- wiring ----------
+  $("addBtn").addEventListener("click", addItem);
+  $("newItem").addEventListener("keydown", function (e) {
+    if (e.key === "Enter") addItem();
+  });
+  $("datePick").addEventListener("change", function () {
+    if (this.value) { currentDate = this.value; render(); }
+  });
+  $("prevDay").addEventListener("click", function () {
+    currentDate = shiftDay(currentDate, -1); render();
+  });
+  $("nextDay").addEventListener("click", function () {
+    currentDate = shiftDay(currentDate, 1); render();
+  });
+  $("todayBtn").addEventListener("click", function () {
+    currentDate = todayISO(); render();
+  });
+  $("copyDay").addEventListener("click", function () {
+    copyText(dayAsText(true), "Day copied to clipboard");
+  });
+  $("copyPlain").addEventListener("click", function () {
+    copyText(dayAsText(false), "Items copied to clipboard");
+  });
+  $("clearDay").addEventListener("click", function () {
+    var list = data[currentDate] || [];
+    if (list.length === 0) { toast("Day is already empty"); return; }
+    if (confirm("Delete all " + list.length + " item(s) for " + prettyDate(currentDate) + "?")) {
+      delete data[currentDate];
+      save();
+      render();
+      toast("Day cleared");
+    }
+  });
+  $("exportBtn").addEventListener("click", exportData);
+  $("importBtn").addEventListener("click", function () { $("importFile").click(); });
+  $("importFile").addEventListener("change", function () {
+    if (this.files && this.files[0]) importData(this.files[0]);
+    this.value = "";
+  });
+
+  render();
+  $("newItem").focus();
+})();
+</script>
+</body>
+</html>
