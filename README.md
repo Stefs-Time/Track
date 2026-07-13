@@ -8,6 +8,8 @@ A simple, dark-themed daily task list that runs locally on Windows. No installs,
 2. Double-click `Track.html` — it opens in your browser (Edge, Chrome, etc.).
 3. Pick a date (defaults to today), type what you did, press **Enter** to add it.
 
+The full guide is built into the app itself — it pops up on first use, and the **?** button (top right) reopens it any time. The HTML file is all you need; this README just mirrors it.
+
 Tip: right-click `Track.html` → *Send to* → *Desktop (create shortcut)* so it's always one click away.
 
 ## Features

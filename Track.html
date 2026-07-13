@@ -442,6 +442,125 @@
   }
   .fab:hover { background: #3ac9b6; transform: translateY(-1px); }
 
+  /* help modal */
+  .helpbtn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    background: var(--card);
+    color: var(--muted);
+    font-size: 15px;
+    font-weight: 650;
+    box-shadow: var(--shadow);
+  }
+  .helpbtn:hover { color: var(--teal); border-color: var(--teal); }
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 12, 14, 0.6);
+    backdrop-filter: blur(3px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    z-index: 20;
+  }
+  .overlay.open { display: flex; }
+  .modal {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55);
+    max-width: 660px;
+    width: 100%;
+    max-height: 84vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .modal-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 22px;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .modal-head h2 { margin: 0; font-size: 17px; font-weight: 650; margin-right: auto; }
+  .modal-head .close {
+    border: none;
+    background: none;
+    color: var(--faint);
+    font-size: 18px;
+    padding: 4px 8px;
+    border-radius: 8px;
+  }
+  .modal-head .close:hover { color: var(--text); background: rgba(255, 255, 255, 0.06); }
+  .modal-body {
+    padding: 6px 22px 22px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--line) transparent;
+    font-size: 13.5px;
+    color: var(--muted);
+  }
+  .modal-body h3 {
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 650;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 20px 0 6px;
+  }
+  .modal-body h3 .tick { color: var(--teal); }
+  .modal-body p { margin: 0 0 8px; }
+  .modal-body ul { margin: 0 0 8px; padding-left: 20px; }
+  .modal-body li { margin-bottom: 4px; }
+  .modal-body b { color: var(--text); font-weight: 600; }
+  .modal-body kbd {
+    font-family: Consolas, monospace;
+    font-size: 12px;
+    background: var(--field);
+    border: 1px solid var(--line);
+    border-bottom-width: 2px;
+    border-radius: 5px;
+    padding: 0 6px;
+    color: var(--text);
+  }
+  .modal-body pre {
+    background: var(--field);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-family: Consolas, monospace;
+    font-size: 12.5px;
+    color: var(--text);
+    overflow-x: auto;
+    margin: 6px 0 8px;
+  }
+  .modal-body .note {
+    background: var(--teal-ghost);
+    border: 1px solid rgba(47, 181, 163, 0.3);
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-top: 16px;
+  }
+  .modal-foot {
+    padding: 14px 22px;
+    border-top: 1px solid var(--line-soft);
+    display: flex;
+    justify-content: flex-end;
+  }
+  .modal-foot button {
+    border: none;
+    border-radius: 8px;
+    background: var(--teal);
+    color: #0e1f1b;
+    font-weight: 650;
+    padding: 8px 26px;
+  }
+  .modal-foot button:hover { background: #3ac9b6; }
+
   /* toast */
   #toast {
     position: fixed;
@@ -513,6 +632,7 @@
     <div class="main-head">
       <h1 id="dayTitle"></h1>
       <div class="saved-pill" id="savedPill"><span class="dot">●</span> Data auto-saved locally</div>
+      <button class="helpbtn" id="helpBtn" title="How Track works">?</button>
     </div>
 
     <div class="nav-row">
@@ -551,6 +671,66 @@
 </div>
 
 <button class="fab" id="fab" title="Add an entry">+</button>
+
+<div class="overlay" id="helpOverlay">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+    <div class="modal-head">
+      <h2 id="helpTitle">How Track works</h2>
+      <button class="close" id="helpClose" title="Close">✕</button>
+    </div>
+    <div class="modal-body">
+      <p>Track is your daily task log in a single file. No installs, no server, no account —
+        everything lives in this HTML file and saves automatically on your machine.</p>
+
+      <h3><span class="tick">●</span> The daily log</h3>
+      <ul>
+        <li>Type what you did in the box and press <kbd>Enter</kbd> — it's saved instantly.</li>
+        <li>Move between days with the <b>‹ ›</b> arrows, or <b>click the big date</b> to open a calendar.</li>
+        <li>Hover an entry and click the <b>✎ pencil</b> to edit it (Save/Cancel), or <b>✕</b> to delete it.</li>
+        <li><b>Recent Days</b> in the sidebar lists every day that has entries — click one to jump there.</li>
+      </ul>
+
+      <h3><span class="tick">●</span> Copy &amp; paste</h3>
+      <ul>
+        <li><b>Copy Day to Clipboard</b> copies the date plus a bulleted list — ready to paste into an email, timesheet or invoice.</li>
+        <li><b>Copy Items Only</b> copies just the lines, no date heading.</li>
+      </ul>
+
+      <h3><span class="tick">●</span> Wishlist</h3>
+      <ul>
+        <li>Queue things that still need doing in the sidebar's <b>Wishlist</b>.</li>
+        <li>When one gets done, <b>drag it onto the log or onto a day</b> in Recent Days — it becomes an entry there.</li>
+        <li>Or hover it and click <b>↳</b> to log it on the day you have open. Click its text to edit, <b>✕</b> to remove.</li>
+      </ul>
+
+      <h3><span class="tick">●</span> CSV import / export (Excel)</h3>
+      <p>Bulk-load the month to date from a spreadsheet. One entry per row: date first, task second.</p>
+      <pre>Date,Task
+2026-07-01,"Installed blinds, lounge"
+02/07/2026,Quoted new office fit-out</pre>
+      <ul>
+        <li>The header row is optional. Dates can be <b>2026-07-01</b> or <b>01/07/2026</b> style (day-first).</li>
+        <li>Comma, semicolon or tab delimited — detected automatically.</li>
+        <li>Re-importing is safe: duplicates and unreadable rows are skipped and reported.</li>
+        <li><b>CSV Export</b> writes the same format, so you can export → edit in Excel → import back.</li>
+      </ul>
+
+      <h3><span class="tick">●</span> Backups &amp; where your data lives</h3>
+      <ul>
+        <li>Data is stored by <b>this browser, on this computer</b>. Stick to one browser (e.g. always Edge).</li>
+        <li><b>Export (JSON)</b> saves everything — including the wishlist — to a file; <b>Import</b> merges it back in. Use it to move to another browser or PC, or as a safety net.</li>
+        <li>Clearing the browser's site data erases the log — keep an occasional export.</li>
+      </ul>
+
+      <div class="note"><b>Tip:</b> right-click the Track.html file → <i>Send to</i> → <i>Desktop (create shortcut)</i>
+        so it's always one click away. Reopen this guide any time with the <b>?</b> button, top right.</div>
+    </div>
+    <div class="modal-foot">
+      <button id="helpDone">Got it</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
@@ -1207,8 +1387,33 @@
     this.value = "";
   });
 
+  // ---------- help ----------
+  var HELP_KEY = "track.helpseen.v1";
+  function openHelp() {
+    $("helpOverlay").classList.add("open");
+    $("helpDone").focus();
+  }
+  function closeHelp() {
+    $("helpOverlay").classList.remove("open");
+    localStorage.setItem(HELP_KEY, "1");
+    $("newItem").focus();
+  }
+  $("helpBtn").addEventListener("click", openHelp);
+  $("helpClose").addEventListener("click", closeHelp);
+  $("helpDone").addEventListener("click", closeHelp);
+  $("helpOverlay").addEventListener("click", function (e) {
+    if (e.target === this) closeHelp();
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && $("helpOverlay").classList.contains("open")) closeHelp();
+  });
+
   render();
-  $("newItem").focus();
+  if (!localStorage.getItem(HELP_KEY)) {
+    openHelp(); // first run: show the guide
+  } else {
+    $("newItem").focus();
+  }
 })();
 </script>
 </body>
