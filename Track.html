@@ -146,7 +146,7 @@
     list-style: none;
     margin: 0;
     padding: 0 2px;
-    max-height: 220px;
+    max-height: 150px;
     overflow-y: auto;
     scrollbar-width: thin;
     scrollbar-color: var(--line) transparent;
@@ -442,6 +442,138 @@
   }
   .fab:hover { background: #3ac9b6; transform: translateY(-1px); }
 
+  /* view tabs */
+  .tabs {
+    display: flex;
+    background: var(--card);
+    border: 1px solid var(--line-soft);
+    border-radius: 999px;
+    padding: 3px;
+    box-shadow: var(--shadow);
+  }
+  .tabs button {
+    border: none;
+    background: none;
+    color: var(--muted);
+    padding: 5px 16px;
+    border-radius: 999px;
+    font-size: 13px;
+  }
+  .tabs button:not(.active):hover { color: var(--text); }
+  .tabs button.active {
+    background: var(--teal);
+    color: #0e1f1b;
+    font-weight: 600;
+  }
+
+  /* week view */
+  .weekview { display: flex; flex-direction: column; gap: 10px; }
+  .wday {
+    background: var(--card);
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 10px 14px;
+  }
+  .wday.today { border-color: rgba(47, 181, 163, 0.5); }
+  .wday.droptarget { outline: 2px dashed var(--teal); outline-offset: 2px; }
+  .wday-head { display: flex; align-items: center; gap: 10px; }
+  .wday-head button {
+    border: none;
+    background: none;
+    color: var(--text);
+    font-weight: 600;
+    font-size: 13.5px;
+    padding: 2px 6px;
+    border-radius: 6px;
+  }
+  .wday-head button:hover { color: var(--teal); }
+  .wday-head .count {
+    color: var(--faint);
+    font-size: 11.5px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 20px;
+    padding: 1px 8px;
+  }
+  .wday ul { list-style: none; margin: 6px 0 0; padding: 0; }
+  .wday ul li {
+    font-size: 13px;
+    color: var(--muted);
+    padding: 2px 6px;
+    display: flex;
+    gap: 8px;
+    align-items: baseline;
+  }
+  .wday ul li::before { content: "•"; color: var(--teal); }
+  .wday .none { color: var(--faint); font-size: 12px; padding: 2px 6px; font-style: italic; }
+
+  /* month view */
+  .monthview {
+    background: var(--card);
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 14px;
+  }
+  .mgrid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+  .mgrid .mhead {
+    text-align: center;
+    color: var(--faint);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 4px 0;
+    user-select: none;
+  }
+  .mcell {
+    min-height: 76px;
+    background: var(--card-2);
+    border: 1px solid var(--line-soft);
+    border-radius: 8px;
+    padding: 6px 8px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    text-align: left;
+    color: var(--muted);
+    font: inherit;
+    min-width: 0;
+    overflow: hidden;
+  }
+  .mcell:hover { border-color: var(--teal); }
+  .mcell.blank { background: none; border: none; cursor: default; box-shadow: none; }
+  .mcell.today { border-color: rgba(47, 181, 163, 0.55); }
+  .mcell.droptarget { outline: 2px dashed var(--teal); outline-offset: -2px; }
+  .mcell .dnum {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .mcell .dnum .count {
+    color: var(--teal);
+    background: var(--teal-ghost);
+    font-size: 10.5px;
+    font-weight: 600;
+    border-radius: 20px;
+    padding: 0 7px;
+  }
+  .mcell .snip {
+    font-size: 11px;
+    color: var(--faint);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+  @media (max-width: 900px) {
+    .mcell { min-height: 54px; }
+    .mcell .snip { display: none; }
+  }
+
   /* help modal */
   .helpbtn {
     width: 32px;
@@ -614,6 +746,16 @@
       <div class="wish-hint">Drag onto the log or a day · ↳ sends to open day</div>
     </section>
 
+    <section>
+      <h2>Recurring <span id="recCount" style="color:var(--teal)"></span></h2>
+      <div class="wish-add">
+        <input type="text" id="newRec" placeholder="Happens often…" autocomplete="off">
+        <button id="addRecBtn" title="Add a recurring task">+</button>
+      </div>
+      <ul class="wishlist" id="recList"></ul>
+      <div class="wish-hint">Drag or ↳ to log it on a day — it stays in this list</div>
+    </section>
+
     <section class="tools">
       <div class="row accent">
         <button id="exportBtn" title="Save all data to a JSON file">Export (JSON)</button>
@@ -631,6 +773,11 @@
   <main class="main">
     <div class="main-head">
       <h1 id="dayTitle"></h1>
+      <div class="tabs" id="viewTabs">
+        <button data-view="day" class="active">Day</button>
+        <button data-view="week">Week</button>
+        <button data-view="month">Month</button>
+      </div>
       <div class="saved-pill" id="savedPill"><span class="dot">●</span> Data auto-saved locally</div>
       <button class="helpbtn" id="helpBtn" title="How Track works">?</button>
     </div>
@@ -667,6 +814,12 @@
         <button class="clearday" id="clearDay">Clear this day…</button>
       </div>
     </div>
+
+    <div class="weekview" id="weekView" style="display:none"></div>
+
+    <div class="monthview" id="monthView" style="display:none">
+      <div class="mgrid" id="monthGrid"></div>
+    </div>
   </main>
 </div>
 
@@ -696,11 +849,25 @@
         <li><b>Copy Items Only</b> copies just the lines, no date heading.</li>
       </ul>
 
+      <h3><span class="tick">●</span> Day · Week · Month views</h3>
+      <ul>
+        <li>Switch views with the <b>Day / Week / Month</b> tabs. The <b>‹ ›</b> arrows then step by day, week or month.</li>
+        <li><b>Week</b> shows the whole week's entries at a glance; <b>Month</b> is a calendar with counts per day.</li>
+        <li>Click any day in either view to open it. The copy buttons follow the view — in Month view, <b>Copy Month</b> gives you the full month-to-date list, ready to paste.</li>
+      </ul>
+
       <h3><span class="tick">●</span> Wishlist</h3>
       <ul>
         <li>Queue things that still need doing in the sidebar's <b>Wishlist</b>.</li>
-        <li>When one gets done, <b>drag it onto the log or onto a day</b> in Recent Days — it becomes an entry there.</li>
+        <li>When one gets done, <b>drag it onto the log or onto a day</b> — in Recent Days, or straight onto a Week or Month cell. It becomes an entry there.</li>
         <li>Or hover it and click <b>↳</b> to log it on the day you have open. Click its text to edit, <b>✕</b> to remove.</li>
+      </ul>
+
+      <h3><span class="tick">●</span> Recurring tasks</h3>
+      <ul>
+        <li>Add tasks you do again and again to <b>Recurring</b> in the sidebar.</li>
+        <li>Drag one onto any day (or click <b>↳</b> for the open day) to log it — <b>it stays in the list</b> so you can use it next time.</li>
+        <li>If it's already on that day, Track skips the duplicate and tells you.</li>
       </ul>
 
       <h3><span class="tick">●</span> CSV import / export (Excel)</h3>
@@ -738,10 +905,17 @@
   "use strict";
   var STORE_KEY = "track.tasks.v1";
   var WISH_KEY = "track.wishlist.v1";
+  var REC_KEY = "track.recurring.v1";
+  var VIEW_KEY = "track.view.v1";
   var data = load();          // { "YYYY-MM-DD": [{id, text}, ...] }
-  var wishlist = loadWishlist(); // [{id, text}, ...]
+  var wishlist = loadList(WISH_KEY);  // [{id, text}, ...]
+  var recurring = loadList(REC_KEY);  // [{id, text}, ...]
   var currentDate = todayISO();
   var editingId = null;
+  var view = (function () {
+    var v = localStorage.getItem(VIEW_KEY);
+    return (v === "week" || v === "month") ? v : "day";
+  })();
 
   // ---------- storage ----------
   function load() {
@@ -762,9 +936,9 @@
   function newId() {
     return Date.now() + "-" + Math.random().toString(36).slice(2, 7);
   }
-  function loadWishlist() {
+  function loadList(key) {
     try {
-      var raw = localStorage.getItem(WISH_KEY);
+      var raw = localStorage.getItem(key);
       var parsed = raw ? JSON.parse(raw) : [];
       return Array.isArray(parsed) ? parsed.filter(function (it) {
         return it && typeof it.text === "string" && it.text !== "";
@@ -773,6 +947,10 @@
   }
   function saveWishlist() {
     localStorage.setItem(WISH_KEY, JSON.stringify(wishlist));
+    pulseSaved();
+  }
+  function saveRecurring() {
+    localStorage.setItem(REC_KEY, JSON.stringify(recurring));
     pulseSaved();
   }
   var pulseTimer;
@@ -815,6 +993,30 @@
     return label;
   }
   function shortDow(iso) { return DOW[dateObj(iso).getDay()]; }
+  function isoOf(d) {
+    return d.getFullYear() + "-" +
+      String(d.getMonth() + 1).padStart(2, "0") + "-" +
+      String(d.getDate()).padStart(2, "0");
+  }
+  function weekStart(iso) { // Monday-first weeks
+    var d = dateObj(iso);
+    return shiftDay(iso, -((d.getDay() + 6) % 7));
+  }
+  function shiftMonth(iso, delta) {
+    var d = dateObj(iso);
+    var first = new Date(d.getFullYear(), d.getMonth() + delta, 1);
+    var maxDay = new Date(first.getFullYear(), first.getMonth() + 1, 0).getDate();
+    return isoOf(new Date(first.getFullYear(), first.getMonth(), Math.min(d.getDate(), maxDay)));
+  }
+  function monthLabel(iso) {
+    return dateObj(iso).toLocaleDateString(undefined, { month: "long", year: "numeric" });
+  }
+  function weekLabel(iso) {
+    var ws = dateObj(weekStart(iso));
+    var we = dateObj(shiftDay(weekStart(iso), 6));
+    var a = ws.getDate() + (ws.getMonth() !== we.getMonth() ? " " + MON[ws.getMonth()] : "");
+    return "Week of " + a + " – " + we.getDate() + " " + MON[we.getMonth()] + " " + we.getFullYear();
+  }
 
   // Accepts 2026-07-05, 2026/07/05, 05/07/2026, 5-7-2026, 05.07.2026.
   // Day-first is assumed for d/m/y unless the first number can only be a month.
@@ -843,11 +1045,49 @@
     return data[currentDate];
   }
 
+  function setView(v) {
+    view = v;
+    localStorage.setItem(VIEW_KEY, v);
+    editingId = null;
+    render();
+  }
+
   function render() {
     $("datePick").value = currentDate;
-    $("dayTitle").textContent = "Log for " + prettyDate(currentDate);
-    $("navDate").textContent = prettyDate(currentDate);
 
+    var tabs = document.querySelectorAll("#viewTabs button");
+    for (var i = 0; i < tabs.length; i++) {
+      tabs[i].classList.toggle("active", tabs[i].dataset.view === view);
+    }
+
+    if (view === "week") {
+      $("dayTitle").textContent = weekLabel(currentDate);
+      $("navDate").textContent = weekLabel(currentDate).replace("Week of ", "");
+      $("copyDay").textContent = "Copy Week to Clipboard";
+    } else if (view === "month") {
+      $("dayTitle").textContent = monthLabel(currentDate);
+      $("navDate").textContent = monthLabel(currentDate);
+      $("copyDay").textContent = "Copy Month to Clipboard";
+    } else {
+      $("dayTitle").textContent = "Log for " + prettyDate(currentDate);
+      $("navDate").textContent = prettyDate(currentDate);
+      $("copyDay").textContent = "Copy Day to Clipboard";
+    }
+
+    $("logPanel").style.display = view === "day" ? "" : "none";
+    $("weekView").style.display = view === "week" ? "" : "none";
+    $("monthView").style.display = view === "month" ? "" : "none";
+
+    if (view === "day") renderDay();
+    if (view === "week") renderWeek();
+    if (view === "month") renderMonth();
+
+    renderSidebar();
+    renderWishlist();
+    renderRecurring();
+  }
+
+  function renderDay() {
     var list = data[currentDate] || [];
     $("daySub").textContent = list.length === 0 ? "" :
       list.length + (list.length === 1 ? " entry" : " entries");
@@ -860,8 +1100,119 @@
 
     $("emptyMsg").style.display = list.length === 0 ? "" : "none";
     $("clearDay").style.display = list.length === 0 ? "none" : "";
-    renderSidebar();
-    renderWishlist();
+  }
+
+  function renderWeek() {
+    var wrap = $("weekView");
+    wrap.innerHTML = "";
+    var ws = weekStart(currentDate);
+    for (var i = 0; i < 7; i++) {
+      (function (d) {
+        var list = data[d] || [];
+        var card = document.createElement("div");
+        card.className = "wday" + (d === todayISO() ? " today" : "");
+
+        var head = document.createElement("div");
+        head.className = "wday-head";
+        var btn = document.createElement("button");
+        var dd = dateObj(d);
+        btn.textContent = DOW[dd.getDay()] + " " + dd.getDate() + " " + MON[dd.getMonth()];
+        btn.title = "Open this day";
+        btn.addEventListener("click", function () {
+          currentDate = d;
+          setView("day");
+        });
+        head.appendChild(btn);
+        if (list.length > 0) {
+          var count = document.createElement("span");
+          count.className = "count";
+          count.textContent = list.length;
+          head.appendChild(count);
+        }
+        card.appendChild(head);
+
+        if (list.length > 0) {
+          var ul = document.createElement("ul");
+          list.forEach(function (it) {
+            var li = document.createElement("li");
+            li.textContent = it.text;
+            ul.appendChild(li);
+          });
+          card.appendChild(ul);
+        } else {
+          var none = document.createElement("div");
+          none.className = "none";
+          none.textContent = "no entries";
+          card.appendChild(none);
+        }
+
+        makeDropTarget(card, function () { return d; });
+        wrap.appendChild(card);
+      })(shiftDay(ws, i));
+    }
+  }
+
+  function renderMonth() {
+    var grid = $("monthGrid");
+    grid.innerHTML = "";
+    ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].forEach(function (h) {
+      var el = document.createElement("div");
+      el.className = "mhead";
+      el.textContent = h;
+      grid.appendChild(el);
+    });
+
+    var d = dateObj(currentDate);
+    var first = new Date(d.getFullYear(), d.getMonth(), 1);
+    var blanks = (first.getDay() + 6) % 7;
+    var daysInMonth = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+
+    for (var b = 0; b < blanks; b++) {
+      var blank = document.createElement("div");
+      blank.className = "mcell blank";
+      grid.appendChild(blank);
+    }
+    for (var day = 1; day <= daysInMonth; day++) {
+      (function (iso) {
+        var list = data[iso] || [];
+        var cell = document.createElement("button");
+        cell.className = "mcell" + (iso === todayISO() ? " today" : "");
+        cell.title = list.length ? list.length + " entr" + (list.length === 1 ? "y" : "ies") : "No entries";
+
+        var dnum = document.createElement("div");
+        dnum.className = "dnum";
+        var n = document.createElement("span");
+        n.textContent = dateObj(iso).getDate();
+        dnum.appendChild(n);
+        if (list.length > 0) {
+          var count = document.createElement("span");
+          count.className = "count";
+          count.textContent = list.length;
+          dnum.appendChild(count);
+        }
+        cell.appendChild(dnum);
+
+        list.slice(0, 2).forEach(function (it) {
+          var snip = document.createElement("div");
+          snip.className = "snip";
+          snip.textContent = it.text;
+          cell.appendChild(snip);
+        });
+        if (list.length > 2) {
+          var more = document.createElement("div");
+          more.className = "snip";
+          more.textContent = "+" + (list.length - 2) + " more";
+          cell.appendChild(more);
+        }
+
+        cell.addEventListener("click", function () {
+          currentDate = iso;
+          setView("day");
+        });
+        makeDropTarget(cell, function () { return iso; });
+        grid.appendChild(cell);
+      })(isoOf(new Date(d.getFullYear(), d.getMonth(), day)));
+    }
   }
 
   function buildEntry(item) {
@@ -973,10 +1324,12 @@
     });
   }
 
-  // ---------- wishlist ----------
+  // ---------- wishlist & recurring ----------
+  // Drag payloads are prefixed: "w:<id>" wishlist (moves), "r:<id>" recurring (copies).
   function makeDropTarget(el, getDay) {
     el.addEventListener("dragover", function (e) {
       e.preventDefault();
+      e.stopPropagation();
       e.dataTransfer.dropEffect = "move";
       el.classList.add("droptarget");
     });
@@ -985,10 +1338,24 @@
     });
     el.addEventListener("drop", function (e) {
       e.preventDefault();
+      e.stopPropagation();
       el.classList.remove("droptarget");
-      var id = e.dataTransfer.getData("text/plain");
-      if (id) moveWishToDay(id, getDay());
+      var payload = e.dataTransfer.getData("text/plain");
+      if (payload.indexOf("w:") === 0) moveWishToDay(payload.slice(2), getDay());
+      else if (payload.indexOf("r:") === 0) assignRecurringToDay(payload.slice(2), getDay());
     });
+  }
+
+  function assignRecurringToDay(id, day) {
+    var item = recurring.find(function (it) { return it.id === id; });
+    if (!item) return;
+    if (!data[day]) data[day] = [];
+    var dup = data[day].some(function (it) { return it.text === item.text; });
+    if (dup) { toast("Already logged on " + shortDow(day) + " " + day); return; }
+    data[day].push({ id: newId(), text: item.text });
+    save();
+    render();
+    toast("Logged on " + shortDow(day) + " " + day + " — kept in Recurring");
   }
 
   function moveWishToDay(id, day) {
@@ -1021,29 +1388,28 @@
     renderWishlist();
   }
 
-  function renderWishlist() {
-    $("wishCount").textContent = wishlist.length ? "· " + wishlist.length : "";
-    var ul = $("wishList");
+  // Shared renderer for the two sidebar queues (wishlist + recurring).
+  function renderQueue(ul, list, cfg) {
     ul.innerHTML = "";
 
-    if (wishlist.length === 0) {
+    if (list.length === 0) {
       var li = document.createElement("li");
       li.style.cursor = "default";
       var span = document.createElement("span");
       span.className = "nothing";
-      span.textContent = "Nothing queued";
+      span.textContent = cfg.emptyText;
       li.appendChild(span);
       ul.appendChild(li);
       return;
     }
 
-    wishlist.forEach(function (item) {
+    list.forEach(function (item) {
       var li = document.createElement("li");
       li.draggable = true;
 
       var grip = document.createElement("span");
       grip.className = "grip";
-      grip.textContent = "⣿";
+      grip.textContent = cfg.grip;
 
       var txt = document.createElement("div");
       txt.className = "wtxt";
@@ -1054,7 +1420,7 @@
       li.addEventListener("dragstart", function (e) {
         // an active edit means the user is typing, not dragging
         if (txt.isContentEditable) { e.preventDefault(); return; }
-        e.dataTransfer.setData("text/plain", item.id);
+        e.dataTransfer.setData("text/plain", cfg.prefix + item.id);
         e.dataTransfer.effectAllowed = "move";
         li.classList.add("dragging");
       });
@@ -1082,10 +1448,10 @@
         txt.contentEditable = "false";
         var v = txt.textContent.trim();
         if (v === "") {
-          removeWish(item.id);
+          cfg.remove(item.id);
         } else if (v !== item.text) {
           item.text = v;
-          saveWishlist();
+          cfg.saveList();
         }
       });
       txt.addEventListener("keydown", function (e) {
@@ -1096,14 +1462,14 @@
       var send = document.createElement("button");
       send.className = "wbtn send";
       send.textContent = "↳";
-      send.title = "Log on open day (" + currentDate + ")";
-      send.addEventListener("click", function () { moveWishToDay(item.id, currentDate); });
+      send.title = cfg.sendTitle + " (" + currentDate + ")";
+      send.addEventListener("click", function () { cfg.send(item.id, currentDate); });
 
       var kill = document.createElement("button");
       kill.className = "wbtn kill";
       kill.textContent = "✕";
-      kill.title = "Delete from wishlist";
-      kill.addEventListener("click", function () { removeWish(item.id); });
+      kill.title = cfg.killTitle;
+      kill.addEventListener("click", function () { cfg.remove(item.id); });
 
       li.appendChild(grip);
       li.appendChild(txt);
@@ -1111,6 +1477,52 @@
       li.appendChild(kill);
       ul.appendChild(li);
     });
+  }
+
+  function renderWishlist() {
+    $("wishCount").textContent = wishlist.length ? "· " + wishlist.length : "";
+    renderQueue($("wishList"), wishlist, {
+      prefix: "w:",
+      grip: "⣿",
+      emptyText: "Nothing queued",
+      sendTitle: "Log on open day",
+      killTitle: "Delete from wishlist",
+      send: moveWishToDay,
+      remove: removeWish,
+      saveList: saveWishlist
+    });
+  }
+
+  function renderRecurring() {
+    $("recCount").textContent = recurring.length ? "· " + recurring.length : "";
+    renderQueue($("recList"), recurring, {
+      prefix: "r:",
+      grip: "⟳",
+      emptyText: "No recurring tasks",
+      sendTitle: "Log on open day, keep here",
+      killTitle: "Delete recurring task",
+      send: assignRecurringToDay,
+      remove: removeRec,
+      saveList: saveRecurring
+    });
+  }
+
+  function addRec() {
+    var input = $("newRec");
+    var v = input.value.trim();
+    if (v === "") return;
+    recurring.push({ id: newId(), text: v });
+    input.value = "";
+    saveRecurring();
+    renderRecurring();
+    input.focus();
+  }
+
+  function removeRec(id) {
+    var i = recurring.findIndex(function (it) { return it.id === id; });
+    if (i !== -1) recurring.splice(i, 1);
+    saveRecurring();
+    renderRecurring();
   }
 
   // ---------- actions ----------
@@ -1134,11 +1546,32 @@
     render();
   }
 
-  function dayAsText(withHeading) {
-    var list = data[currentDate] || [];
+  function dayAsText(iso, withHeading) {
+    var list = data[iso] || [];
     var lines = list.map(function (it) { return (withHeading ? "- " : "") + it.text; });
-    if (withHeading) lines.unshift(prettyDate(currentDate), "");
+    if (withHeading) lines.unshift(prettyDate(iso), "");
     return lines.join("\n");
+  }
+
+  // What the copy buttons copy follows the active view: day, week, or month.
+  function viewAsText(withHeading) {
+    var days;
+    if (view === "week") {
+      days = [];
+      for (var i = 0; i < 7; i++) days.push(shiftDay(weekStart(currentDate), i));
+    } else if (view === "month") {
+      var d = dateObj(currentDate);
+      var n = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+      days = [];
+      for (var day = 1; day <= n; day++) days.push(isoOf(new Date(d.getFullYear(), d.getMonth(), day)));
+    } else {
+      days = [currentDate];
+    }
+    return days.filter(function (iso) {
+      return (data[iso] || []).length > 0;
+    }).map(function (iso) {
+      return dayAsText(iso, withHeading);
+    }).join("\n\n");
   }
 
   function copyText(text, doneMsg) {
@@ -1275,6 +1708,7 @@
     var payload = {};
     Object.keys(data).forEach(function (d) { payload[d] = data[d]; });
     payload._wishlist = wishlist;
+    payload._recurring = recurring;
     downloadFile("track-backup-" + todayISO() + ".json",
       JSON.stringify(payload, null, 2), "application/json");
     toast("Backup exported");
@@ -1289,19 +1723,22 @@
           throw new Error("bad format");
         }
         var added = 0;
-        if (Array.isArray(incoming._wishlist)) {
-          var wishTexts = wishlist.map(function (it) { return it.text; });
-          incoming._wishlist.forEach(function (it) {
+        function mergeQueue(incomingList, target, saveFn) {
+          if (!Array.isArray(incomingList)) return;
+          var texts = target.map(function (it) { return it.text; });
+          incomingList.forEach(function (it) {
             var text = (it && typeof it.text === "string") ? it.text
                      : (typeof it === "string") ? it : null;
-            if (text && wishTexts.indexOf(text) === -1) {
-              wishlist.push({ id: newId(), text: text });
-              wishTexts.push(text);
+            if (text && texts.indexOf(text) === -1) {
+              target.push({ id: newId(), text: text });
+              texts.push(text);
               added++;
             }
           });
-          saveWishlist();
+          saveFn();
         }
+        mergeQueue(incoming._wishlist, wishlist, saveWishlist);
+        mergeQueue(incoming._recurring, recurring, saveRecurring);
         Object.keys(incoming).forEach(function (day) {
           if (!/^\d{4}-\d{2}-\d{2}$/.test(day) || !Array.isArray(incoming[day])) return;
           if (!data[day]) data[day] = [];
@@ -1344,24 +1781,36 @@
     if (input.showPicker) { try { input.showPicker(); return; } catch (e) {} }
     input.click();
   });
-  $("prevDay").addEventListener("click", function () {
-    currentDate = shiftDay(currentDate, -1); editingId = null; render();
-  });
-  $("nextDay").addEventListener("click", function () {
-    currentDate = shiftDay(currentDate, 1); editingId = null; render();
-  });
+  function shiftForView(dir) {
+    if (view === "week") currentDate = shiftDay(currentDate, 7 * dir);
+    else if (view === "month") currentDate = shiftMonth(currentDate, dir);
+    else currentDate = shiftDay(currentDate, dir);
+    editingId = null;
+    render();
+  }
+  $("prevDay").addEventListener("click", function () { shiftForView(-1); });
+  $("nextDay").addEventListener("click", function () { shiftForView(1); });
   $("todayBtn").addEventListener("click", function () {
     currentDate = todayISO(); editingId = null; render();
   });
+  var tabBtns = document.querySelectorAll("#viewTabs button");
+  for (var t = 0; t < tabBtns.length; t++) {
+    tabBtns[t].addEventListener("click", function () { setView(this.dataset.view); });
+  }
   $("fab").addEventListener("click", function () {
+    if (view !== "day") setView("day");
     $("newItem").focus();
     $("newItem").scrollIntoView({ block: "center", behavior: "smooth" });
   });
   $("copyDay").addEventListener("click", function () {
-    copyText(dayAsText(true), "Day copied to clipboard");
+    copyText(viewAsText(true), (view === "week" ? "Week" : view === "month" ? "Month" : "Day") + " copied to clipboard");
   });
   $("copyPlain").addEventListener("click", function () {
-    copyText(dayAsText(false), "Entries copied to clipboard");
+    copyText(viewAsText(false), "Entries copied to clipboard");
+  });
+  $("addRecBtn").addEventListener("click", addRec);
+  $("newRec").addEventListener("keydown", function (e) {
+    if (e.key === "Enter") addRec();
   });
   $("clearDay").addEventListener("click", function () {
     var list = data[currentDate] || [];

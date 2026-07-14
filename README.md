@@ -15,6 +15,8 @@ Tip: right-click `Track.html` → *Send to* → *Desktop (create shortcut)* so i
 ## Features
 
 - **Per-day lists** — use the date picker or ‹ › buttons to move between days; the sidebar shows every day that has entries.
+- **Day, Week and Month views** — a weekly overview and a monthly calendar with entry counts; click any day to open it, and the copy buttons follow the view (Copy Month = the whole month-to-date, ready to paste).
+- **Recurring tasks** — keep often-repeated tasks in the sidebar and drag (or ↳) them onto any day; they stay in the list for next time, and duplicates on the same day are skipped.
 - **Copy & paste** — "Copy day to clipboard" copies the date plus a bulleted list, ready to paste into an email, timesheet or invoice. "Copy items only" copies just the lines.
 - **Edit in place** — click any item to edit it; press Enter to save, Escape to cancel. Emptying an item deletes it.
 - **Auto-save** — everything is stored in the browser's local storage on your machine, instantly, as you type.
