@@ -85,6 +85,50 @@
     scrollbar-color: var(--line) transparent;
   }
   .daylist li + li { margin-top: 2px; }
+  .mgroup { display: flex; align-items: center; gap: 2px; margin-top: 10px; }
+  .daylist li:first-child .mgroup { margin-top: 2px; }
+  .mtoggle {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    border: none;
+    background: none;
+    color: var(--faint);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    padding: 4px 8px;
+    border-radius: 6px;
+    text-align: left;
+    white-space: nowrap;
+  }
+  .mtoggle:hover { color: var(--text); }
+  .mtoggle .chev { font-size: 9px; width: 10px; flex-shrink: 0; }
+  .mtoggle .mbadge {
+    margin-left: auto;
+    color: var(--faint);
+    font-size: 10.5px;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 20px;
+    padding: 1px 7px;
+    letter-spacing: 0;
+  }
+  .mgoto {
+    border: none;
+    background: none;
+    color: var(--faint);
+    font-size: 12px;
+    padding: 2px 7px;
+    border-radius: 6px;
+    opacity: 0;
+  }
+  .mgroup:hover .mgoto, .mgoto:focus-visible { opacity: 1; }
+  .mgoto:hover { color: var(--teal); }
+  .daylist button.dayrow { padding-left: 24px; }
   .daylist button {
     width: 100%;
     display: flex;
@@ -219,6 +263,7 @@
     margin-bottom: 18px;
   }
   .main-head h1 { margin: 0; font-size: 20px; font-weight: 650; margin-right: auto; }
+  .head-right { display: flex; align-items: center; gap: 12px; margin-left: auto; }
   .saved-pill {
     display: flex;
     align-items: center;
@@ -778,8 +823,10 @@
         <button data-view="week">Week</button>
         <button data-view="month">Month</button>
       </div>
-      <div class="saved-pill" id="savedPill"><span class="dot">●</span> Data auto-saved locally</div>
-      <button class="helpbtn" id="helpBtn" title="How Track works">?</button>
+      <div class="head-right">
+        <div class="saved-pill" id="savedPill"><span class="dot">●</span> Data auto-saved locally</div>
+        <button class="helpbtn" id="helpBtn" title="How Track works">?</button>
+      </div>
     </div>
 
     <div class="nav-row">
@@ -840,7 +887,7 @@
         <li>Type what you did in the box and press <kbd>Enter</kbd> — it's saved instantly.</li>
         <li>Move between days with the <b>‹ ›</b> arrows, or <b>click the big date</b> to open a calendar.</li>
         <li>Hover an entry and click the <b>✎ pencil</b> to edit it (Save/Cancel), or <b>✕</b> to delete it.</li>
-        <li><b>Recent Days</b> in the sidebar lists every day that has entries — click one to jump there.</li>
+        <li><b>Recent Days</b> in the sidebar lists every day that has entries, grouped by month — click a month name to fold or unfold it, and the <b>▦</b> icon opens that month in the calendar.</li>
       </ul>
 
       <h3><span class="tick">●</span> Copy &amp; paste</h3>
@@ -986,12 +1033,6 @@
   }
   var DOW = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   var MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-  function shortLabel(iso) {
-    var d = dateObj(iso);
-    var label = DOW[d.getDay()] + " " + MON[d.getMonth()] + " " + d.getDate();
-    if (d.getFullYear() !== new Date().getFullYear()) label += " " + d.getFullYear();
-    return label;
-  }
   function shortDow(iso) { return DOW[dateObj(iso).getDay()]; }
   function isoOf(d) {
     return d.getFullYear() + "-" +
@@ -1290,7 +1331,21 @@
     render();
   }
 
+  // Months collapse so years of history stay scannable. Only the month
+  // being viewed opens by default; toggles live for the session.
+  var monthOpen = {};
+  var lastViewedMonth = null;
+  function monthIsOpen(m) {
+    return monthOpen[m] === undefined ? m === currentDate.slice(0, 7) : monthOpen[m];
+  }
+
   function renderSidebar() {
+    var m = currentDate.slice(0, 7);
+    if (m !== lastViewedMonth) {
+      monthOpen[m] = true; // moving into a month always reveals it
+      lastViewedMonth = m;
+    }
+
     var ul = $("dayList");
     ul.innerHTML = "";
     var days = Object.keys(data).filter(function (d) {
@@ -1299,28 +1354,84 @@
     if (days.indexOf(currentDate) === -1) days.push(currentDate);
     days.sort().reverse();
 
+    var order = [], groups = {};
     days.forEach(function (d) {
-      var li = document.createElement("li");
-      var btn = document.createElement("button");
-      if (d === currentDate) btn.className = "current";
-      var label = document.createElement("span");
-      label.textContent = shortLabel(d);
-      btn.appendChild(label);
-      var n = (data[d] || []).length;
-      if (n > 0) {
-        var count = document.createElement("span");
-        count.className = "count";
-        count.textContent = n;
-        btn.appendChild(count);
-      }
-      btn.addEventListener("click", function () {
-        currentDate = d;
-        editingId = null;
-        render();
+      var key = d.slice(0, 7);
+      if (!groups[key]) { groups[key] = []; order.push(key); }
+      groups[key].push(d);
+    });
+
+    order.forEach(function (key) {
+      var open = monthIsOpen(key);
+      var entryTotal = groups[key].reduce(function (sum, d) {
+        return sum + (data[d] || []).length;
+      }, 0);
+
+      var headLi = document.createElement("li");
+      var head = document.createElement("div");
+      head.className = "mgroup";
+
+      var toggle = document.createElement("button");
+      toggle.className = "mtoggle";
+      var chev = document.createElement("span");
+      chev.className = "chev";
+      chev.textContent = open ? "▾" : "▸";
+      toggle.appendChild(chev);
+      toggle.appendChild(document.createTextNode(monthLabel(key + "-01")));
+      var badge = document.createElement("span");
+      badge.className = "mbadge";
+      badge.textContent = groups[key].filter(function (d) { return (data[d] || []).length > 0; }).length || "·";
+      toggle.appendChild(badge);
+      toggle.title = entryTotal + " entr" + (entryTotal === 1 ? "y" : "ies") + " — click to " + (open ? "fold" : "unfold");
+      toggle.addEventListener("click", function () {
+        monthOpen[key] = !monthIsOpen(key);
+        renderSidebar();
       });
-      makeDropTarget(btn, function () { return d; });
-      li.appendChild(btn);
-      ul.appendChild(li);
+      // dragging a task over a folded month unfolds it
+      toggle.addEventListener("dragenter", function () {
+        if (!monthIsOpen(key)) { monthOpen[key] = true; renderSidebar(); }
+      });
+
+      var goto = document.createElement("button");
+      goto.className = "mgoto";
+      goto.textContent = "▦";
+      goto.title = "Open " + monthLabel(key + "-01") + " in Month view";
+      goto.addEventListener("click", function () {
+        currentDate = groups[key][0];
+        setView("month");
+      });
+
+      head.appendChild(toggle);
+      head.appendChild(goto);
+      headLi.appendChild(head);
+      ul.appendChild(headLi);
+
+      if (!open) return;
+
+      groups[key].forEach(function (d) {
+        var li = document.createElement("li");
+        var btn = document.createElement("button");
+        btn.className = "dayrow" + (d === currentDate ? " current" : "");
+        var label = document.createElement("span");
+        var dd = dateObj(d);
+        label.textContent = DOW[dd.getDay()] + " " + dd.getDate();
+        btn.appendChild(label);
+        var n = (data[d] || []).length;
+        if (n > 0) {
+          var count = document.createElement("span");
+          count.className = "count";
+          count.textContent = n;
+          btn.appendChild(count);
+        }
+        btn.addEventListener("click", function () {
+          currentDate = d;
+          editingId = null;
+          render();
+        });
+        makeDropTarget(btn, function () { return d; });
+        li.appendChild(btn);
+        ul.appendChild(li);
+      });
     });
   }
 
