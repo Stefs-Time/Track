@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="dark">
-<title>Track — Daily Task List</title>
+<title>Docket — Daily Work Log</title>
 <style>
   :root {
     --bg: #14171c;
@@ -899,7 +899,7 @@
   <aside class="side">
     <div class="brand">
       <span class="glyph">✓</span>
-      <span class="name">Track</span>
+      <span class="name">Docket</span>
     </div>
 
     <section class="grow">
@@ -951,7 +951,7 @@
       </div>
       <div class="head-right">
         <div class="saved-pill" id="savedPill"><span class="dot">●</span> Data auto-saved locally</div>
-        <button class="helpbtn" id="helpBtn" title="How Track works">?</button>
+        <button class="helpbtn" id="helpBtn" title="How Docket works">?</button>
       </div>
     </div>
 
@@ -1001,11 +1001,11 @@
 <div class="overlay" id="helpOverlay">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
     <div class="modal-head">
-      <h2 id="helpTitle">How Track works</h2>
+      <h2 id="helpTitle">How Docket works</h2>
       <button class="close" id="helpClose" title="Close">✕</button>
     </div>
     <div class="modal-body">
-      <p>Track is your daily task log in a single file. No installs, no server, no account —
+      <p>Docket is your daily record of work done, in a single file. No installs, no server, no account —
         everything lives in this HTML file and saves automatically on your machine.</p>
 
       <h3><span class="tick">●</span> The daily log</h3>
@@ -1040,7 +1040,7 @@
       <ul>
         <li>Add tasks you do again and again to <b>Recurring</b> in the sidebar.</li>
         <li>Drag one onto any day (or click <b>↳</b> for the open day) to log it — <b>it stays in the list</b> so you can use it next time.</li>
-        <li>If it's already on that day, Track skips the duplicate and tells you.</li>
+        <li>If it's already on that day, Docket skips the duplicate and tells you.</li>
       </ul>
 
       <h3><span class="tick">●</span> CSV import / export (Excel)</h3>
@@ -1062,7 +1062,7 @@
         <li>Clearing the browser's site data erases the log — keep an occasional export.</li>
       </ul>
 
-      <div class="note"><b>Tip:</b> right-click the Track.html file → <i>Send to</i> → <i>Desktop (create shortcut)</i>
+      <div class="note"><b>Tip:</b> right-click the Docket.html file → <i>Send to</i> → <i>Desktop (create shortcut)</i>
         so it's always one click away. Reopen this guide any time with the <b>?</b> button, top right.</div>
     </div>
     <div class="modal-foot">
@@ -1076,6 +1076,8 @@
 <script>
 (function () {
   "use strict";
+  // Storage keys keep the app's original "track." prefix on purpose:
+  // data saved before the rename to Docket must keep loading.
   var STORE_KEY = "track.tasks.v1";
   var WISH_KEY = "track.wishlist.v1";
   var REC_KEY = "track.recurring.v1";
@@ -1901,7 +1903,7 @@
       });
     });
     // BOM so Excel opens it as UTF-8
-    downloadFile("track-export-" + todayISO() + ".csv", "﻿" + lines.join("\r\n"), "text/csv");
+    downloadFile("docket-export-" + todayISO() + ".csv", "﻿" + lines.join("\r\n"), "text/csv");
     toast("CSV exported");
   }
 
@@ -1948,7 +1950,7 @@
     Object.keys(data).forEach(function (d) { payload[d] = data[d]; });
     payload._wishlist = wishlist;
     payload._recurring = recurring;
-    downloadFile("track-backup-" + todayISO() + ".json",
+    downloadFile("docket-backup-" + todayISO() + ".json",
       JSON.stringify(payload, null, 2), "application/json");
     toast("Backup exported");
   }
@@ -1996,7 +1998,7 @@
         render();
         toast("Imported " + added + " entr" + (added === 1 ? "y" : "ies"));
       } catch (e) {
-        toast("Import failed — not a valid Track backup file");
+        toast("Import failed — not a valid Docket backup file");
       }
     };
     reader.readAsText(file);
