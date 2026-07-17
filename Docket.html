@@ -161,7 +161,7 @@
   .daylist button {
     width: 100%;
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: center;
     gap: 8px;
     padding: 7px 10px;
@@ -180,11 +180,22 @@
     font-weight: 600;
   }
   .daylist .count {
+    margin-left: auto;
     color: var(--faint);
     font-size: 11.5px;
     background: rgba(255, 255, 255, 0.06);
     border-radius: 20px;
     padding: 1px 8px;
+  }
+  .daylist .tag {
+    color: var(--teal);
+    background: var(--teal-ghost);
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: .8px;
+    text-transform: uppercase;
+    border-radius: 20px;
+    padding: 1px 7px;
   }
   .daylist button.current .count { color: var(--teal); background: var(--teal-ghost); }
   .nothing { color: var(--faint); font-size: 13px; padding: 4px 10px; }
@@ -405,6 +416,11 @@
     transform: translateY(-1px);
   }
   .side-actions button:active { transform: translateY(0); }
+  .side-actions button:disabled {
+    opacity: .4;
+    pointer-events: none;
+    box-shadow: none;
+  }
 
   /* entries */
   .logzone { border-radius: var(--radius); }
@@ -882,7 +898,37 @@
     transition: opacity .2s ease, transform .25s cubic-bezier(.2, .9, .35, 1.2);
     z-index: 10;
   }
-  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto; }
+  #toast .undo {
+    border: none;
+    background: var(--teal-ghost);
+    color: var(--teal);
+    font-weight: 650;
+    font-size: 12.5px;
+    border-radius: 999px;
+    padding: 3px 13px;
+    margin-left: 12px;
+  }
+  #toast .undo:hover { background: rgba(53, 211, 174, 0.22); }
+
+  /* hover hints */
+  #tip {
+    position: fixed;
+    z-index: 40;
+    max-width: 280px;
+    background: rgba(38, 44, 53, 0.97);
+    border: 1px solid var(--line);
+    color: var(--text);
+    font-size: 12px;
+    line-height: 1.45;
+    padding: 5px 11px;
+    border-radius: 7px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .15s ease;
+  }
+  #tip.show { opacity: 1; transition-delay: .35s; }
 
   @media (max-width: 760px) {
     .app { flex-direction: column; }
@@ -911,7 +957,7 @@
       <h2>Wishlist <span id="wishCount" style="color:var(--teal)"></span></h2>
       <div class="wish-add">
         <input type="text" id="newWish" placeholder="Needs doing…" autocomplete="off">
-        <button id="addWishBtn" title="Add to wishlist">+</button>
+        <button id="addWishBtn" data-tip="Add to the wishlist" aria-label="Add to the wishlist">+</button>
       </div>
       <ul class="wishlist" id="wishList"></ul>
       <div class="wish-hint">Drag onto the log or a day · ↳ sends to open day</div>
@@ -921,7 +967,7 @@
       <h2>Recurring <span id="recCount" style="color:var(--teal)"></span></h2>
       <div class="wish-add">
         <input type="text" id="newRec" placeholder="Happens often…" autocomplete="off">
-        <button id="addRecBtn" title="Add a recurring task">+</button>
+        <button id="addRecBtn" data-tip="Add a recurring task" aria-label="Add a recurring task">+</button>
       </div>
       <ul class="wishlist" id="recList"></ul>
       <div class="wish-hint">Drag or ↳ to log it on a day — it stays in this list</div>
@@ -929,12 +975,12 @@
 
     <section class="tools">
       <div class="row accent">
-        <button id="exportBtn" title="Save all data to a JSON file">Export (JSON)</button>
-        <button id="importBtn" title="Load data from a JSON backup file">Import</button>
+        <button id="exportBtn" data-tip="Back up everything — entries, wishlist and recurring — to a JSON file">Export (JSON)</button>
+        <button id="importBtn" data-tip="Merge a JSON backup back in — duplicates are skipped">Import</button>
       </div>
       <div class="row">
-        <button id="csvImportBtn" title="Import entries from a CSV file (date, task)">CSV Import</button>
-        <button id="csvExportBtn" title="Export all entries as a CSV file">CSV Export</button>
+        <button id="csvImportBtn" data-tip="Bulk-load entries from a spreadsheet CSV — date first, task second">CSV Import</button>
+        <button id="csvExportBtn" data-tip="Export every entry as a CSV that opens straight in Excel">CSV Export</button>
       </div>
       <input type="file" id="importFile" accept=".json,application/json" hidden>
       <input type="file" id="csvFile" accept=".csv,text/csv,text/plain" hidden>
@@ -945,29 +991,29 @@
     <div class="main-head">
       <h1 id="dayTitle"></h1>
       <div class="tabs" id="viewTabs">
-        <button data-view="day" class="active">Day</button>
-        <button data-view="week">Week</button>
-        <button data-view="month">Month</button>
+        <button data-view="day" class="active" data-tip="One day at a time — shortcut: D">Day</button>
+        <button data-view="week" data-tip="The whole week at a glance — shortcut: W">Week</button>
+        <button data-view="month" data-tip="Calendar with entry counts — shortcut: M">Month</button>
       </div>
       <div class="head-right">
-        <div class="saved-pill" id="savedPill"><span class="dot">●</span> Data auto-saved locally</div>
-        <button class="helpbtn" id="helpBtn" title="How Docket works">?</button>
+        <div class="saved-pill" id="savedPill" data-tip="Everything saves to this browser automatically — keep an occasional Export as a backup"><span class="dot">●</span> Data auto-saved locally</div>
+        <button class="helpbtn" id="helpBtn" data-tip="How Docket works — shortcut: ?" aria-label="How Docket works">?</button>
       </div>
     </div>
 
     <div class="nav-row">
       <div class="datenav">
-        <button class="arrow" id="prevDay" title="Previous day">‹</button>
+        <button class="arrow" id="prevDay" data-tip="Previous day — shortcut: ←" aria-label="Previous">‹</button>
         <div class="datewrap">
-          <div class="bigdate" id="navDate" title="Pick a date"></div>
+          <div class="bigdate" id="navDate" data-tip="Click to pick a date from the calendar"></div>
           <input type="date" id="datePick" tabindex="-1">
         </div>
-        <button class="arrow" id="nextDay" title="Next day">›</button>
+        <button class="arrow" id="nextDay" data-tip="Next day — shortcut: →" aria-label="Next">›</button>
       </div>
       <div class="side-actions">
-        <button id="copyDay">Copy Day to Clipboard</button>
-        <button id="copyPlain" title="Copies just the items, one per line, no date heading">Copy Items Only</button>
-        <button id="todayBtn">Jump to Today</button>
+        <button id="copyDay" data-tip="Date heading + bulleted list — ready to paste into an email or invoice. Shortcut: C">Copy Day to Clipboard</button>
+        <button id="copyPlain" data-tip="Just the lines, one per line — no date heading">Copy Items Only</button>
+        <button id="todayBtn" data-tip="Back to today — shortcut: T">Jump to Today</button>
       </div>
     </div>
 
@@ -984,7 +1030,7 @@
 
       <div class="foot-actions">
         <span class="spacer"></span>
-        <button class="clearday" id="clearDay">Clear this day…</button>
+        <button class="clearday" id="clearDay" data-tip="Delete every entry on this day — Undo appears in case you slip">Clear this day</button>
       </div>
     </div>
 
@@ -996,23 +1042,25 @@
   </main>
 </div>
 
-<button class="fab" id="fab" title="Add an entry">+</button>
+<button class="fab" id="fab" data-tip="Add an entry — shortcut: N" aria-label="Add an entry">+</button>
 
 <div class="overlay" id="helpOverlay">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
     <div class="modal-head">
       <h2 id="helpTitle">How Docket works</h2>
-      <button class="close" id="helpClose" title="Close">✕</button>
+      <button class="close" id="helpClose" data-tip="Close — Esc works too" aria-label="Close">✕</button>
     </div>
     <div class="modal-body">
       <p>Docket is your daily record of work done, in a single file. No installs, no server, no account —
-        everything lives in this HTML file and saves automatically on your machine.</p>
+        everything lives in this HTML file and saves automatically on your machine.
+        Not sure what a button does? <b>Hover it</b> — everything has a hint.</p>
 
       <h3><span class="tick">●</span> The daily log</h3>
       <ul>
         <li>Type what you did in the box and press <kbd>Enter</kbd> — it's saved instantly.</li>
         <li>Move between days with the <b>‹ ›</b> arrows, or <b>click the big date</b> to open a calendar.</li>
         <li>Hover an entry and click the <b>✎ pencil</b> to edit it (Save/Cancel), or <b>✕</b> to delete it.</li>
+        <li>Deleted the wrong thing? An <b>Undo</b> button pops up for a few seconds — same for <b>Clear this day</b>.</li>
         <li><b>Recent Days</b> in the sidebar lists every day that has entries, grouped by month — click a month name to fold or unfold it, and the <b>▦</b> icon opens that month in the calendar.</li>
       </ul>
 
@@ -1027,6 +1075,15 @@
         <li>Switch views with the <b>Day / Week / Month</b> tabs. The <b>‹ ›</b> arrows then step by day, week or month.</li>
         <li><b>Week</b> shows the whole week's entries at a glance; <b>Month</b> is a calendar with counts per day.</li>
         <li>Click any day in either view to open it. The copy buttons follow the view — in Month view, <b>Copy Month</b> gives you the full month-to-date list, ready to paste.</li>
+      </ul>
+
+      <h3><span class="tick">●</span> Keyboard shortcuts</h3>
+      <p>They work whenever you're not typing in a box:</p>
+      <ul>
+        <li><kbd>←</kbd> <kbd>→</kbd> — previous / next day (steps by week or month in those views)</li>
+        <li><kbd>T</kbd> — jump to today &nbsp;·&nbsp; <kbd>D</kbd> <kbd>W</kbd> <kbd>M</kbd> — switch to Day, Week or Month view</li>
+        <li><kbd>N</kbd> — start typing a new entry &nbsp;·&nbsp; <kbd>C</kbd> — copy the open day, week or month</li>
+        <li><kbd>?</kbd> — open this guide &nbsp;·&nbsp; <kbd>Esc</kbd> — close it</li>
       </ul>
 
       <h3><span class="tick">●</span> Wishlist</h3>
@@ -1159,6 +1216,13 @@
       weekday: "long", day: "numeric", month: "long", year: "numeric"
     });
   }
+  // "Today — Thursday 17 July 2026" when the date is near enough to name.
+  function dayHeading(iso) {
+    var rel = iso === todayISO() ? "Today"
+            : iso === shiftDay(todayISO(), -1) ? "Yesterday"
+            : iso === shiftDay(todayISO(), 1) ? "Tomorrow" : null;
+    return rel ? rel + " — " + prettyDate(iso) : prettyDate(iso);
+  }
   var DOW = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   var MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   function shortDow(iso) { return DOW[dateObj(iso).getDay()]; }
@@ -1222,6 +1286,7 @@
   }
 
   function render() {
+    hideTip();
     $("datePick").value = currentDate;
 
     var tabs = document.querySelectorAll("#viewTabs button");
@@ -1229,17 +1294,23 @@
       tabs[i].classList.toggle("active", tabs[i].dataset.view === view);
     }
 
+    var unit = view === "week" ? "week" : view === "month" ? "month" : "day";
+    $("prevDay").dataset.tip = "Previous " + unit + " — shortcut: ←";
+    $("nextDay").dataset.tip = "Next " + unit + " — shortcut: →";
+    $("todayBtn").disabled = currentDate === todayISO();
+
+    // The heading names the view; the navigator below it owns the date.
     if (view === "week") {
-      $("dayTitle").textContent = weekLabel(currentDate);
+      $("dayTitle").textContent = "Weekly Overview";
       $("navDate").textContent = weekLabel(currentDate).replace("Week of ", "");
       $("copyDay").textContent = "Copy Week to Clipboard";
     } else if (view === "month") {
-      $("dayTitle").textContent = monthLabel(currentDate);
+      $("dayTitle").textContent = "Monthly Calendar";
       $("navDate").textContent = monthLabel(currentDate);
       $("copyDay").textContent = "Copy Month to Clipboard";
     } else {
-      $("dayTitle").textContent = "Log for " + prettyDate(currentDate);
-      $("navDate").textContent = prettyDate(currentDate);
+      $("dayTitle").textContent = "Daily Log";
+      $("navDate").textContent = dayHeading(currentDate);
       $("copyDay").textContent = "Copy Day to Clipboard";
     }
 
@@ -1286,7 +1357,7 @@
         var btn = document.createElement("button");
         var dd = dateObj(d);
         btn.textContent = DOW[dd.getDay()] + " " + dd.getDate() + " " + MON[dd.getMonth()];
-        btn.title = "Open this day";
+        btn.dataset.tip = "Open this day";
         btn.addEventListener("click", function () {
           currentDate = d;
           setView("day");
@@ -1346,7 +1417,7 @@
         var list = data[iso] || [];
         var cell = document.createElement("button");
         cell.className = "mcell" + (iso === todayISO() ? " today" : "");
-        cell.title = list.length ? list.length + " entr" + (list.length === 1 ? "y" : "ies") : "No entries";
+        cell.dataset.tip = (list.length ? list.length + " entr" + (list.length === 1 ? "y" : "ies") : "No entries") + " — click to open the day";
 
         var dnum = document.createElement("div");
         dnum.className = "dnum";
@@ -1395,13 +1466,15 @@
 
     var edit = document.createElement("button");
     edit.className = "icon edit";
-    edit.title = "Edit entry";
+    edit.dataset.tip = "Edit this entry — double-clicking the text works too";
+    edit.setAttribute("aria-label", "Edit entry");
     edit.textContent = "✎";
     edit.addEventListener("click", function () { startEdit(item.id); });
 
     var del = document.createElement("button");
     del.className = "icon del";
-    del.title = "Delete entry";
+    del.dataset.tip = "Delete this entry — you can Undo";
+    del.setAttribute("aria-label", "Delete entry");
     del.textContent = "✕";
     del.addEventListener("click", function () { removeItem(item.id); });
 
@@ -1510,7 +1583,7 @@
       badge.className = "mbadge";
       badge.textContent = groups[key].filter(function (d) { return (data[d] || []).length > 0; }).length || "·";
       toggle.appendChild(badge);
-      toggle.title = entryTotal + " entr" + (entryTotal === 1 ? "y" : "ies") + " — click to " + (open ? "fold" : "unfold");
+      toggle.dataset.tip = entryTotal + " entr" + (entryTotal === 1 ? "y" : "ies") + " — click to " + (open ? "fold" : "unfold") + " the month";
       toggle.addEventListener("click", function () {
         monthOpen[key] = !monthIsOpen(key);
         renderSidebar();
@@ -1523,7 +1596,8 @@
       var goto = document.createElement("button");
       goto.className = "mgoto";
       goto.textContent = "▦";
-      goto.title = "Open " + monthLabel(key + "-01") + " in Month view";
+      goto.dataset.tip = "Open " + monthLabel(key + "-01") + " in the Month view";
+      goto.setAttribute("aria-label", "Open " + monthLabel(key + "-01") + " in the Month view");
       goto.addEventListener("click", function () {
         currentDate = groups[key][0];
         setView("month");
@@ -1545,6 +1619,13 @@
         label.textContent = DOW[dd.getDay()] + " " + dd.getDate();
         btn.appendChild(label);
         var n = (data[d] || []).length;
+        btn.dataset.tip = "Open " + prettyDate(d) + (n ? " — " + n + " entr" + (n === 1 ? "y" : "ies") : "");
+        if (d === todayISO()) {
+          var tag = document.createElement("span");
+          tag.className = "tag";
+          tag.textContent = "today";
+          btn.appendChild(tag);
+        }
         if (n > 0) {
           var count = document.createElement("span");
           count.className = "count";
@@ -1622,9 +1703,15 @@
 
   function removeWish(id) {
     var i = wishlist.findIndex(function (it) { return it.id === id; });
-    if (i !== -1) wishlist.splice(i, 1);
+    if (i === -1) return;
+    var gone = wishlist.splice(i, 1)[0];
     saveWishlist();
     renderWishlist();
+    toast("Removed from wishlist", function () {
+      wishlist.splice(Math.min(i, wishlist.length), 0, gone);
+      saveWishlist();
+      renderWishlist();
+    });
   }
 
   // Shared renderer for the two sidebar queues (wishlist + recurring).
@@ -1654,7 +1741,7 @@
       txt.className = "wtxt";
       txt.textContent = item.text;
       txt.spellcheck = false;
-      txt.title = "Click to edit · drag to a day";
+      txt.dataset.tip = "Click to edit · drag onto the log or any day";
 
       li.addEventListener("dragstart", function (e) {
         // an active edit means the user is typing, not dragging
@@ -1701,13 +1788,15 @@
       var send = document.createElement("button");
       send.className = "wbtn send";
       send.textContent = "↳";
-      send.title = cfg.sendTitle + " (" + currentDate + ")";
+      send.dataset.tip = cfg.sendTitle + " (" + shortDow(currentDate) + " " + currentDate + ")";
+      send.setAttribute("aria-label", cfg.sendTitle);
       send.addEventListener("click", function () { cfg.send(item.id, currentDate); });
 
       var kill = document.createElement("button");
       kill.className = "wbtn kill";
       kill.textContent = "✕";
-      kill.title = cfg.killTitle;
+      kill.dataset.tip = cfg.killTitle + " — you can Undo";
+      kill.setAttribute("aria-label", cfg.killTitle);
       kill.addEventListener("click", function () { cfg.remove(item.id); });
 
       li.appendChild(grip);
@@ -1759,9 +1848,15 @@
 
   function removeRec(id) {
     var i = recurring.findIndex(function (it) { return it.id === id; });
-    if (i !== -1) recurring.splice(i, 1);
+    if (i === -1) return;
+    var gone = recurring.splice(i, 1)[0];
     saveRecurring();
     renderRecurring();
+    toast("Recurring task deleted", function () {
+      recurring.splice(Math.min(i, recurring.length), 0, gone);
+      saveRecurring();
+      renderRecurring();
+    });
   }
 
   // ---------- actions ----------
@@ -1779,12 +1874,20 @@
   }
 
   function removeItem(id) {
+    var day = currentDate;
     var list = items();
     var i = list.findIndex(function (it) { return it.id === id; });
-    if (i !== -1) list.splice(i, 1);
+    if (i === -1) return;
+    var gone = list.splice(i, 1)[0];
     if (editingId === id) editingId = null;
     save();
     render();
+    toast("Entry deleted", function () {
+      if (!data[day]) data[day] = [];
+      data[day].splice(Math.min(i, data[day].length), 0, gone);
+      save();
+      render();
+    });
   }
 
   function dayAsText(iso, withHeading) {
@@ -1836,12 +1939,25 @@
   }
 
   var toastTimer;
-  function toast(msg) {
+  // Pass an undo function to get an Undo button; those toasts linger longer.
+  function toast(msg, undo) {
     var t = $("toast");
-    t.textContent = msg;
+    t.textContent = "";
+    t.appendChild(document.createTextNode(msg));
+    if (undo) {
+      var b = document.createElement("button");
+      b.className = "undo";
+      b.textContent = "Undo";
+      b.addEventListener("click", function () {
+        clearTimeout(toastTimer);
+        t.classList.remove("show");
+        undo();
+      });
+      t.appendChild(b);
+    }
     t.classList.add("show");
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(function () { t.classList.remove("show"); }, 2600);
+    toastTimer = setTimeout(function () { t.classList.remove("show"); }, undo ? 6000 : 2600);
   }
 
   function downloadFile(name, content, mime) {
@@ -2031,38 +2147,48 @@
   }
   $("prevDay").addEventListener("click", function () { shiftForView(-1); });
   $("nextDay").addEventListener("click", function () { shiftForView(1); });
-  $("todayBtn").addEventListener("click", function () {
-    currentDate = todayISO(); editingId = null; render();
-  });
+  function goToday() {
+    currentDate = todayISO();
+    editingId = null;
+    render();
+  }
+  $("todayBtn").addEventListener("click", goToday);
   var tabBtns = document.querySelectorAll("#viewTabs button");
   for (var t = 0; t < tabBtns.length; t++) {
     tabBtns[t].addEventListener("click", function () { setView(this.dataset.view); });
   }
-  $("fab").addEventListener("click", function () {
+  function focusNewItem() {
     if (view !== "day") setView("day");
     $("newItem").focus();
     $("newItem").scrollIntoView({ block: "center", behavior: "smooth" });
-  });
-  $("copyDay").addEventListener("click", function () {
-    copyText(viewAsText(true), (view === "week" ? "Week" : view === "month" ? "Month" : "Day") + " copied to clipboard");
-  });
-  $("copyPlain").addEventListener("click", function () {
-    copyText(viewAsText(false), "Entries copied to clipboard");
-  });
+  }
+  $("fab").addEventListener("click", focusNewItem);
+  function copyView(withHeading) {
+    if (withHeading) {
+      copyText(viewAsText(true), (view === "week" ? "Week" : view === "month" ? "Month" : "Day") + " copied to clipboard");
+    } else {
+      copyText(viewAsText(false), "Entries copied to clipboard");
+    }
+  }
+  $("copyDay").addEventListener("click", function () { copyView(true); });
+  $("copyPlain").addEventListener("click", function () { copyView(false); });
   $("addRecBtn").addEventListener("click", addRec);
   $("newRec").addEventListener("keydown", function (e) {
     if (e.key === "Enter") addRec();
   });
   $("clearDay").addEventListener("click", function () {
-    var list = data[currentDate] || [];
-    if (list.length === 0) { toast("Day is already empty"); return; }
-    if (confirm("Delete all " + list.length + " entr" + (list.length === 1 ? "y" : "ies") + " for " + prettyDate(currentDate) + "?")) {
-      delete data[currentDate];
-      editingId = null;
+    var day = currentDate;
+    var gone = data[day] || [];
+    if (gone.length === 0) { toast("Day is already empty"); return; }
+    delete data[day];
+    editingId = null;
+    save();
+    render();
+    toast("Cleared " + gone.length + " entr" + (gone.length === 1 ? "y" : "ies"), function () {
+      data[day] = gone;
       save();
       render();
-      toast("Day cleared");
-    }
+    });
   });
   $("csvExportBtn").addEventListener("click", exportCSV);
   $("csvImportBtn").addEventListener("click", function () { $("csvFile").click(); });
@@ -2094,9 +2220,58 @@
   $("helpOverlay").addEventListener("click", function (e) {
     if (e.target === this) closeHelp();
   });
+  // ---------- keyboard shortcuts ----------
+  // Active anywhere except while typing in a field or editing text.
   document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape" && $("helpOverlay").classList.contains("open")) closeHelp();
+    var helpOpen = $("helpOverlay").classList.contains("open");
+    if (e.key === "Escape" && helpOpen) { closeHelp(); return; }
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    var a = document.activeElement;
+    if (a && (a.tagName === "INPUT" || a.tagName === "TEXTAREA" || a.isContentEditable)) return;
+    if (helpOpen) return;
+    switch (e.key) {
+      case "ArrowLeft": e.preventDefault(); shiftForView(-1); break;
+      case "ArrowRight": e.preventDefault(); shiftForView(1); break;
+      case "t": case "T": goToday(); break;
+      case "d": case "D": setView("day"); break;
+      case "w": case "W": setView("week"); break;
+      case "m": case "M": setView("month"); break;
+      case "n": case "N": case "/": e.preventDefault(); focusNewItem(); break;
+      case "c": case "C": copyView(true); break;
+      case "?": openHelp(); break;
+    }
   });
+
+  // ---------- hover hints ----------
+  // One fixed tooltip element follows anything carrying a data-tip attribute;
+  // being position:fixed, it never gets clipped by the scrolling sidebar lists.
+  var tip = document.createElement("div");
+  tip.id = "tip";
+  document.body.appendChild(tip);
+  var tipFor = null;
+  function hideTip() {
+    tipFor = null;
+    tip.classList.remove("show");
+  }
+  document.addEventListener("mouseover", function (e) {
+    var t = e.target && e.target.closest ? e.target.closest("[data-tip]") : null;
+    if (t === tipFor) return;
+    if (!t) { hideTip(); return; }
+    tipFor = t;
+    tip.textContent = t.dataset.tip;
+    var r = t.getBoundingClientRect();
+    tip.style.left = "0px";
+    tip.style.top = "0px";
+    tip.classList.add("show");
+    var x = Math.min(Math.max(8, r.left + r.width / 2 - tip.offsetWidth / 2), window.innerWidth - tip.offsetWidth - 8);
+    var y = r.top - tip.offsetHeight - 8;
+    if (y < 8) y = r.bottom + 8;
+    tip.style.left = x + "px";
+    tip.style.top = y + "px";
+  });
+  document.addEventListener("mousedown", hideTip, true);
+  document.addEventListener("scroll", hideTip, true);
+  document.addEventListener("dragstart", hideTip, true);
 
   render();
   if (!localStorage.getItem(HELP_KEY)) {
