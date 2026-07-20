@@ -14,7 +14,7 @@
     --field: #2b323c;
     --text: #edf0f4;
     --muted: #a3adba;
-    --faint: #626c7a;
+    --faint: #6e7987;
     --line: rgba(255, 255, 255, 0.075);
     --line-soft: rgba(255, 255, 255, 0.05);
     --hi: inset 0 1px 0 rgba(255, 255, 255, 0.04);
@@ -63,12 +63,18 @@
   .side {
     width: 248px;
     flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
     background: var(--side);
     border-right: 1px solid var(--line-soft);
     display: flex;
     flex-direction: column;
     padding: 18px 14px;
     gap: 18px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--line) transparent;
   }
   .brand {
     display: flex;
@@ -101,13 +107,15 @@
     color: var(--faint);
     user-select: none;
   }
-  .side section { min-height: 0; }
-  .side .grow { flex: 1 1 auto; overflow: hidden; display: flex; flex-direction: column; }
+  .side section { min-height: 0; flex-shrink: 0; }
+  .side .grow { flex: 1 1 auto; min-height: 150px; overflow: hidden; display: flex; flex-direction: column; }
 
   .daylist {
     list-style: none;
     margin: 0;
     padding: 0;
+    flex: 1 1 auto;
+    min-height: 0;
     overflow-y: auto;
     scrollbar-width: thin;
     scrollbar-color: var(--line) transparent;
@@ -293,10 +301,10 @@
 
   /* ================= main ================= */
   .main {
-    flex: 1;
+    flex: 0 1 900px;
     min-width: 0;
+    margin: 0 auto;
     padding: 26px 34px 80px;
-    max-width: 880px;
   }
   .main-head {
     display: flex;
@@ -307,6 +315,7 @@
   }
   .main-head h1 {
     margin: 0;
+    min-width: 200px; /* widest title — stops the tabs shifting between views */
     font-size: 21px;
     font-weight: 700;
     letter-spacing: -.2px;
@@ -384,6 +393,7 @@
     padding: 4px 0;
     cursor: pointer;
     border-radius: 8px;
+    text-wrap: balance;
   }
   .datenav .bigdate:hover { background: rgba(255, 255, 255, 0.04); }
   .datenav input[type="date"] {
@@ -737,6 +747,7 @@
     max-width: 100%;
   }
   @media (max-width: 900px) {
+    .datenav .bigdate { font-size: 18px; }
     .mcell { min-height: 54px; }
     .mcell .snip { display: none; }
   }
@@ -932,10 +943,20 @@
 
   @media (max-width: 760px) {
     .app { flex-direction: column; }
-    .side { width: 100%; border-right: none; border-bottom: 1px solid var(--line-soft); }
-    .main { padding: 20px 16px 90px; }
+    .side {
+      width: 100%;
+      position: static;
+      height: auto;
+      overflow: visible;
+      border-right: none;
+      border-bottom: 1px solid var(--line-soft);
+    }
+    .side .grow { min-height: 0; }
+    .daylist { max-height: 300px; }
+    .main { margin: 0; padding: 20px 16px 90px; }
     .nav-row { flex-direction: column; }
     .side-actions { flex-direction: row; flex-wrap: wrap; }
+    .side-actions button { flex: 1; }
   }
 </style>
 </head>
