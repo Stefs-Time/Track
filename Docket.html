@@ -643,6 +643,9 @@
     transition: transform .15s ease, box-shadow .15s ease;
   }
   .wday:hover { transform: translateY(-1px); box-shadow: var(--shadow-lift), var(--hi); }
+  /* days with no work fade back so logged days read at a glance */
+  .wday.vacant { opacity: .55; box-shadow: none; }
+  .wday.vacant:hover, .wday.vacant.droptarget { opacity: 1; }
   .wday.today {
     border-color: rgba(53, 211, 174, 0.45);
     box-shadow: var(--shadow), 0 0 0 1px rgba(53, 211, 174, 0.15), var(--hi);
@@ -1370,8 +1373,10 @@
     for (var i = 0; i < 7; i++) {
       (function (d) {
         var list = data[d] || [];
+        var isToday = d === todayISO();
         var card = document.createElement("div");
-        card.className = "wday" + (d === todayISO() ? " today" : "");
+        card.className = "wday" + (isToday ? " today" : "") +
+          (list.length === 0 && !isToday ? " vacant" : "");
 
         var head = document.createElement("div");
         head.className = "wday-head";
