@@ -1,6 +1,6 @@
 # Docket — Daily Work Log
 
-A daily log of work done with an ink-and-paper ledger look, built for consulting: record what you did each day, then copy it straight into an email, timesheet or invoice. Runs locally on Windows — no installs, no server, no account. It's a single file.
+A daily log of work done with a black-and-silver ledger look, built for consulting: record what you did each day, then copy it straight into an email, timesheet or invoice. Runs locally on Windows — no installs, no server, no account. It's a single file.
 
 ## How to use
 
