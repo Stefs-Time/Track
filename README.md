@@ -1,6 +1,6 @@
 # Docket — Daily Work Log
 
-A dark-themed daily log of work done, built for consulting: record what you did each day, then copy it straight into an email, timesheet or invoice. Runs locally on Windows — no installs, no server, no account. It's a single file.
+A daily log of work done with a black-and-silver ledger look, built for consulting: record what you did each day, then copy it straight into an email, timesheet or invoice. Runs locally on Windows — no installs, no server, no account. It's a single file.
 
 ## How to use
 
@@ -16,6 +16,7 @@ Tip: right-click `Docket.html` → *Send to* → *Desktop (create shortcut)* so 
 
 - **Per-day lists** — use the date picker or ‹ › buttons to move between days; the sidebar groups every logged day by month, with old months folded away.
 - **Day, Week and Month views** — a weekly overview and a monthly calendar with entry counts; click any day to open it, and the copy buttons follow the view (Copy Month = the whole month-to-date, ready to paste).
+- **Activity at a glance** — stat tiles count the open day, its week and its month; a clickable 14-day activity chart sits beside them, and the month calendar shades busier days like a heatmap.
 - **Copy & paste** — "Copy Day to Clipboard" copies the date plus a bulleted list, ready to paste into an email, timesheet or invoice. "Copy Items Only" copies just the lines.
 - **Wishlist** — queue things that still need doing, then drag them onto a day (or click ↳) when they're done.
 - **Recurring tasks** — keep often-repeated tasks in the sidebar and drag (or ↳) them onto any day; they stay in the list for next time, and duplicates on the same day are skipped.

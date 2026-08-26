@@ -4,37 +4,38 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="dark">
-<meta name="theme-color" content="#14171c">
-<meta name="description" content="Docket — a dark-themed daily log of work done. Record what you did each day, then copy it straight into an email, timesheet or invoice. Runs locally, no server, single file.">
+<meta name="theme-color" content="#0a0b0e">
+<meta name="description" content="Docket — a black-and-silver daily log of work done. Record what you did each day, then copy it straight into an email, timesheet or invoice. Runs locally, no server, single file.">
 <meta name="application-name" content="Docket">
 <meta name="apple-mobile-web-app-title" content="Docket">
 <title>Docket — Daily Work Log</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231f242c'/%3E%3Crect x='9' y='6' width='14' height='21' rx='2.5' fill='none' stroke='%2335d3ae' stroke-width='2'/%3E%3Crect x='12' y='3.5' width='8' height='4.5' rx='1.5' fill='%2335d3ae'/%3E%3Cpath d='M12 16l2.6 2.6 5.4-5.8' fill='none' stroke='%2335d3ae' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
-<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231f242c'/%3E%3Crect x='9' y='6' width='14' height='21' rx='2.5' fill='none' stroke='%2335d3ae' stroke-width='2'/%3E%3Crect x='12' y='3.5' width='8' height='4.5' rx='1.5' fill='%2335d3ae'/%3E%3Cpath d='M12 16l2.6 2.6 5.4-5.8' fill='none' stroke='%2335d3ae' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230a0b0e'/%3E%3Crect x='9' y='6' width='14' height='21' rx='2.5' fill='none' stroke='%23c9d0d9' stroke-width='2'/%3E%3Crect x='12' y='3.5' width='8' height='4.5' rx='1.5' fill='%23c9d0d9'/%3E%3Cpath d='M12 16l2.6 2.6 5.4-5.8' fill='none' stroke='%23c9d0d9' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230a0b0e'/%3E%3Crect x='9' y='6' width='14' height='21' rx='2.5' fill='none' stroke='%23c9d0d9' stroke-width='2'/%3E%3Crect x='12' y='3.5' width='8' height='4.5' rx='1.5' fill='%23c9d0d9'/%3E%3Cpath d='M12 16l2.6 2.6 5.4-5.8' fill='none' stroke='%23c9d0d9' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <style>
   :root {
-    --bg: #14171c;
-    --side: #171b21;
-    --card: #1f242c;
-    --card-2: #252b34;
-    --field: #2b323c;
-    --text: #edf0f4;
-    --muted: #a3adba;
-    --faint: #6e7987;
-    --line: rgba(255, 255, 255, 0.075);
-    --line-soft: rgba(255, 255, 255, 0.05);
-    --hi: inset 0 1px 0 rgba(255, 255, 255, 0.04);
-    --teal: #35d3ae;
-    --teal-strong: #23b493;
-    --teal-ghost: rgba(53, 211, 174, 0.1);
-    --grad: linear-gradient(135deg, #3fe0b0 0%, #23b9c2 100%);
-    --on-grad: #062019;
-    --glow: 0 4px 18px rgba(47, 205, 172, 0.28);
-    --green: #4fc17a;
+    --bg: #0a0b0e;
+    --bg-2: #101216;
+    --sheet: #14161b;
+    --sheet-2: #1b1e24;
+    --text: #e9ebef;
+    --muted: #a7adb6;
+    --faint: #6b7280;
+    --line: rgba(255, 255, 255, 0.11);
+    --line-soft: rgba(255, 255, 255, 0.06);
+    --hi: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    --silver: #c9d0d9;
+    --silver-soft: rgba(201, 208, 217, 0.28);
+    --ghost: rgba(201, 208, 217, 0.08);
+    --chrome: linear-gradient(135deg, #f2f4f7 0%, #a7afbb 45%, #dfe3e9 100%);
+    --chrome-text: linear-gradient(160deg, #f5f7fa 10%, #b6bec9 55%, #e6eaef 90%);
+    --on-chrome: #14161a;
+    --green: #58c07a;
     --danger: #e07070;
-    --radius: 12px;
-    --shadow: 0 1px 2px rgba(0, 0, 0, 0.25), 0 8px 24px rgba(0, 0, 0, 0.22);
-    --shadow-lift: 0 2px 4px rgba(0, 0, 0, 0.3), 0 14px 34px rgba(0, 0, 0, 0.36);
+    --radius: 10px;
+    --serif: Georgia, "Iowan Old Style", "Times New Roman", serif;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 12px 32px rgba(0, 0, 0, 0.45);
+    --shadow-lift: 0 2px 4px rgba(0, 0, 0, 0.45), 0 18px 44px rgba(0, 0, 0, 0.55);
+    --noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
   }
   * { box-sizing: border-box; }
   html { color-scheme: dark; }
@@ -44,74 +45,817 @@
     font-family: "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", sans-serif;
     font-size: 14px;
     background:
-      radial-gradient(1100px 700px at 88% -12%, rgba(47, 205, 172, 0.07), transparent 60%),
-      radial-gradient(900px 650px at -12% 112%, rgba(56, 132, 255, 0.05), transparent 55%),
+      var(--noise),
+      radial-gradient(1200px 700px at 50% -25%, rgba(201, 208, 217, 0.08), transparent 65%),
       var(--bg);
-    background-attachment: fixed;
     color: var(--text);
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
   }
-  ::selection { background: var(--teal); color: #10201c; }
+  ::selection { background: var(--silver); color: #14161a; }
   ::-webkit-scrollbar { width: 10px; height: 10px; }
   ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: #2c333d; border-radius: 8px; border: 2px solid transparent; background-clip: content-box; }
-  ::-webkit-scrollbar-thumb:hover { background: #3a4350; background-clip: content-box; border: 2px solid transparent; }
-  button { font: inherit; cursor: pointer; transition: background .15s, border-color .15s, color .15s, filter .15s, transform .15s, box-shadow .15s; }
-  button:focus-visible, input:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+  ::-webkit-scrollbar-thumb { background: #2c3037; border-radius: 8px; border: 2px solid transparent; background-clip: content-box; }
+  ::-webkit-scrollbar-thumb:hover { background: #3d424b; background-clip: content-box; border: 2px solid transparent; }
+  button { font: inherit; cursor: pointer; transition: background .15s, border-color .15s, color .15s, filter .15s, transform .15s, box-shadow .15s, opacity .15s; }
+  button:focus-visible, input:focus-visible { outline: 2px solid var(--silver); outline-offset: 2px; }
+  input, [contenteditable] { caret-color: var(--silver); }
+  .addcard > button:active, .wish-add button:active, .tabs button:active { transform: scale(.96); }
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation: none !important; transition: none !important; }
   }
 
-  .app { display: flex; min-height: 100vh; }
+  /* inline SVG icons — sized by context */
+  .ic { display: inline-flex; flex-shrink: 0; }
+  .ic svg { width: 15px; height: 15px; display: block; }
 
-  /* ================= sidebar ================= */
-  .side {
-    width: 248px;
-    flex-shrink: 0;
+  /* ================= masthead ================= */
+  .mast {
     position: sticky;
     top: 0;
-    height: 100vh;
-    overflow-y: auto;
-    background: var(--side);
-    border-right: 1px solid var(--line-soft);
+    z-index: 6;
     display: flex;
-    flex-direction: column;
-    padding: 18px 14px;
-    gap: 18px;
-    scrollbar-width: thin;
-    scrollbar-color: var(--line) transparent;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 18px;
+    padding: 10px 26px;
+    background: rgba(10, 11, 14, 0.82);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--line-soft);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.03);
   }
   .brand {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 2px 8px 4px;
+    margin-right: auto;
     user-select: none;
   }
   .brand .glyph {
     display: grid;
     place-items: center;
-    width: 27px;
-    height: 27px;
-    border-radius: 8px;
-    background: var(--grad);
-    color: var(--on-grad);
-    font-size: 14px;
-    font-weight: 800;
-    box-shadow: var(--glow);
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    background: var(--chrome);
+    color: var(--on-chrome);
+    box-shadow: var(--shadow), var(--hi);
   }
-  .brand .name { font-size: 17px; font-weight: 700; letter-spacing: .3px; }
-
-  .side h2 {
-    margin: 0 0 8px;
-    padding: 0 8px;
-    font-size: 11px;
+  .brand .glyph svg { width: 20px; height: 20px; display: block; }
+  .brand-text { display: flex; flex-direction: column; line-height: 1.15; }
+  .brand .name { font-family: var(--serif); font-size: 19px; font-weight: 700; letter-spacing: .2px; }
+  .brand .sub {
+    font-size: 9px;
     font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--faint);
+  }
+  .head-right { display: flex; align-items: center; gap: 10px; }
+  .saved-pill {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    background: var(--sheet);
+    border: 1px solid var(--line-soft);
+    border-radius: 999px;
+    padding: 4px 13px;
+    font-size: 12px;
+    color: var(--muted);
+    box-shadow: var(--shadow), var(--hi);
+    user-select: none;
+    transition: border-color .3s;
+  }
+  .saved-pill .dot { color: var(--green); font-size: 13px; transition: text-shadow .3s; }
+  .saved-pill.pulse { border-color: rgba(88, 192, 122, 0.5); }
+  .saved-pill.pulse .dot { animation: ping .8s ease; }
+  @keyframes ping {
+    0% { text-shadow: 0 0 0 rgba(88, 192, 122, 0.7); }
+    60% { text-shadow: 0 0 12px rgba(88, 192, 122, 0.9); }
+    100% { text-shadow: 0 0 0 rgba(88, 192, 122, 0); }
+  }
+  .helpbtn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    background: var(--sheet);
+    color: var(--muted);
+    font-size: 15px;
+    font-weight: 650;
+    box-shadow: var(--shadow);
+  }
+  .helpbtn:hover { color: var(--silver); border-color: var(--silver); }
+
+  /* view tabs — segmented, sliding chrome pill */
+  .tabs {
+    position: relative;
+    display: flex;
+    background: var(--sheet);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 3px;
+    box-shadow: var(--shadow), var(--hi);
+  }
+  .tabs button {
+    position: relative;
+    z-index: 1;
+    width: 76px;
+    border: none;
+    background: none;
+    color: var(--muted);
+    padding: 5px 0;
+    border-radius: 999px;
+    font-size: 13px;
+  }
+  .tabs button:not(.active):hover { color: var(--text); }
+  .tabs button.active {
+    background: var(--chrome);
+    color: var(--on-chrome);
+    font-weight: 650;
+  }
+  @supports selector(:has(*)) {
+    .tabs button.active { background: none; }
+    .tabs::before {
+      content: "";
+      position: absolute;
+      top: 3px;
+      bottom: 3px;
+      left: 3px;
+      width: 76px;
+      border-radius: 999px;
+      background: var(--chrome);
+      box-shadow: 0 2px 10px rgba(201, 208, 217, 0.2);
+      transition: transform .28s cubic-bezier(.3, .85, .3, 1.06);
+    }
+    .tabs:has(button:nth-of-type(2).active)::before { transform: translateX(76px); }
+    .tabs:has(button:nth-of-type(3).active)::before { transform: translateX(152px); }
+  }
+
+  .app { display: flex; align-items: stretch; min-height: calc(100vh - 55px); }
+
+  /* ================= main column ================= */
+  .main {
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 30px 38px 90px;
+  }
+
+  /* editorial date hero */
+  .hero { text-align: center; margin-bottom: 22px; }
+  .eyebrow {
+    margin: 0 0 2px;
+    font-size: 11px;
+    font-weight: 650;
+    letter-spacing: 2.8px;
+    text-transform: uppercase;
+    color: var(--faint);
+  }
+  .datenav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+  }
+  .datenav .arrow {
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    background: var(--sheet);
+    color: var(--muted);
+    box-shadow: var(--shadow), var(--hi);
+  }
+  .datenav .arrow .ic svg { width: 16px; height: 16px; }
+  .datenav .arrow:hover { border-color: var(--silver); color: var(--silver-bright, #eef1f5); background: var(--ghost); }
+  .datenav .arrow:active { transform: scale(.92); }
+  .datenav .datewrap { position: relative; min-width: 0; }
+  .datenav .bigdate {
+    font-family: var(--serif);
+    font-size: 38px;
+    font-weight: 400;
+    letter-spacing: -.4px;
+    line-height: 1.15;
+    padding: 2px 10px;
+    cursor: pointer;
+    border-radius: 8px;
+    text-wrap: balance;
+    background: var(--chrome-text);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .datenav .bigdate::after {
+    content: "▾";
+    font-size: 12px;
+    margin-left: 10px;
+    vertical-align: 6px;
+    -webkit-text-fill-color: #6b7280;
+  }
+  .datenav .bigdate:hover { filter: brightness(1.18); }
+  .datenav .bigdate:hover::after { -webkit-text-fill-color: #c9d0d9; }
+  .datenav input[type="date"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    border: none;
+  }
+  .side-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .side-actions button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--sheet);
+    color: var(--text);
+    padding: 6px 15px;
+    font-size: 12.5px;
+    box-shadow: var(--shadow), var(--hi);
+    white-space: nowrap;
+  }
+  .side-actions button .ic { color: var(--faint); }
+  .side-actions button .ic svg { width: 13px; height: 13px; }
+  .side-actions button:hover {
+    border-color: var(--silver);
+    color: #eef1f5;
+    background: var(--ghost);
+  }
+  .side-actions button:hover .ic { color: var(--silver); }
+  .side-actions button:disabled { opacity: .4; pointer-events: none; box-shadow: none; }
+
+  /* views */
+  .logzone { border-radius: var(--radius); }
+  .logzone.droptarget { outline: 2px dashed var(--silver); outline-offset: 4px; }
+  .daylist button.droptarget { outline: 2px dashed var(--silver); outline-offset: -2px; }
+  .logzone, .weekview, .monthview { animation: viewin .22s ease; }
+  @keyframes viewin {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* stat strip — silver rules, engraved numbers */
+  .stats {
+    display: flex;
+    align-items: stretch;
+    border-top: 2px solid #aeb6c0;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 16px;
+  }
+  .stat {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1px;
+    padding: 10px 16px 9px;
+  }
+  .stat + .stat { border-left: 1px solid var(--line-soft); }
+  .stat .sn {
+    font-family: var(--serif);
+    font-size: 28px;
+    line-height: 1.15;
+    font-variant-numeric: tabular-nums;
+    background: var(--chrome-text);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .stat .sl {
+    font-size: 9.5px;
+    font-weight: 650;
     letter-spacing: 1.4px;
     text-transform: uppercase;
     color: var(--faint);
+    white-space: nowrap;
+  }
+  .stat.wide { flex: 1.5 1 0; justify-content: flex-end; gap: 6px; }
+  .stat.wide .actstrip { width: 100%; height: 24px; }
+
+  /* activity bars — one bar per day, click to jump */
+  .actstrip { display: flex; align-items: flex-end; gap: 3px; height: 20px; }
+  .actstrip button {
+    flex: 1 1 0;
+    max-width: 10px;
+    min-height: 3px;
+    padding: 0;
+    border: none;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.1);
+  }
+  .actstrip button.hit { background: var(--silver); opacity: .65; }
+  .actstrip button.cur { opacity: 1; box-shadow: 0 0 0 1.5px rgba(201, 208, 217, 0.4); }
+  .actstrip button:hover { opacity: 1; transform: translateY(-1px); background: #eef1f5; }
+  .view-sum .actstrip { width: 92px; }
+
+  /* add card */
+  .addcard { display: flex; gap: 10px; margin-bottom: 14px; }
+  .addcard .inwrap { position: relative; flex: 1; min-width: 0; display: flex; }
+  .addcard input {
+    flex: 1;
+    min-width: 0;
+    font: inherit;
+    color: var(--text);
+    background: var(--sheet);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 9px 78px 9px 13px;
+    box-shadow: var(--shadow), var(--hi);
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .addcard input::placeholder { color: var(--faint); font-style: italic; }
+  .addcard input:focus {
+    outline: none;
+    border-color: var(--silver);
+    box-shadow: 0 0 0 3px var(--ghost);
+  }
+  .addcard .enterhint {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: Consolas, monospace;
+    font-size: 11px;
+    color: var(--faint);
+    background: var(--sheet-2);
+    border: 1px solid var(--line);
+    border-bottom-width: 2px;
+    border-radius: 6px;
+    padding: 1px 8px;
+    opacity: 0;
+    pointer-events: none;
     user-select: none;
+    transition: opacity .15s;
+  }
+  .addcard input:not(:placeholder-shown) ~ .enterhint { opacity: 1; }
+  .addcard > button {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    border: none;
+    border-radius: 8px;
+    background: var(--chrome);
+    color: var(--on-chrome);
+    font-weight: 650;
+    padding: 0 20px;
+    box-shadow: var(--shadow);
+  }
+  .addcard > button .ic svg { width: 14px; height: 14px; }
+  .addcard > button:hover { filter: brightness(1.08); box-shadow: var(--shadow), 0 2px 14px rgba(201, 208, 217, 0.25); }
+
+  /* the ledger sheet: ruled rows behind a silver margin line */
+  .sheet {
+    position: relative;
+    background: var(--sheet);
+    border: 1px solid var(--line-soft);
+    border-radius: 6px;
+    box-shadow: var(--shadow), var(--hi);
+    overflow: hidden;
+  }
+  .sheet::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 46px;
+    width: 1px;
+    background: var(--silver-soft);
+    pointer-events: none;
+  }
+  ol.items { list-style: none; margin: 0; padding: 0; }
+  ol.items li.entry {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 46px;
+    padding: 10px 14px 10px 60px;
+    border-bottom: 1px solid var(--line-soft);
+    transition: background .15s;
+  }
+  ol.items li:last-child { border-bottom: none; }
+  ol.items li.entry:hover { background: var(--sheet-2); }
+  ol.items li.entry .num {
+    position: absolute;
+    left: 0;
+    width: 38px;
+    text-align: right;
+    font-family: var(--serif);
+    font-size: 13px;
+    color: var(--faint);
+    font-variant-numeric: tabular-nums;
+    user-select: none;
+    transition: color .15s;
+  }
+  ol.items li.entry:hover .num { color: #eef1f5; }
+  ol.items li.entry .txt {
+    flex: 1;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  ol.items li.entry .icon {
+    display: grid;
+    place-items: center;
+    border: none;
+    background: none;
+    color: var(--faint);
+    padding: 4px;
+    border-radius: 7px;
+    opacity: 0;
+  }
+  ol.items li.entry .icon .ic svg { width: 14px; height: 14px; }
+  ol.items li.entry:hover .icon, ol.items li.entry .icon:focus-visible { opacity: 1; }
+  ol.items li.entry .icon.edit:hover { color: #eef1f5; background: var(--ghost); }
+  ol.items li.entry .icon.del:hover { color: var(--danger); background: rgba(224, 112, 112, 0.1); }
+  ol.items li.new { animation: rise .25s ease; }
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  /* opening a day staggers its entries in */
+  ol.items.stagger li.entry { animation: rise .3s ease backwards; }
+  ol.items.stagger li.entry:nth-child(2) { animation-delay: .04s; }
+  ol.items.stagger li.entry:nth-child(3) { animation-delay: .08s; }
+  ol.items.stagger li.entry:nth-child(4) { animation-delay: .12s; }
+  ol.items.stagger li.entry:nth-child(5) { animation-delay: .16s; }
+  ol.items.stagger li.entry:nth-child(6) { animation-delay: .2s; }
+  ol.items.stagger li.entry:nth-child(7) { animation-delay: .24s; }
+  ol.items.stagger li.entry:nth-child(n+8) { animation-delay: .28s; }
+
+  ol.items li.editing {
+    display: block;
+    padding: 12px 14px 12px 60px;
+    border-bottom: 1px solid var(--line-soft);
+    background: var(--sheet-2);
+  }
+  ol.items li.editing input {
+    width: 100%;
+    font: inherit;
+    color: var(--text);
+    background: #22262d;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 9px 13px;
+    margin-bottom: 10px;
+  }
+  ol.items li.editing input:focus { outline: none; border-color: var(--silver); box-shadow: 0 0 0 3px var(--ghost); }
+  .editrow { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .editrow button {
+    border: none;
+    border-radius: 8px;
+    padding: 8px 0;
+    font-weight: 650;
+    font-size: 12.5px;
+    letter-spacing: .6px;
+    text-transform: uppercase;
+  }
+  .editrow .save { background: var(--chrome); color: var(--on-chrome); }
+  .editrow .save:hover { filter: brightness(1.08); }
+  .editrow .cancel { background: #343941; color: var(--text); }
+  .editrow .cancel:hover { filter: brightness(1.15); }
+
+  .empty {
+    text-align: center;
+    padding: 36px 12px 38px;
+    border: 1px dashed var(--line);
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.012);
+  }
+  .empty svg { width: 40px; height: 40px; color: var(--faint); opacity: .8; animation: floaty 3.4s ease-in-out infinite alternate; }
+  @keyframes floaty { to { transform: translateY(-6px); } }
+  .empty .e1 { margin: 10px 0 3px; font-family: var(--serif); font-style: italic; color: var(--muted); font-size: 15.5px; }
+  .empty .e2 { margin: 0; color: var(--faint); font-size: 12.5px; }
+
+  .foot-actions { display: flex; margin-top: 12px; }
+  .foot-actions .spacer { flex: 1; }
+  .clearday {
+    border: none;
+    background: none;
+    color: var(--faint);
+    font-size: 12.5px;
+    padding: 4px 8px;
+    border-radius: 6px;
+  }
+  .clearday:hover { color: var(--danger); background: rgba(224, 112, 112, 0.08); }
+
+  /* floating add */
+  .fab {
+    position: fixed;
+    right: 30px;
+    bottom: 30px;
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    border: none;
+    background: var(--chrome);
+    color: var(--on-chrome);
+    font-size: 26px;
+    line-height: 1;
+    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.55), 0 2px 14px rgba(201, 208, 217, 0.18);
+    transition: transform .22s ease, filter .15s, box-shadow .22s;
+    z-index: 5;
+  }
+  .fab:hover { filter: brightness(1.08); transform: translateY(-2px) rotate(90deg); }
+  .fab:active { transform: translateY(0) rotate(90deg) scale(.95); }
+  @media (min-width: 861px) {
+    .fab { right: 300px; } /* clear of the right rail */
+  }
+
+  /* week + month summary line */
+  .view-sum {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px 12px;
+    color: var(--faint);
+    font-size: 12.5px;
+    font-style: italic;
+    font-variant-numeric: tabular-nums;
+    padding: 0 2px;
+    user-select: none;
+  }
+  .mlegend { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-style: normal; color: var(--faint); }
+  .mlegend i { width: 9px; height: 9px; border-radius: 2px; background: var(--sheet-2); border: 1px solid var(--line-soft); }
+  .mlegend i.l1 { background: rgba(222, 228, 235, 0.1); border-color: rgba(222, 228, 235, 0.18); }
+  .mlegend i.l2 { background: rgba(222, 228, 235, 0.22); border-color: rgba(222, 228, 235, 0.3); }
+  .mlegend i.l3 { background: rgba(222, 228, 235, 0.38); border-color: rgba(222, 228, 235, 0.46); }
+
+  /* week view — ruled day sections */
+  .weekview { display: flex; flex-direction: column; gap: 10px; }
+  .wday {
+    display: flex;
+    gap: 14px;
+    background: var(--sheet);
+    border: 1px solid var(--line-soft);
+    border-radius: 6px;
+    box-shadow: var(--shadow), var(--hi);
+    padding: 11px 14px;
+    transition: transform .15s ease, box-shadow .15s ease, opacity .15s ease;
+  }
+  .wday:hover { transform: translateY(-1px); box-shadow: var(--shadow-lift), var(--hi); }
+  /* days with no work fade back so logged days read at a glance */
+  .wday.vacant { opacity: .5; box-shadow: none; }
+  .wday.vacant:hover, .wday.vacant.droptarget { opacity: 1; }
+  .wday.today { border-color: var(--silver-soft); box-shadow: var(--shadow), 0 0 0 1px rgba(201, 208, 217, 0.15), var(--hi); }
+  .wday.today .wday-head button { color: #eef1f5; }
+  .wday.droptarget { outline: 2px dashed var(--silver); outline-offset: 2px; }
+  .wchip {
+    flex-shrink: 0;
+    width: 46px;
+    align-self: flex-start;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    padding: 5px 0 6px;
+    border-radius: 8px;
+    background: var(--sheet-2);
+    border: 1px solid var(--line-soft);
+    user-select: none;
+    cursor: pointer;
+    transition: border-color .15s, transform .15s;
+  }
+  .wchip:hover { border-color: var(--silver); transform: translateY(-1px); }
+  .wchip .wd {
+    font-size: 8.5px;
+    font-weight: 700;
+    letter-spacing: 1.4px;
+    color: var(--faint);
+    text-transform: uppercase;
+  }
+  .wchip .wn {
+    font-family: var(--serif);
+    font-size: 19px;
+    line-height: 1.15;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+  }
+  .wday.today .wchip { background: var(--chrome); border-color: transparent; box-shadow: 0 2px 10px rgba(201, 208, 217, 0.2); }
+  .wday.today .wchip .wd, .wday.today .wchip .wn { color: var(--on-chrome); }
+  .wday-main { flex: 1; min-width: 0; }
+  .wday-head { display: flex; align-items: center; gap: 9px; }
+  .wday-head button {
+    border: none;
+    background: none;
+    color: var(--text);
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 15px;
+    padding: 2px 6px;
+    margin-left: -6px;
+    border-radius: 6px;
+  }
+  .wday-head button:hover { color: #ffffff; text-decoration: underline; text-underline-offset: 3px; }
+  .wday-head .wsub { color: var(--faint); font-size: 12px; }
+  .wday-head .count {
+    margin-left: auto;
+    color: var(--muted);
+    font-size: 11.5px;
+    font-variant-numeric: tabular-nums;
+    background: rgba(255, 255, 255, 0.07);
+    border-radius: 20px;
+    padding: 1px 8px;
+  }
+  .wday ul { list-style: none; margin: 5px 0 0; padding: 0; }
+  .wday ul li {
+    display: flex;
+    gap: 9px;
+    font-size: 13px;
+    color: var(--muted);
+    padding: 2.5px 6px 2.5px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  }
+  .wday ul li:last-child { border-bottom: none; }
+  .wday ul li::before {
+    content: "";
+    flex-shrink: 0;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--silver);
+    opacity: .6;
+    margin-top: 8px;
+  }
+  .wday .none { color: var(--faint); font-size: 12px; padding: 1px 0; font-style: italic; }
+
+  /* month view — engraved calendar */
+  .monthview {
+    background: var(--sheet);
+    border: 1px solid var(--line-soft);
+    border-radius: 6px;
+    box-shadow: var(--shadow), var(--hi);
+    padding: 14px;
+  }
+  .monthview .view-sum { margin: 2px 2px 12px; }
+  .weekview .view-sum { margin: -2px 0 0; }
+  .mgrid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+    background: var(--line-soft);
+    border: 1px solid var(--line-soft);
+  }
+  .mgrid .mhead {
+    text-align: center;
+    color: var(--faint);
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 1.4px;
+    padding: 6px 0;
+    background: var(--sheet-2);
+    user-select: none;
+  }
+  .mcell {
+    min-height: 80px;
+    background: var(--sheet);
+    border: none;
+    border-radius: 0;
+    padding: 6px 8px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    text-align: left;
+    color: var(--muted);
+    font: inherit;
+    min-width: 0;
+    overflow: hidden;
+    transition: background .12s, box-shadow .12s;
+  }
+  .mcell:hover { background: var(--ghost); box-shadow: inset 0 0 0 1.5px var(--silver); }
+  /* weekends sit back a touch so the working week reads first */
+  .mcell.wknd { background: var(--bg-2); }
+  /* heatmap: busier days shine brighter */
+  .mcell.d1 { background: rgba(222, 228, 235, 0.06); }
+  .mcell.d2 { background: rgba(222, 228, 235, 0.12); }
+  .mcell.d3 { background: rgba(222, 228, 235, 0.19); }
+  .mcell.d2 .snip, .mcell.d3 .snip { color: #b9c0c9; }
+  .mcell.blank { background: var(--sheet); cursor: default; }
+  .mcell.blank:hover { background: var(--sheet); box-shadow: none; }
+  .mcell.droptarget { outline: 2px dashed var(--silver); outline-offset: -2px; }
+  .mcell .dnum {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: var(--serif);
+    font-size: 13.5px;
+    font-variant-numeric: tabular-nums;
+    color: var(--text);
+  }
+  /* today: circled in silver, like a mark on an engraved calendar */
+  .mcell.today .dnum span:first-child {
+    display: grid;
+    place-items: center;
+    width: 23px;
+    height: 23px;
+    margin: -3px 0 -2px -4px;
+    border: 1.6px solid var(--silver);
+    border-radius: 50%;
+    color: #eef1f5;
+    font-weight: 700;
+    font-size: 12px;
+    box-shadow: 0 0 8px rgba(201, 208, 217, 0.25);
+  }
+  .mcell .dnum .count {
+    color: #dfe3e9;
+    background: rgba(222, 228, 235, 0.14);
+    font-family: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+    font-size: 10.5px;
+    font-weight: 600;
+    border-radius: 20px;
+    padding: 0 7px;
+  }
+  .mcell .snip {
+    font-size: 11px;
+    color: var(--faint);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+  @media (max-width: 900px) {
+    .datenav .bigdate { font-size: 26px; }
+    .mcell { min-height: 56px; }
+    .mcell .snip { display: none; }
+  }
+
+  /* keyboard hint footer */
+  .keys {
+    margin-top: 30px;
+    text-align: center;
+    color: var(--faint);
+    font-size: 11.5px;
+    user-select: none;
+  }
+  .keys kbd {
+    font-family: Consolas, monospace;
+    font-size: 11px;
+    background: var(--sheet-2);
+    border: 1px solid var(--line);
+    border-bottom-width: 2px;
+    border-radius: 5px;
+    padding: 0 6px;
+    color: var(--muted);
+    margin: 0 1px;
+  }
+
+  /* ================= right rail ================= */
+  .side {
+    order: 2; /* right rail — the log reads first */
+    width: 272px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 55px;
+    height: calc(100vh - 55px);
+    overflow-y: auto;
+    background: transparent;
+    border-left: 1px solid var(--line-soft);
+    display: flex;
+    flex-direction: column;
+    padding: 20px 16px;
+    gap: 22px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--line) transparent;
+  }
+  .side > * { animation: fadeup .45s ease backwards; }
+  .side > *:nth-child(2) { animation-delay: .05s; }
+  .side > *:nth-child(3) { animation-delay: .1s; }
+  .side > *:nth-child(4) { animation-delay: .15s; }
+  @keyframes fadeup { from { opacity: 0; transform: translateY(8px); } }
+  .side h2 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 8px;
+    padding: 0 6px;
+    font-size: 10.5px;
+    font-weight: 650;
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+    color: var(--faint);
+    user-select: none;
+  }
+  .side h2::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--line), transparent);
   }
   .side section { min-height: 0; flex-shrink: 0; }
   .side .grow { flex: 1 1 auto; min-height: 150px; overflow: hidden; display: flex; flex-direction: column; }
@@ -139,10 +883,10 @@
     background: none;
     color: var(--faint);
     font-size: 11px;
-    font-weight: 600;
+    font-weight: 650;
     letter-spacing: 1.2px;
     text-transform: uppercase;
-    padding: 4px 8px;
+    padding: 4px 6px;
     border-radius: 6px;
     text-align: left;
     white-space: nowrap;
@@ -152,94 +896,99 @@
   .mtoggle .chev.open { transform: rotate(90deg); }
   .mtoggle .mbadge {
     margin-left: auto;
-    color: var(--faint);
+    color: var(--muted);
     font-size: 10.5px;
     font-weight: 600;
-    background: rgba(255, 255, 255, 0.06);
+    font-variant-numeric: tabular-nums;
+    background: rgba(255, 255, 255, 0.07);
     border-radius: 20px;
     padding: 1px 7px;
     letter-spacing: 0;
   }
   .mgoto {
+    display: grid;
+    place-items: center;
     border: none;
     background: none;
     color: var(--faint);
-    font-size: 12px;
-    padding: 2px 7px;
+    padding: 3px 7px;
     border-radius: 6px;
     opacity: 0;
   }
+  .mgoto .ic svg { width: 13px; height: 13px; }
   .mgroup:hover .mgoto, .mgoto:focus-visible { opacity: 1; }
-  .mgoto:hover { color: var(--teal); }
-  .daylist button.dayrow { padding-left: 24px; }
+  .mgoto:hover { color: var(--silver); }
+  .daylist button.dayrow { padding-left: 22px; }
   .daylist button {
     width: 100%;
     display: flex;
     justify-content: flex-start;
     align-items: center;
     gap: 8px;
-    padding: 7px 10px;
-    font-size: 13.5px;
+    padding: 6px 9px;
+    font-size: 13px;
     border: none;
-    border-radius: 8px;
+    border-radius: 7px;
     background: none;
     text-align: left;
     color: var(--muted);
   }
   .daylist button:hover { background: rgba(255, 255, 255, 0.05); color: var(--text); }
   .daylist button.current {
-    background: linear-gradient(90deg, var(--teal-ghost), rgba(255, 255, 255, 0.05));
-    box-shadow: inset 2.5px 0 0 var(--teal);
+    background: var(--ghost);
+    box-shadow: inset 2.5px 0 0 var(--silver);
     color: var(--text);
     font-weight: 600;
   }
   .daylist .count {
     margin-left: auto;
-    color: var(--faint);
-    font-size: 11.5px;
-    background: rgba(255, 255, 255, 0.06);
+    color: var(--muted);
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+    background: rgba(255, 255, 255, 0.07);
     border-radius: 20px;
-    padding: 1px 8px;
+    padding: 1px 7px;
   }
   .daylist .tag {
-    color: var(--teal);
-    background: var(--teal-ghost);
-    font-size: 9.5px;
+    color: var(--on-chrome);
+    background: var(--chrome);
+    font-size: 9px;
     font-weight: 700;
     letter-spacing: .8px;
     text-transform: uppercase;
     border-radius: 20px;
     padding: 1px 7px;
   }
-  .daylist button.current .count { color: var(--teal); background: var(--teal-ghost); }
-  .nothing { color: var(--faint); font-size: 13px; padding: 4px 10px; }
+  .daylist button.current .count { color: #eef1f5; background: rgba(222, 228, 235, 0.14); }
+  .nothing { color: var(--faint); font-size: 12.5px; font-style: italic; padding: 4px 9px; }
 
-  /* wishlist */
+  /* wishlist + recurring */
   .wish-add { display: flex; gap: 6px; padding: 0 2px 8px; }
   .wish-add input {
     flex: 1;
     min-width: 0;
     font: inherit;
-    font-size: 13px;
+    font-size: 12.5px;
     color: var(--text);
-    background: var(--field);
+    background: var(--sheet);
     border: 1px solid var(--line);
-    border-radius: 8px;
+    border-radius: 7px;
     padding: 6px 10px;
+    transition: border-color .15s, box-shadow .15s;
   }
-  .wish-add input::placeholder { color: var(--faint); }
-  .wish-add input:focus { outline: none; border-color: var(--teal); }
+  .wish-add input::placeholder { color: var(--faint); font-style: italic; }
+  .wish-add input:focus { outline: none; border-color: var(--silver); box-shadow: 0 0 0 3px var(--ghost); }
   .wish-add button {
-    width: 32px;
+    width: 31px;
     border: none;
-    border-radius: 8px;
-    background: var(--grad);
-    color: var(--on-grad);
+    border-radius: 7px;
+    background: var(--chrome);
+    color: var(--on-chrome);
     font-weight: 700;
     font-size: 16px;
     line-height: 1;
   }
-  .wish-add button:hover { filter: brightness(1.12); box-shadow: var(--glow); }
+  .wish-add button:hover { filter: brightness(1.08); }
 
   ul.wishlist {
     list-style: none;
@@ -254,8 +1003,8 @@
     display: flex;
     align-items: flex-start;
     gap: 7px;
-    padding: 6px 8px;
-    border-radius: 8px;
+    padding: 6px 7px;
+    border-radius: 7px;
     cursor: grab;
   }
   ul.wishlist li:hover { background: rgba(255, 255, 255, 0.05); }
@@ -263,522 +1012,59 @@
   ul.wishlist .grip { color: var(--faint); font-size: 11px; padding-top: 3px; user-select: none; }
   ul.wishlist .wtxt {
     flex: 1;
-    font-size: 13px;
+    font-size: 12.5px;
     color: var(--muted);
     white-space: pre-wrap;
     word-break: break-word;
-    border-radius: 6px;
+    border-radius: 5px;
     padding: 0 2px;
   }
   ul.wishlist li:hover .wtxt { color: var(--text); }
-  ul.wishlist .wtxt:focus { outline: none; background: var(--teal-ghost); box-shadow: inset 0 -1px 0 var(--teal); }
+  ul.wishlist .wtxt:focus { outline: none; background: var(--ghost); box-shadow: inset 0 -1px 0 var(--silver); }
   ul.wishlist .wbtn {
-    border: none;
-    background: none;
-    color: var(--faint);
-    padding: 0 3px;
-    font-size: 13px;
-    border-radius: 6px;
-    opacity: 0;
-  }
-  ul.wishlist li:hover .wbtn, ul.wishlist .wbtn:focus-visible { opacity: 1; }
-  ul.wishlist .wbtn.send:hover { color: var(--teal); }
-  ul.wishlist .wbtn.kill:hover { color: var(--danger); }
-  .wish-hint { padding: 8px 10px 0; color: var(--faint); font-size: 11px; user-select: none; }
-
-  /* sidebar bottom buttons */
-  .side .tools { display: flex; flex-direction: column; gap: 8px; }
-  .tools .row { display: flex; border-radius: 8px; overflow: hidden; box-shadow: var(--shadow); }
-  .tools .row button {
-    flex: 1;
-    border: none;
-    padding: 8px 6px;
-    font-size: 12.5px;
-    font-weight: 600;
-    color: var(--text);
-    background: var(--card-2);
-  }
-  .tools .row button + button { border-left: 1px solid rgba(0, 0, 0, 0.25); }
-  .tools .row button:hover { filter: brightness(1.15); }
-  .tools .row.accent { box-shadow: var(--shadow), var(--glow); }
-  .tools .row.accent button { background: var(--grad); color: var(--on-grad); }
-  .tools .row.accent button + button { border-left: 1px solid rgba(0, 0, 0, 0.18); }
-  .tools .row.accent button:hover { filter: brightness(1.1); }
-
-  /* ================= main ================= */
-  .main {
-    flex: 0 1 900px;
-    min-width: 0;
-    margin: 0 auto;
-    padding: 26px 34px 80px;
-  }
-  .main-head {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 18px;
-  }
-  .main-head h1 {
-    margin: 0;
-    min-width: 200px; /* widest title — stops the tabs shifting between views */
-    font-size: 21px;
-    font-weight: 700;
-    letter-spacing: -.2px;
-    margin-right: auto;
-    background: linear-gradient(180deg, #f4f7fa, #b9c2ce);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
-  .head-right { display: flex; align-items: center; gap: 12px; margin-left: auto; }
-  .saved-pill {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    background: var(--card);
-    border: 1px solid var(--line-soft);
-    border-radius: 999px;
-    padding: 5px 14px;
-    font-size: 12.5px;
-    color: var(--muted);
-    box-shadow: var(--shadow);
-    user-select: none;
-    transition: border-color .3s;
-  }
-  .saved-pill .dot { color: var(--green); font-size: 13px; transition: text-shadow .3s; }
-  .saved-pill.pulse { border-color: rgba(79, 193, 122, 0.5); }
-  .saved-pill.pulse .dot { animation: ping .8s ease; }
-  @keyframes ping {
-    0% { text-shadow: 0 0 0 rgba(79, 193, 122, 0.7); }
-    60% { text-shadow: 0 0 12px rgba(79, 193, 122, 0.9); }
-    100% { text-shadow: 0 0 0 rgba(79, 193, 122, 0); }
-  }
-
-  /* date navigator row */
-  .nav-row {
-    display: flex;
-    gap: 14px;
-    align-items: stretch;
-    margin-bottom: 18px;
-  }
-  .datenav {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 55%), var(--card);
-    border: 1px solid var(--line-soft);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow), var(--hi);
-    padding: 10px 12px;
-  }
-  .datenav .arrow {
-    width: 40px;
-    height: 40px;
-    border: 1px solid var(--line);
-    border-radius: 50%;
-    background: var(--card-2);
-    color: var(--muted);
-    font-size: 16px;
-  }
-  .datenav .arrow:hover {
-    border-color: var(--teal);
-    color: var(--teal);
-    background: var(--teal-ghost);
-  }
-  .datenav .arrow:active { transform: scale(.92); }
-  .datenav .datewrap {
-    position: relative;
-    flex: 1;
-    text-align: center;
-  }
-  .datenav .bigdate {
-    font-size: 22px;
-    font-weight: 650;
-    letter-spacing: -.2px;
-    padding: 4px 0;
-    cursor: pointer;
-    border-radius: 8px;
-    text-wrap: balance;
-  }
-  .datenav .bigdate:hover { background: rgba(255, 255, 255, 0.04); }
-  .datenav input[type="date"] {
-    position: absolute;
-    inset: 0;
-    opacity: 0;
-    cursor: pointer;
-    border: none;
-  }
-  .side-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    justify-content: center;
-  }
-  .side-actions button {
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    background: var(--card);
-    color: var(--text);
-    padding: 7px 16px;
-    font-size: 13px;
-    box-shadow: var(--shadow);
-    white-space: nowrap;
-  }
-  .side-actions button:hover {
-    border-color: var(--teal);
-    color: var(--teal);
-    background: var(--teal-ghost);
-    transform: translateY(-1px);
-  }
-  .side-actions button:active { transform: translateY(0); }
-  .side-actions button:disabled {
-    opacity: .4;
-    pointer-events: none;
-    box-shadow: none;
-  }
-
-  /* entries */
-  .logzone { border-radius: var(--radius); }
-  .logzone.droptarget { outline: 2px dashed var(--teal); outline-offset: 4px; }
-  .daylist button.droptarget { outline: 2px dashed var(--teal); outline-offset: -2px; }
-
-  .day-sub { color: var(--faint); font-size: 12.5px; margin: 0 2px 10px; min-height: 1.2em; }
-
-  .logzone, .weekview, .monthview { animation: viewin .22s ease; }
-  @keyframes viewin {
-    from { opacity: 0; transform: translateY(4px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .addcard {
-    display: flex;
-    gap: 10px;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 55%), var(--card);
-    border: 1px solid var(--line-soft);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow), var(--hi);
-    padding: 10px;
-    margin-bottom: 14px;
-  }
-  .addcard input {
-    flex: 1;
-    min-width: 0;
-    font: inherit;
-    color: var(--text);
-    background: var(--field);
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    padding: 9px 13px;
-  }
-  .addcard input::placeholder { color: var(--faint); }
-  .addcard input:focus {
-    outline: none;
-    border-color: var(--teal);
-    box-shadow: 0 0 0 3px var(--teal-ghost);
-  }
-  .addcard button {
-    border: none;
-    border-radius: 8px;
-    background: var(--grad);
-    color: var(--on-grad);
-    font-weight: 650;
-    padding: 0 22px;
-  }
-  .addcard button:hover { filter: brightness(1.12); box-shadow: var(--glow); }
-
-  ol.items { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
-  ol.items li.entry {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.015), transparent 60%), var(--card-2);
-    border: 1px solid var(--line-soft);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow), var(--hi);
-    padding: 11px 16px;
-    transition: transform .15s ease, box-shadow .15s ease, border-color .15s;
-  }
-  ol.items li.entry:hover {
-    transform: translateY(-1px);
-    border-color: rgba(53, 211, 174, 0.25);
-    box-shadow: var(--shadow-lift), inset 2.5px 0 0 var(--teal);
-  }
-  ol.items li.new { animation: rise .25s ease; }
-  @keyframes rise {
-    from { opacity: 0; transform: translateY(6px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  ol.items li.entry .txt {
-    flex: 1;
-    white-space: pre-wrap;
-    word-break: break-word;
-  }
-  ol.items li.entry .icon {
-    border: none;
-    background: none;
-    color: var(--faint);
-    font-size: 14px;
-    padding: 2px 5px;
-    border-radius: 6px;
-    opacity: 0;
-  }
-  ol.items li.entry:hover .icon, ol.items li.entry .icon:focus-visible { opacity: 1; }
-  ol.items li.entry .icon.edit:hover { color: var(--teal); }
-  ol.items li.entry .icon.del:hover { color: var(--danger); }
-
-  ol.items li.editing {
-    display: block;
-    background: var(--card-2);
-    border: 1px solid var(--line-soft);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    padding: 12px;
-  }
-  ol.items li.editing input {
-    width: 100%;
-    font: inherit;
-    color: var(--text);
-    background: var(--field);
-    border: 1px solid rgba(255, 255, 255, 0.35);
-    border-radius: 8px;
-    padding: 9px 13px;
-    margin-bottom: 10px;
-  }
-  ol.items li.editing input:focus { outline: none; border-color: var(--teal); }
-  .editrow { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .editrow button {
-    border: none;
-    border-radius: 8px;
-    padding: 8px 0;
-    font-weight: 650;
-    font-size: 13px;
-    letter-spacing: .6px;
-    text-transform: uppercase;
-  }
-  .editrow .save { background: var(--grad); color: var(--on-grad); }
-  .editrow .save:hover { filter: brightness(1.1); box-shadow: var(--glow); }
-  .editrow .cancel { background: #4a4f56; color: var(--text); }
-  .editrow .cancel:hover { filter: brightness(1.12); }
-
-  .empty {
-    color: var(--faint);
-    text-align: center;
-    padding: 30px 10px 34px;
-    border: 1px dashed var(--line);
-    border-radius: var(--radius);
-    font-size: 13.5px;
-  }
-  .empty::before {
-    content: "✓";
     display: grid;
     place-items: center;
-    width: 46px;
-    height: 46px;
-    margin: 0 auto 12px;
-    border: 1px dashed var(--line);
-    border-radius: 50%;
-    font-size: 18px;
-    color: var(--faint);
-  }
-
-  .foot-actions { display: flex; margin-top: 14px; }
-  .foot-actions .spacer { flex: 1; }
-  .clearday {
     border: none;
     background: none;
     color: var(--faint);
-    font-size: 12.5px;
-    padding: 4px 8px;
-    border-radius: 6px;
-  }
-  .clearday:hover { color: var(--danger); background: rgba(224, 112, 112, 0.08); }
-
-  /* floating add */
-  .fab {
-    position: fixed;
-    right: 30px;
-    bottom: 30px;
-    width: 54px;
-    height: 54px;
-    border-radius: 50%;
-    border: none;
-    background: var(--grad);
-    color: var(--on-grad);
-    font-size: 26px;
-    line-height: 1;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), var(--glow);
-    transition: transform .22s ease, filter .15s, box-shadow .22s;
-  }
-  .fab:hover { filter: brightness(1.1); transform: translateY(-2px) rotate(90deg); }
-  .fab:active { transform: translateY(0) rotate(90deg) scale(.95); }
-
-  /* view tabs */
-  .tabs {
-    display: flex;
-    background: var(--card);
-    border: 1px solid var(--line-soft);
-    border-radius: 999px;
     padding: 3px;
-    box-shadow: var(--shadow);
-  }
-  .tabs button {
-    border: none;
-    background: none;
-    color: var(--muted);
-    padding: 5px 16px;
-    border-radius: 999px;
-    font-size: 13px;
-  }
-  .tabs button:not(.active):hover { color: var(--text); }
-  .tabs button.active {
-    background: var(--grad);
-    color: var(--on-grad);
-    font-weight: 600;
-    box-shadow: var(--glow);
-  }
-
-  /* week view */
-  .weekview { display: flex; flex-direction: column; gap: 10px; }
-  .wday {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.015), transparent 60%), var(--card);
-    border: 1px solid var(--line-soft);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow), var(--hi);
-    padding: 10px 14px;
-    transition: transform .15s ease, box-shadow .15s ease;
-  }
-  .wday:hover { transform: translateY(-1px); box-shadow: var(--shadow-lift), var(--hi); }
-  /* days with no work fade back so logged days read at a glance */
-  .wday.vacant { opacity: .55; box-shadow: none; }
-  .wday.vacant:hover, .wday.vacant.droptarget { opacity: 1; }
-  .wday.today {
-    border-color: rgba(53, 211, 174, 0.45);
-    box-shadow: var(--shadow), 0 0 0 1px rgba(53, 211, 174, 0.15), var(--hi);
-  }
-  .wday.today .wday-head button { color: var(--teal); }
-  .wday.droptarget { outline: 2px dashed var(--teal); outline-offset: 2px; }
-  .wday-head { display: flex; align-items: center; gap: 10px; }
-  .wday-head button {
-    border: none;
-    background: none;
-    color: var(--text);
-    font-weight: 600;
-    font-size: 13.5px;
-    padding: 2px 6px;
     border-radius: 6px;
+    opacity: 0;
   }
-  .wday-head button:hover { color: var(--teal); }
-  .wday-head .count {
-    color: var(--faint);
-    font-size: 11.5px;
-    background: rgba(255, 255, 255, 0.06);
-    border-radius: 20px;
-    padding: 1px 8px;
-  }
-  .wday ul { list-style: none; margin: 6px 0 0; padding: 0; }
-  .wday ul li {
-    font-size: 13px;
-    color: var(--muted);
-    padding: 2px 6px;
-    display: flex;
-    gap: 8px;
-    align-items: baseline;
-  }
-  .wday ul li::before { content: "•"; color: var(--teal); }
-  .wday .none { color: var(--faint); font-size: 12px; padding: 2px 6px; font-style: italic; }
+  ul.wishlist .wbtn .ic svg { width: 13px; height: 13px; }
+  ul.wishlist li:hover .wbtn, ul.wishlist .wbtn:focus-visible { opacity: 1; }
+  ul.wishlist .wbtn.send:hover { color: #eef1f5; background: var(--ghost); }
+  ul.wishlist .wbtn.kill:hover { color: var(--danger); background: rgba(224, 112, 112, 0.1); }
+  .wish-hint { padding: 8px 8px 0; color: var(--faint); font-size: 11px; user-select: none; }
 
-  /* month view */
-  .monthview {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.015), transparent 40%), var(--card);
-    border: 1px solid var(--line-soft);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow), var(--hi);
-    padding: 14px;
-  }
-  .mgrid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
-  .mgrid .mhead {
-    text-align: center;
-    color: var(--faint);
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    padding: 4px 0;
-    user-select: none;
-  }
-  .mcell {
-    min-height: 76px;
-    background: var(--card-2);
-    border: 1px solid var(--line-soft);
-    border-radius: 8px;
-    padding: 6px 8px;
-    cursor: pointer;
+  /* backup / data buttons */
+  .tools-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+  .tools-grid button {
     display: flex;
-    flex-direction: column;
-    gap: 2px;
-    text-align: left;
-    color: var(--muted);
-    font: inherit;
-    min-width: 0;
-    overflow: hidden;
-  }
-  .mcell { transition: transform .12s ease, border-color .12s, box-shadow .12s; }
-  .mcell:hover { border-color: var(--teal); transform: translateY(-1px); box-shadow: var(--shadow); }
-  .mcell.blank { background: none; border: none; cursor: default; box-shadow: none; transform: none; }
-  .mcell.today {
-    border-color: rgba(53, 211, 174, 0.55);
-    box-shadow: 0 0 0 1px rgba(53, 211, 174, 0.18);
-  }
-  .mcell.today .dnum span:first-child { color: var(--teal); }
-  .mcell.droptarget { outline: 2px dashed var(--teal); outline-offset: -2px; }
-  .mcell .dnum {
-    display: flex;
-    justify-content: space-between;
     align-items: center;
-    font-size: 12.5px;
+    justify-content: center;
+    gap: 7px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--sheet);
+    color: var(--muted);
+    padding: 8px 4px;
+    font-size: 11.5px;
     font-weight: 600;
-    color: var(--text);
-  }
-  .mcell .dnum .count {
-    color: var(--teal);
-    background: var(--teal-ghost);
-    font-size: 10.5px;
-    font-weight: 600;
-    border-radius: 20px;
-    padding: 0 7px;
-  }
-  .mcell .snip {
-    font-size: 11px;
-    color: var(--faint);
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 100%;
+    box-shadow: var(--hi);
   }
-  @media (max-width: 900px) {
-    .datenav .bigdate { font-size: 18px; }
-    .mcell { min-height: 54px; }
-    .mcell .snip { display: none; }
-  }
+  .tools-grid button .ic { color: var(--silver); opacity: .8; }
+  .tools-grid button .ic svg { width: 13px; height: 13px; }
+  .tools-grid button:hover { color: var(--text); border-color: var(--silver); background: var(--ghost); }
+  .tools-grid button:hover .ic { opacity: 1; }
 
   /* help modal */
-  .helpbtn {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    border: 1px solid var(--line);
-    background: var(--card);
-    color: var(--muted);
-    font-size: 15px;
-    font-weight: 650;
-    box-shadow: var(--shadow);
-  }
-  .helpbtn:hover { color: var(--teal); border-color: var(--teal); }
   .overlay {
     position: fixed;
     inset: 0;
-    background: rgba(10, 12, 14, 0.6);
-    backdrop-filter: blur(3px);
+    background: rgba(0, 0, 0, 0.62);
+    backdrop-filter: blur(4px);
     display: none;
     align-items: center;
     justify-content: center;
@@ -793,12 +1079,11 @@
     to { opacity: 1; transform: translateY(0) scale(1); }
   }
   .modal {
-    background: var(--card);
+    background: var(--sheet);
     border: 1px solid var(--line);
-    border-radius: 14px;
+    border-radius: 12px;
     border-top: none;
-    background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 20%);
-    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
     max-width: 660px;
     width: 100%;
     max-height: 84vh;
@@ -821,10 +1106,10 @@
     left: 0;
     right: 0;
     height: 3px;
-    background: var(--grad);
-    border-radius: 14px 14px 0 0;
+    background: var(--chrome);
+    border-radius: 12px 12px 0 0;
   }
-  .modal-head h2 { margin: 0; font-size: 17px; font-weight: 650; margin-right: auto; }
+  .modal-head h2 { margin: 0; font-family: var(--serif); font-size: 19px; font-weight: 650; margin-right: auto; }
   .modal-head .close {
     border: none;
     background: none;
@@ -844,13 +1129,13 @@
   }
   .modal-body h3 {
     color: var(--text);
-    font-size: 13px;
+    font-size: 12.5px;
     font-weight: 650;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 1.2px;
     margin: 20px 0 6px;
   }
-  .modal-body h3 .tick { color: var(--teal); }
+  .modal-body h3 .tick { color: var(--silver); }
   .modal-body p { margin: 0 0 8px; }
   .modal-body ul { margin: 0 0 8px; padding-left: 20px; }
   .modal-body li { margin-bottom: 4px; }
@@ -858,7 +1143,7 @@
   .modal-body kbd {
     font-family: Consolas, monospace;
     font-size: 12px;
-    background: var(--field);
+    background: var(--sheet-2);
     border: 1px solid var(--line);
     border-bottom-width: 2px;
     border-radius: 5px;
@@ -866,7 +1151,7 @@
     color: var(--text);
   }
   .modal-body pre {
-    background: var(--field);
+    background: var(--sheet-2);
     border: 1px solid var(--line);
     border-radius: 8px;
     padding: 10px 14px;
@@ -877,8 +1162,8 @@
     margin: 6px 0 8px;
   }
   .modal-body .note {
-    background: var(--teal-ghost);
-    border: 1px solid rgba(47, 181, 163, 0.3);
+    background: var(--ghost);
+    border: 1px solid var(--silver-soft);
     border-radius: 8px;
     padding: 10px 14px;
     margin-top: 16px;
@@ -892,27 +1177,27 @@
   .modal-foot button {
     border: none;
     border-radius: 8px;
-    background: var(--teal);
-    color: #0e1f1b;
+    background: var(--chrome);
+    color: var(--on-chrome);
     font-weight: 650;
     padding: 8px 26px;
   }
-  .modal-foot button:hover { background: #3ac9b6; }
+  .modal-foot button:hover { filter: brightness(1.08); }
 
-  /* toast */
+  /* toast — a silver plate on the black */
   #toast {
     position: fixed;
     left: 50%;
     bottom: 30px;
     transform: translateX(-50%) translateY(12px);
-    background: rgba(37, 43, 52, 0.92);
-    backdrop-filter: blur(6px);
-    border: 1px solid rgba(53, 211, 174, 0.35);
-    color: var(--text);
+    background: #e9ebef;
+    border: 1px solid #f5f7fa;
+    color: #14161a;
     padding: 9px 22px;
     border-radius: 999px;
     font-size: 13px;
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5), 0 2px 10px rgba(47, 205, 172, 0.12);
+    font-weight: 500;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6), 0 2px 14px rgba(201, 208, 217, 0.15);
     opacity: 0;
     pointer-events: none;
     transition: opacity .2s ease, transform .25s cubic-bezier(.2, .9, .35, 1.2);
@@ -921,63 +1206,79 @@
   #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto; }
   #toast .undo {
     border: none;
-    background: var(--teal-ghost);
-    color: var(--teal);
-    font-weight: 650;
+    background: rgba(20, 22, 26, 0.12);
+    color: #14161a;
+    font-weight: 700;
     font-size: 12.5px;
     border-radius: 999px;
     padding: 3px 13px;
     margin-left: 12px;
   }
-  #toast .undo:hover { background: rgba(53, 211, 174, 0.22); }
+  #toast .undo:hover { background: rgba(20, 22, 26, 0.2); }
 
   /* hover hints */
   #tip {
     position: fixed;
     z-index: 40;
     max-width: 280px;
-    background: rgba(38, 44, 53, 0.97);
-    border: 1px solid var(--line);
-    color: var(--text);
+    background: #e9ebef;
+    border: 1px solid #f5f7fa;
+    color: #14161a;
     font-size: 12px;
     line-height: 1.45;
     padding: 5px 11px;
     border-radius: 7px;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
     opacity: 0;
     pointer-events: none;
     transition: opacity .15s ease;
   }
   #tip.show { opacity: 1; transition-delay: .35s; }
 
-  @media (max-width: 760px) {
-    .app { flex-direction: column; }
+  @media (max-width: 860px) {
+    .app { flex-direction: column; min-height: 0; }
     .side {
       width: 100%;
       position: static;
       height: auto;
       overflow: visible;
-      border-right: none;
-      border-bottom: 1px solid var(--line-soft);
+      border-left: none;
+      border-top: 1px solid var(--line);
+      padding: 20px 16px 30px;
     }
     .side .grow { min-height: 0; }
     .daylist { max-height: 300px; }
-    .main { margin: 0; padding: 20px 16px 90px; }
-    .nav-row { flex-direction: column; }
-    .side-actions { flex-direction: row; flex-wrap: wrap; }
-    .side-actions button { flex: 1; }
+    .main { margin: 0; max-width: none; padding: 20px 16px 40px; }
+    .mast { padding: 8px 14px; gap: 8px 12px; }
+    .stats { flex-wrap: wrap; }
+    .stat { flex: 1 1 32%; }
+    .stat.wide { flex: 1 1 100%; border-left: none; border-top: 1px solid var(--line-soft); }
+    .keys { display: none; }
   }
 </style>
 </head>
 <body>
+<header class="mast">
+  <div class="brand">
+    <span class="glyph" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none"><rect x="9" y="6" width="14" height="21" rx="2.5" stroke="currentColor" stroke-width="2"/><rect x="12" y="3.5" width="8" height="4.5" rx="1.5" fill="currentColor" stroke="none"/><path d="M12 16l2.6 2.6 5.4-5.8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+    <span class="brand-text">
+      <span class="name">Docket</span>
+      <span class="sub">Daily work log</span>
+    </span>
+  </div>
+  <div class="tabs" id="viewTabs">
+    <button data-view="day" class="active" data-tip="One day at a time — shortcut: D">Day</button>
+    <button data-view="week" data-tip="The whole week at a glance — shortcut: W">Week</button>
+    <button data-view="month" data-tip="Calendar with entry counts — shortcut: M">Month</button>
+  </div>
+  <div class="head-right">
+    <div class="saved-pill" id="savedPill" data-tip="Everything saves to this browser automatically — keep an occasional Export as a backup"><span class="dot">●</span> Auto-saved locally</div>
+    <button class="helpbtn" id="helpBtn" data-tip="How Docket works — shortcut: ?" aria-label="How Docket works">?</button>
+  </div>
+</header>
 <div class="app">
 
   <aside class="side">
-    <div class="brand">
-      <span class="glyph">✓</span>
-      <span class="name">Docket</span>
-    </div>
-
     <section class="grow">
       <h2>Recent days</h2>
       <ul class="daylist" id="dayList"></ul>
@@ -1004,13 +1305,12 @@
     </section>
 
     <section class="tools">
-      <div class="row accent">
-        <button id="exportBtn" data-tip="Back up everything — entries, wishlist and recurring — to a JSON file">Export (JSON)</button>
-        <button id="importBtn" data-tip="Merge a JSON backup back in — duplicates are skipped">Import</button>
-      </div>
-      <div class="row">
-        <button id="csvImportBtn" data-tip="Bulk-load entries from a spreadsheet CSV — date first, task second">CSV Import</button>
-        <button id="csvExportBtn" data-tip="Export every entry as a CSV that opens straight in Excel">CSV Export</button>
+      <h2>Backup &amp; data</h2>
+      <div class="tools-grid">
+        <button id="exportBtn" data-tip="Back up everything — entries, wishlist and recurring — to a JSON file"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg></span>Export JSON</button>
+        <button id="importBtn" data-tip="Merge a JSON backup back in — duplicates are skipped"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 8 5-5 5 5"/><path d="M12 3v12"/></svg></span>Import JSON</button>
+        <button id="csvExportBtn" data-tip="Export every entry as a CSV that opens straight in Excel"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M12 18v-6"/><path d="m9 15 3 3 3-3"/></svg></span>Export CSV</button>
+        <button id="csvImportBtn" data-tip="Bulk-load entries from a spreadsheet CSV — date first, task second"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M12 12v6"/><path d="m9 15 3-3 3 3"/></svg></span>Import CSV</button>
       </div>
       <input type="file" id="importFile" accept=".json,application/json" hidden>
       <input type="file" id="csvFile" accept=".csv,text/csv,text/plain" hidden>
@@ -1018,45 +1318,48 @@
   </aside>
 
   <main class="main">
-    <div class="main-head">
-      <h1 id="dayTitle"></h1>
-      <div class="tabs" id="viewTabs">
-        <button data-view="day" class="active" data-tip="One day at a time — shortcut: D">Day</button>
-        <button data-view="week" data-tip="The whole week at a glance — shortcut: W">Week</button>
-        <button data-view="month" data-tip="Calendar with entry counts — shortcut: M">Month</button>
-      </div>
-      <div class="head-right">
-        <div class="saved-pill" id="savedPill" data-tip="Everything saves to this browser automatically — keep an occasional Export as a backup"><span class="dot">●</span> Data auto-saved locally</div>
-        <button class="helpbtn" id="helpBtn" data-tip="How Docket works — shortcut: ?" aria-label="How Docket works">?</button>
-      </div>
-    </div>
-
-    <div class="nav-row">
+    <section class="hero">
+      <p class="eyebrow" id="dayTitle"></p>
       <div class="datenav">
-        <button class="arrow" id="prevDay" data-tip="Previous day — shortcut: ←" aria-label="Previous">‹</button>
+        <button class="arrow" id="prevDay" data-tip="Previous day — shortcut: ←" aria-label="Previous"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></span></button>
         <div class="datewrap">
           <div class="bigdate" id="navDate" data-tip="Click to pick a date from the calendar"></div>
           <input type="date" id="datePick" tabindex="-1">
         </div>
-        <button class="arrow" id="nextDay" data-tip="Next day — shortcut: →" aria-label="Next">›</button>
+        <button class="arrow" id="nextDay" data-tip="Next day — shortcut: →" aria-label="Next"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></span></button>
       </div>
       <div class="side-actions">
-        <button id="copyDay" data-tip="Date heading + bulleted list — ready to paste into an email or invoice. Shortcut: C">Copy Day to Clipboard</button>
-        <button id="copyPlain" data-tip="Just the lines, one per line — no date heading">Copy Items Only</button>
-        <button id="todayBtn" data-tip="Back to today — shortcut: T">Jump to Today</button>
+        <button id="copyDay" data-tip="Date heading + bulleted list — ready to paste into an email or invoice. Shortcut: C"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span><span id="copyDayLabel">Copy Day to Clipboard</span></button>
+        <button id="copyPlain" data-tip="Just the lines, one per line — no date heading"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg></span>Copy Items Only</button>
+        <button id="todayBtn" data-tip="Back to today — shortcut: T"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M12 14h.01"/></svg></span>Jump to Today</button>
       </div>
-    </div>
+    </section>
 
     <div class="logzone" id="logPanel">
-      <p class="day-sub" id="daySub"></p>
-
-      <div class="addcard">
-        <input type="text" id="newItem" placeholder="What did you do? Press Enter to log it…" autocomplete="off">
-        <button id="addBtn">Add</button>
+      <div class="stats">
+        <div class="stat" data-tip="Entries logged on the open day"><span class="sn" id="statToday">0</span><span class="sl">This day</span></div>
+        <div class="stat" data-tip="Entries in the open day's week (Mon–Sun)"><span class="sn" id="statWeek">0</span><span class="sl">This week</span></div>
+        <div class="stat" data-tip="Entries in the open day's month"><span class="sn" id="statMonth">0</span><span class="sl">This month</span></div>
+        <div class="stat wide">
+          <div class="actstrip" id="actStrip"></div>
+          <span class="sl">Last 14 days</span>
+        </div>
       </div>
 
-      <ol class="items" id="itemList"></ol>
-      <div class="empty" id="emptyMsg">No entries for this day yet — add your first one above.</div>
+      <div class="addcard">
+        <div class="inwrap">
+          <input type="text" id="newItem" placeholder="What did you do?" autocomplete="off">
+          <kbd class="enterhint">Enter ↵</kbd>
+        </div>
+        <button id="addBtn"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>Add</button>
+      </div>
+
+      <div class="sheet" id="sheet"><ol class="items" id="itemList"></ol></div>
+      <div class="empty" id="emptyMsg">
+        <svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><rect x="9" y="6" width="14" height="21" rx="2.5" stroke="currentColor" stroke-width="1.6"/><rect x="12" y="3.5" width="8" height="4.5" rx="1.5" fill="currentColor" stroke="none"/><path d="M12 16l2.6 2.6 5.4-5.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <p class="e1">Nothing logged for this day yet</p>
+        <p class="e2">Type above and press Enter — or drag something in from the Wishlist.</p>
+      </div>
 
       <div class="foot-actions">
         <span class="spacer"></span>
@@ -1067,8 +1370,11 @@
     <div class="weekview" id="weekView" style="display:none"></div>
 
     <div class="monthview" id="monthView" style="display:none">
+      <div class="view-sum"><span id="monthSum"></span><span class="mlegend" aria-hidden="true">less <i></i><i class="l1"></i><i class="l2"></i><i class="l3"></i> more</span></div>
       <div class="mgrid" id="monthGrid"></div>
     </div>
+
+    <div class="keys" aria-hidden="true"><kbd>←</kbd><kbd>→</kbd> move &nbsp;·&nbsp; <kbd>T</kbd> today &nbsp;·&nbsp; <kbd>D</kbd><kbd>W</kbd><kbd>M</kbd> views &nbsp;·&nbsp; <kbd>N</kbd> new entry &nbsp;·&nbsp; <kbd>C</kbd> copy &nbsp;·&nbsp; <kbd>?</kbd> guide</div>
   </main>
 </div>
 
@@ -1088,6 +1394,7 @@
       <h3><span class="tick">●</span> The daily log</h3>
       <ul>
         <li>Type what you did in the box and press <kbd>Enter</kbd> — it's saved instantly.</li>
+        <li>The tiles above the log count the open day, its week and its month; the small bars chart the <b>last 14 days</b> — click a bar to jump to that day.</li>
         <li>Move between days with the <b>‹ ›</b> arrows, or <b>click the big date</b> to open a calendar.</li>
         <li>Hover an entry and click the <b>✎ pencil</b> to edit it (Save/Cancel), or <b>✕</b> to delete it.</li>
         <li>Deleted the wrong thing? An <b>Undo</b> button pops up for a few seconds — same for <b>Clear this day</b>.</li>
@@ -1139,13 +1446,13 @@
         <li>The header row is optional. Dates can be <b>2026-07-01</b> or <b>01/07/2026</b> style (day-first).</li>
         <li>Comma, semicolon or tab delimited — detected automatically.</li>
         <li>Re-importing is safe: duplicates and unreadable rows are skipped and reported.</li>
-        <li><b>CSV Export</b> writes the same format, so you can export → edit in Excel → import back.</li>
+        <li><b>Export CSV</b> writes the same format, so you can export → edit in Excel → import back.</li>
       </ul>
 
       <h3><span class="tick">●</span> Backups &amp; where your data lives</h3>
       <ul>
         <li>Data is stored by <b>this browser, on this computer</b>. Stick to one browser (e.g. always Edge).</li>
-        <li><b>Export (JSON)</b> saves everything — including the wishlist — to a file; <b>Import</b> merges it back in. Use it to move to another browser or PC, or as a safety net.</li>
+        <li><b>Export JSON</b> saves everything — including the wishlist — to a file; <b>Import JSON</b> merges it back in. Use it to move to another browser or PC, or as a safety net.</li>
         <li>Clearing the browser's site data erases the log — keep an occasional export.</li>
       </ul>
 
@@ -1254,6 +1561,7 @@
     return rel ? rel + " — " + prettyDate(iso) : prettyDate(iso);
   }
   var DOW = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  var LONGDOW = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
   var MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   function shortDow(iso) { return DOW[dateObj(iso).getDay()]; }
   function isoOf(d) {
@@ -1303,10 +1611,52 @@
   // ---------- rendering ----------
   var $ = function (id) { return document.getElementById(id); };
 
+  // Crisp stroke icons for the buttons that JS builds on every render.
+  var ICONS = {
+    pencil: '<path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>',
+    x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+    send: '<polyline points="15 10 20 15 15 20"/><path d="M4 4v7a4 4 0 0 0 4 4h12"/>',
+    grid: '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>'
+  };
+  function icon(name) {
+    var s = document.createElement("span");
+    s.className = "ic";
+    s.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ICONS[name] + '</svg>';
+    return s;
+  }
+
   function items() {
     if (!data[currentDate]) data[currentDate] = [];
     return data[currentDate];
   }
+
+  function entryCount(iso) { return (data[iso] || []).length; }
+
+  // One clickable bar per day; heights scale to the busiest day shown.
+  function fillBars(strip, days, currentIso, maxH) {
+    strip.innerHTML = "";
+    var max = 1;
+    days.forEach(function (d) { max = Math.max(max, entryCount(d)); });
+    days.forEach(function (d) {
+      var n = entryCount(d);
+      var b = document.createElement("button");
+      b.className = (n > 0 ? "hit" : "") + (d === currentIso ? " cur" : "");
+      b.style.height = (n > 0 ? Math.round(4 + (maxH - 4) * n / max) : 3) + "px";
+      b.dataset.tip = shortDow(d) + " " + d + " — " +
+        (n === 0 ? "no entries" : n + (n === 1 ? " entry" : " entries")) + " · click to open";
+      b.setAttribute("aria-label", "Open " + prettyDate(d));
+      b.addEventListener("click", function () {
+        currentDate = d;
+        editingId = null;
+        setView("day");
+      });
+      strip.appendChild(b);
+    });
+  }
+
+  // Entries stagger in when a day is opened, but not on edits within it.
+  var lastRenderKey = null;
+  var staggerNext = false;
 
   function setView(v) {
     view = v;
@@ -1318,6 +1668,9 @@
   function render() {
     hideTip();
     $("datePick").value = currentDate;
+    var renderKey = view + "|" + currentDate;
+    staggerNext = renderKey !== lastRenderKey;
+    lastRenderKey = renderKey;
 
     var tabs = document.querySelectorAll("#viewTabs button");
     for (var i = 0; i < tabs.length; i++) {
@@ -1333,15 +1686,15 @@
     if (view === "week") {
       $("dayTitle").textContent = "Weekly Overview";
       $("navDate").textContent = weekLabel(currentDate).replace("Week of ", "");
-      $("copyDay").textContent = "Copy Week to Clipboard";
+      $("copyDayLabel").textContent = "Copy Week to Clipboard";
     } else if (view === "month") {
       $("dayTitle").textContent = "Monthly Calendar";
       $("navDate").textContent = monthLabel(currentDate);
-      $("copyDay").textContent = "Copy Month to Clipboard";
+      $("copyDayLabel").textContent = "Copy Month to Clipboard";
     } else {
       $("dayTitle").textContent = "Daily Log";
       $("navDate").textContent = dayHeading(currentDate);
-      $("copyDay").textContent = "Copy Day to Clipboard";
+      $("copyDayLabel").textContent = "Copy Day to Clipboard";
     }
 
     $("logPanel").style.display = view === "day" ? "" : "none";
@@ -1359,15 +1712,30 @@
 
   function renderDay() {
     var list = data[currentDate] || [];
-    $("daySub").textContent = list.length === 0 ? "" :
-      list.length + (list.length === 1 ? " entry" : " entries");
+
+    // stat tiles: the open day, its week, its month, and a 14-day chart
+    var weekN = 0;
+    var ws = weekStart(currentDate);
+    for (var w = 0; w < 7; w++) weekN += entryCount(shiftDay(ws, w));
+    var md = dateObj(currentDate);
+    var dim = new Date(md.getFullYear(), md.getMonth() + 1, 0).getDate();
+    var monthN = 0;
+    for (var dn = 1; dn <= dim; dn++) monthN += entryCount(isoOf(new Date(md.getFullYear(), md.getMonth(), dn)));
+    $("statToday").textContent = list.length;
+    $("statWeek").textContent = weekN;
+    $("statMonth").textContent = monthN;
+    var days14 = [];
+    for (var b = 13; b >= 0; b--) days14.push(shiftDay(currentDate, -b));
+    fillBars($("actStrip"), days14, currentDate, 20);
 
     var ol = $("itemList");
+    ol.classList.toggle("stagger", staggerNext);
     ol.innerHTML = "";
-    list.forEach(function (item) {
-      ol.appendChild(item.id === editingId ? buildEditor(item) : buildEntry(item));
+    list.forEach(function (item, idx) {
+      ol.appendChild(item.id === editingId ? buildEditor(item) : buildEntry(item, idx));
     });
 
+    $("sheet").style.display = list.length === 0 ? "none" : "";
     $("emptyMsg").style.display = list.length === 0 ? "" : "none";
     $("clearDay").style.display = list.length === 0 ? "none" : "";
   }
@@ -1376,6 +1744,28 @@
     var wrap = $("weekView");
     wrap.innerHTML = "";
     var ws = weekStart(currentDate);
+
+    var total = 0, daysWith = 0;
+    for (var c = 0; c < 7; c++) {
+      var n = (data[shiftDay(ws, c)] || []).length;
+      total += n;
+      if (n > 0) daysWith++;
+    }
+    var sum = document.createElement("div");
+    sum.className = "view-sum";
+    var sumText = document.createElement("span");
+    sumText.textContent = total === 0 ? "Nothing logged this week yet" :
+      total + (total === 1 ? " entry" : " entries") + " across " +
+      daysWith + (daysWith === 1 ? " day" : " days") + " this week";
+    sum.appendChild(sumText);
+    var weekDays = [];
+    for (var wd2 = 0; wd2 < 7; wd2++) weekDays.push(shiftDay(ws, wd2));
+    var strip = document.createElement("div");
+    strip.className = "actstrip";
+    fillBars(strip, weekDays, todayISO(), 14);
+    sum.appendChild(strip);
+    wrap.appendChild(sum);
+
     for (var i = 0; i < 7; i++) {
       (function (d) {
         var list = data[d] || [];
@@ -1383,25 +1773,49 @@
         var card = document.createElement("div");
         card.className = "wday" + (isToday ? " today" : "") +
           (list.length === 0 && !isToday ? " vacant" : "");
+        var dd = dateObj(d);
+
+        // calendar-style date chip on the left
+        var chip = document.createElement("div");
+        chip.className = "wchip";
+        chip.addEventListener("click", function () {
+          currentDate = d;
+          setView("day");
+        });
+        var wd = document.createElement("span");
+        wd.className = "wd";
+        wd.textContent = DOW[dd.getDay()];
+        var wn = document.createElement("span");
+        wn.className = "wn";
+        wn.textContent = dd.getDate();
+        chip.appendChild(wd);
+        chip.appendChild(wn);
+        card.appendChild(chip);
+
+        var main = document.createElement("div");
+        main.className = "wday-main";
 
         var head = document.createElement("div");
         head.className = "wday-head";
         var btn = document.createElement("button");
-        var dd = dateObj(d);
-        btn.textContent = DOW[dd.getDay()] + " " + dd.getDate() + " " + MON[dd.getMonth()];
-        btn.dataset.tip = "Open this day";
+        btn.textContent = LONGDOW[dd.getDay()];
+        btn.dataset.tip = "Open " + prettyDate(d);
         btn.addEventListener("click", function () {
           currentDate = d;
           setView("day");
         });
         head.appendChild(btn);
+        var sub = document.createElement("span");
+        sub.className = "wsub";
+        sub.textContent = dd.getDate() + " " + MON[dd.getMonth()];
+        head.appendChild(sub);
         if (list.length > 0) {
           var count = document.createElement("span");
           count.className = "count";
           count.textContent = list.length;
           head.appendChild(count);
         }
-        card.appendChild(head);
+        main.appendChild(head);
 
         if (list.length > 0) {
           var ul = document.createElement("ul");
@@ -1410,14 +1824,15 @@
             li.textContent = it.text;
             ul.appendChild(li);
           });
-          card.appendChild(ul);
+          main.appendChild(ul);
         } else {
           var none = document.createElement("div");
           none.className = "none";
           none.textContent = "no entries";
-          card.appendChild(none);
+          main.appendChild(none);
         }
 
+        card.appendChild(main);
         makeDropTarget(card, function () { return d; });
         wrap.appendChild(card);
       })(shiftDay(ws, i));
@@ -1439,6 +1854,17 @@
     var blanks = (first.getDay() + 6) % 7;
     var daysInMonth = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
 
+    var total = 0, daysWith = 0;
+    for (var c = 1; c <= daysInMonth; c++) {
+      var cn = (data[isoOf(new Date(d.getFullYear(), d.getMonth(), c))] || []).length;
+      total += cn;
+      if (cn > 0) daysWith++;
+    }
+    $("monthSum").textContent = total === 0 ?
+      "Nothing logged in " + monthLabel(currentDate) + " yet" :
+      total + (total === 1 ? " entry" : " entries") + " across " +
+      daysWith + (daysWith === 1 ? " day" : " days") + " in " + monthLabel(currentDate);
+
     for (var b = 0; b < blanks; b++) {
       var blank = document.createElement("div");
       blank.className = "mcell blank";
@@ -1448,7 +1874,10 @@
       (function (iso) {
         var list = data[iso] || [];
         var cell = document.createElement("button");
-        cell.className = "mcell" + (iso === todayISO() ? " today" : "");
+        var cdow = dateObj(iso).getDay();
+        cell.className = "mcell" + (iso === todayISO() ? " today" : "") +
+          (cdow === 0 || cdow === 6 ? " wknd" : "") +
+          (list.length >= 4 ? " d3" : list.length >= 2 ? " d2" : list.length === 1 ? " d1" : "");
         cell.dataset.tip = (list.length ? list.length + " entr" + (list.length === 1 ? "y" : "ies") : "No entries") + " — click to open the day";
 
         var dnum = document.createElement("div");
@@ -1485,11 +1914,22 @@
         grid.appendChild(cell);
       })(isoOf(new Date(d.getFullYear(), d.getMonth(), day)));
     }
+    // pad the final row so the printed grid stays rectangular
+    var used = (blanks + daysInMonth) % 7;
+    for (var t2 = used === 0 ? 0 : 7 - used; t2 > 0; t2--) {
+      var tail = document.createElement("div");
+      tail.className = "mcell blank";
+      grid.appendChild(tail);
+    }
   }
 
-  function buildEntry(item) {
+  function buildEntry(item, idx) {
     var li = document.createElement("li");
     li.className = "entry";
+
+    var num = document.createElement("span");
+    num.className = "num";
+    num.textContent = idx + 1;
 
     var txt = document.createElement("div");
     txt.className = "txt";
@@ -1500,16 +1940,17 @@
     edit.className = "icon edit";
     edit.dataset.tip = "Edit this entry — double-clicking the text works too";
     edit.setAttribute("aria-label", "Edit entry");
-    edit.textContent = "✎";
+    edit.appendChild(icon("pencil"));
     edit.addEventListener("click", function () { startEdit(item.id); });
 
     var del = document.createElement("button");
     del.className = "icon del";
     del.dataset.tip = "Delete this entry — you can Undo";
     del.setAttribute("aria-label", "Delete entry");
-    del.textContent = "✕";
+    del.appendChild(icon("x"));
     del.addEventListener("click", function () { removeItem(item.id); });
 
+    li.appendChild(num);
     li.appendChild(txt);
     li.appendChild(edit);
     li.appendChild(del);
@@ -1627,7 +2068,7 @@
 
       var goto = document.createElement("button");
       goto.className = "mgoto";
-      goto.textContent = "▦";
+      goto.appendChild(icon("grid"));
       goto.dataset.tip = "Open " + monthLabel(key + "-01") + " in the Month view";
       goto.setAttribute("aria-label", "Open " + monthLabel(key + "-01") + " in the Month view");
       goto.addEventListener("click", function () {
@@ -1819,14 +2260,14 @@
 
       var send = document.createElement("button");
       send.className = "wbtn send";
-      send.textContent = "↳";
+      send.appendChild(icon("send"));
       send.dataset.tip = cfg.sendTitle + " (" + shortDow(currentDate) + " " + currentDate + ")";
       send.setAttribute("aria-label", cfg.sendTitle);
       send.addEventListener("click", function () { cfg.send(item.id, currentDate); });
 
       var kill = document.createElement("button");
       kill.className = "wbtn kill";
-      kill.textContent = "✕";
+      kill.appendChild(icon("x"));
       kill.dataset.tip = cfg.killTitle + " — you can Undo";
       kill.setAttribute("aria-label", cfg.killTitle);
       kill.addEventListener("click", function () { cfg.remove(item.id); });
