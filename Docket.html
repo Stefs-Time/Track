@@ -129,6 +129,8 @@
   }
   .saved-pill .dot { color: var(--green); font-size: 13px; transition: text-shadow .3s; }
   .saved-pill.pulse { border-color: rgba(88, 192, 122, 0.5); }
+  .saved-pill.failed { border-color: rgba(224, 112, 112, 0.55); color: var(--text); }
+  .saved-pill.failed .dot { color: var(--danger); }
   .saved-pill.pulse .dot { animation: ping .8s ease; }
   @keyframes ping {
     0% { text-shadow: 0 0 0 rgba(88, 192, 122, 0.7); }
@@ -237,6 +239,11 @@
   .datenav .arrow:active { transform: scale(.92); }
   .datenav .datewrap { position: relative; min-width: 0; }
   .datenav .bigdate {
+    appearance: none;
+    -webkit-appearance: none;
+    border: 0;
+    font: inherit;
+    text-align: center;
     font-family: var(--serif);
     font-size: 38px;
     font-weight: 400;
@@ -264,8 +271,8 @@
     position: absolute;
     inset: 0;
     opacity: 0;
-    cursor: pointer;
     border: none;
+    pointer-events: none; /* the .bigdate button below owns the click */
   }
   .side-actions {
     display: flex;
@@ -574,6 +581,11 @@
   @media (min-width: 861px) {
     .fab { right: 300px; } /* clear of the right rail */
   }
+  /* below 861px the rail stacks under the log, so the FAB floats over the
+     content: reserve a lane for it rather than letting it cover a button */
+  @media (max-width: 860px) {
+    .foot-actions { padding-right: 72px; }
+  }
 
   /* week + month summary line */
   .view-sum {
@@ -859,6 +871,18 @@
   }
   .side section { min-height: 0; flex-shrink: 0; }
   .side .grow { flex: 1 1 auto; min-height: 150px; overflow: hidden; display: flex; flex-direction: column; }
+  /* the list scrolls; a bottom fade stops a half-cut row from reading as a bug */
+  .side .grow.scrolls { position: relative; }
+  .side .grow.scrolls::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 34px;
+    background: linear-gradient(to top, var(--bg), rgba(10, 11, 14, 0));
+    pointer-events: none;
+  }
 
   .daylist {
     list-style: none;
@@ -1032,10 +1056,15 @@
     opacity: 0;
   }
   ul.wishlist .wbtn .ic svg { width: 13px; height: 13px; }
+  @media (pointer: coarse) {
+    /* fingers need more than the 19px the hover-only layout gets away with */
+    ul.wishlist .wbtn { padding: 7px; opacity: 1; }
+  }
   ul.wishlist li:hover .wbtn, ul.wishlist .wbtn:focus-visible { opacity: 1; }
   ul.wishlist .wbtn.send:hover { color: #eef1f5; background: var(--ghost); }
   ul.wishlist .wbtn.kill:hover { color: var(--danger); background: rgba(224, 112, 112, 0.1); }
   .wish-hint { padding: 8px 8px 0; color: var(--faint); font-size: 11px; user-select: none; }
+  .side h2 .qcount { color: var(--silver); font-weight: 600; }
 
   /* backup / data buttons */
   .tools-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
@@ -1285,7 +1314,7 @@
     </section>
 
     <section>
-      <h2>Wishlist <span id="wishCount" style="color:var(--teal)"></span></h2>
+      <h2>Wishlist <span class="qcount" id="wishCount"></span></h2>
       <div class="wish-add">
         <input type="text" id="newWish" placeholder="Needs doing…" autocomplete="off">
         <button id="addWishBtn" data-tip="Add to the wishlist" aria-label="Add to the wishlist">+</button>
@@ -1295,7 +1324,7 @@
     </section>
 
     <section>
-      <h2>Recurring <span id="recCount" style="color:var(--teal)"></span></h2>
+      <h2>Recurring <span class="qcount" id="recCount"></span></h2>
       <div class="wish-add">
         <input type="text" id="newRec" placeholder="Happens often…" autocomplete="off">
         <button id="addRecBtn" data-tip="Add a recurring task" aria-label="Add a recurring task">+</button>
@@ -1323,7 +1352,7 @@
       <div class="datenav">
         <button class="arrow" id="prevDay" data-tip="Previous day — shortcut: ←" aria-label="Previous"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></span></button>
         <div class="datewrap">
-          <div class="bigdate" id="navDate" data-tip="Click to pick a date from the calendar"></div>
+          <button type="button" class="bigdate" id="navDate" data-tip="Pick a date from the calendar" aria-label="Pick a date"></button>
           <input type="date" id="datePick" tabindex="-1">
         </div>
         <button class="arrow" id="nextDay" data-tip="Next day — shortcut: →" aria-label="Next"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></span></button>
@@ -1389,7 +1418,7 @@
     <div class="modal-body">
       <p>Docket is your daily record of work done, in a single file. No installs, no server, no account —
         everything lives in this HTML file and saves automatically on your machine.
-        Not sure what a button does? <b>Hover it</b> — everything has a hint.</p>
+        Not sure what a button does? <b>Hover it</b> — or <kbd>Tab</kbd> to it — and it explains itself.</p>
 
       <h3><span class="tick">●</span> The daily log</h3>
       <ul>
@@ -1465,7 +1494,7 @@
   </div>
 </div>
 
-<div id="toast"></div>
+<div id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
 
 <script>
 (function () {
@@ -1494,13 +1523,34 @@
       return (parsed && typeof parsed === "object" && !Array.isArray(parsed)) ? parsed : {};
     } catch (e) { return {}; }
   }
+  // Every write goes through here: localStorage can be full, or blocked
+  // outright (private windows, file:// with site data disabled). Failing
+  // silently would leave the screen showing work that was never stored.
+  var storageBroken = false;
+  function writeStore(key, value) {
+    try {
+      localStorage.setItem(key, value);
+      if (storageBroken) {
+        storageBroken = false;
+        toast("Saving again — your log is being stored");
+      }
+      pulseSaved();
+      return true;
+    } catch (e) {
+      failSaved();
+      if (!storageBroken) {
+        storageBroken = true;
+        toast("Couldn't save — this browser's storage is full or blocked. Export a backup before closing.");
+      }
+      return false;
+    }
+  }
   function save() {
     // prune empty days so the sidebar stays clean
     Object.keys(data).forEach(function (d) {
       if (!data[d] || data[d].length === 0) delete data[d];
     });
-    localStorage.setItem(STORE_KEY, JSON.stringify(data));
-    pulseSaved();
+    writeStore(STORE_KEY, JSON.stringify(data));
   }
   function newId() {
     return Date.now() + "-" + Math.random().toString(36).slice(2, 7);
@@ -1515,19 +1565,32 @@
     } catch (e) { return []; }
   }
   function saveWishlist() {
-    localStorage.setItem(WISH_KEY, JSON.stringify(wishlist));
-    pulseSaved();
+    writeStore(WISH_KEY, JSON.stringify(wishlist));
   }
   function saveRecurring() {
-    localStorage.setItem(REC_KEY, JSON.stringify(recurring));
-    pulseSaved();
+    writeStore(REC_KEY, JSON.stringify(recurring));
   }
   var pulseTimer;
   function pulseSaved() {
     var p = document.getElementById("savedPill");
+    p.classList.remove("failed");
+    p.firstChild.textContent = "●";
+    p.lastChild.textContent = " Auto-saved locally";
+    p.dataset.tip = "Everything saves to this browser automatically — keep an occasional Export as a backup";
     p.classList.add("pulse");
     clearTimeout(pulseTimer);
     pulseTimer = setTimeout(function () { p.classList.remove("pulse"); }, 900);
+  }
+  // The pill is the only always-visible promise that the data is safe;
+  // when a write fails it has to stop making that promise.
+  function failSaved() {
+    var p = document.getElementById("savedPill");
+    clearTimeout(pulseTimer);
+    p.classList.remove("pulse");
+    p.classList.add("failed");
+    p.firstChild.textContent = "▲";
+    p.lastChild.textContent = " Not saved";
+    p.dataset.tip = "This browser refused to store the last change — export a backup before you close the file";
   }
 
   // ---------- date helpers ----------
@@ -1660,7 +1723,7 @@
 
   function setView(v) {
     view = v;
-    localStorage.setItem(VIEW_KEY, v);
+    try { localStorage.setItem(VIEW_KEY, v); } catch (e) {}
     editingId = null;
     render();
   }
@@ -1708,6 +1771,15 @@
     renderSidebar();
     renderWishlist();
     renderRecurring();
+    markScrollable();
+  }
+
+  // Recent days scrolls once there is enough history; without a cue the
+  // half-visible row at the fold just looks like a clipping bug.
+  function markScrollable() {
+    var ul = $("dayList");
+    var grow = ul.parentNode;
+    grow.classList.toggle("scrolls", ul.scrollHeight > ul.clientHeight + 1);
   }
 
   function renderDay() {
@@ -2060,6 +2132,7 @@
       toggle.addEventListener("click", function () {
         monthOpen[key] = !monthIsOpen(key);
         renderSidebar();
+        markScrollable();
       });
       // dragging a task over a folded month unfolds it
       toggle.addEventListener("dragenter", function () {
@@ -2391,8 +2464,8 @@
     }).join("\n\n");
   }
 
-  function copyText(text, doneMsg) {
-    if (text.trim() === "") { toast("Nothing to copy — the day is empty"); return; }
+  function copyText(text, doneMsg, emptyMsg) {
+    if (text.trim() === "") { toast(emptyMsg || "Nothing to copy"); return; }
     function fallback() {
       var ta = document.createElement("textarea");
       ta.value = text;
@@ -2585,7 +2658,9 @@
         });
         save();
         render();
-        toast("Imported " + added + " entr" + (added === 1 ? "y" : "ies"));
+        toast(added === 0
+          ? "Nothing new — every entry in that backup is already in your log"
+          : "Imported " + added + " item" + (added === 1 ? "" : "s"));
       } catch (e) {
         toast("Import failed — not a valid Docket backup file");
       }
@@ -2637,10 +2712,12 @@
   }
   $("fab").addEventListener("click", focusNewItem);
   function copyView(withHeading) {
+    var noun = view === "week" ? "week" : view === "month" ? "month" : "day";
+    var empty = "Nothing to copy — this " + noun + " has no entries";
     if (withHeading) {
-      copyText(viewAsText(true), (view === "week" ? "Week" : view === "month" ? "Month" : "Day") + " copied to clipboard");
+      copyText(viewAsText(true), noun.charAt(0).toUpperCase() + noun.slice(1) + " copied to clipboard", empty);
     } else {
-      copyText(viewAsText(false), "Entries copied to clipboard");
+      copyText(viewAsText(false), "Entries copied to clipboard", empty);
     }
   }
   $("copyDay").addEventListener("click", function () { copyView(true); });
@@ -2678,15 +2755,37 @@
 
   // ---------- help ----------
   var HELP_KEY = "track.helpseen.v1";
+  var helpOpener = null;
   function openHelp() {
+    helpOpener = document.activeElement;
     $("helpOverlay").classList.add("open");
     $("helpDone").focus();
   }
   function closeHelp() {
     $("helpOverlay").classList.remove("open");
-    localStorage.setItem(HELP_KEY, "1");
-    $("newItem").focus();
+    try { localStorage.setItem(HELP_KEY, "1"); } catch (e) {}
+    // Send focus back where it came from; falling back to the entry box,
+    // which only exists in Day view.
+    var back = helpOpener && document.contains(helpOpener) && helpOpener.offsetParent !== null
+      ? helpOpener
+      : (view === "day" ? $("newItem") : $("helpBtn"));
+    helpOpener = null;
+    if (back) back.focus();
   }
+  // aria-modal="true" is a promise to assistive tech that the rest of the
+  // page is out of reach; without a trap, Tab broke that promise immediately.
+  $("helpOverlay").addEventListener("keydown", function (e) {
+    if (e.key !== "Tab") return;
+    var f = this.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+    var list = [];
+    for (var i = 0; i < f.length; i++) {
+      if (!f[i].disabled && f[i].offsetParent !== null) list.push(f[i]);
+    }
+    if (list.length === 0) return;
+    var first = list[0], last = list[list.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  });
   $("helpBtn").addEventListener("click", openHelp);
   $("helpClose").addEventListener("click", closeHelp);
   $("helpDone").addEventListener("click", closeHelp);
@@ -2726,8 +2825,7 @@
     tipFor = null;
     tip.classList.remove("show");
   }
-  document.addEventListener("mouseover", function (e) {
-    var t = e.target && e.target.closest ? e.target.closest("[data-tip]") : null;
+  function showTip(t) {
     if (t === tipFor) return;
     if (!t) { hideTip(); return; }
     tipFor = t;
@@ -2741,7 +2839,20 @@
     if (y < 8) y = r.bottom + 8;
     tip.style.left = x + "px";
     tip.style.top = y + "px";
+  }
+  document.addEventListener("mouseover", function (e) {
+    showTip(e.target && e.target.closest ? e.target.closest("[data-tip]") : null);
   });
+  // Keyboard parity: the guide promises a hint on everything, so focus
+  // has to raise the same hint the mouse does.
+  document.addEventListener("focusin", function (e) {
+    var el = e.target;
+    if (!el || !el.closest) return;
+    try { if (!el.matches(":focus-visible")) return; } catch (err) {}
+    showTip(el.closest("[data-tip]"));
+  });
+  document.addEventListener("focusout", hideTip);
+  window.addEventListener("resize", markScrollable);
   document.addEventListener("mousedown", hideTip, true);
   document.addEventListener("scroll", hideTip, true);
   document.addEventListener("dragstart", hideTip, true);
