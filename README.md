@@ -23,7 +23,7 @@ Tip: right-click `Docket.html` → *Send to* → *Desktop (create shortcut)* so 
 - **Edit in place** — hover an entry and click the pencil to edit (Save/Cancel), or ✕ to delete.
 - **Undo** — deleting an entry, a wishlist/recurring item, or clearing a whole day pops up an **Undo** button for a few seconds, so nothing is lost to a slipped click.
 - **Keyboard shortcuts** — `←` `→` move between days (weeks/months in those views), `T` jumps to today, `D`/`W`/`M` switch views, `N` starts a new entry, `C` copies the open view, `?` opens the guide.
-- **Hover hints** — every button and control explains itself when you hover over it.
+- **Hover hints** — every button and control explains itself when you hover over it, or when you Tab to it with the keyboard.
 - **Auto-save** — everything is stored in the browser's local storage on your machine, instantly, as you type.
 - **CSV import/export** — bulk-load the month to date from a spreadsheet, or export everything for Excel.
 - **Backup** — Export saves all your data (including wishlist and recurring tasks) to a JSON file; Import merges a backup back in (no duplicates).
