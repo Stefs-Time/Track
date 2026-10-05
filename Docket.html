@@ -193,6 +193,7 @@
     }
     .tabs:has(button:nth-of-type(2).active)::before { transform: translateX(76px); }
     .tabs:has(button:nth-of-type(3).active)::before { transform: translateX(152px); }
+    .tabs:not(:has(button.active))::before { opacity: 0; }
   }
 
   .app { display: flex; align-items: stretch; min-height: calc(100vh - 55px); }
@@ -267,6 +268,9 @@
   }
   .datenav .bigdate:hover { filter: brightness(1.18); }
   .datenav .bigdate:hover::after { -webkit-text-fill-color: #c9d0d9; }
+  .datenav .bigdate:disabled { cursor: default; filter: none; }
+  .datenav .bigdate:disabled::after { content: none; }
+  .datenav .arrow.gone { visibility: hidden; }
   .datenav input[type="date"] {
     position: absolute;
     inset: 0;
@@ -308,7 +312,7 @@
   .logzone { border-radius: var(--radius); }
   .logzone.droptarget { outline: 2px dashed var(--silver); outline-offset: 4px; }
   .daylist button.droptarget { outline: 2px dashed var(--silver); outline-offset: -2px; }
-  .logzone, .weekview, .monthview { animation: viewin .22s ease; }
+  .logzone, .weekview, .monthview, .jobview { animation: viewin .22s ease; }
   @keyframes viewin {
     from { opacity: 0; transform: translateY(4px); }
     to { opacity: 1; transform: translateY(0); }
@@ -424,6 +428,70 @@
   .addcard > button .ic svg { width: 14px; height: 14px; }
   .addcard > button:hover { filter: brightness(1.08); box-shadow: var(--shadow), 0 2px 14px rgba(201, 208, 217, 0.25); }
 
+  /* job box — sticky, so a run of entries all land on the same job */
+  .addcard .jobwrap { position: relative; flex: 0 0 196px; display: flex; min-width: 0; }
+  .jobwrap > .ic {
+    position: absolute;
+    left: 11px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--faint);
+    pointer-events: none;
+    transition: color .15s;
+  }
+  .jobwrap > .ic svg { width: 14px; height: 14px; }
+  .addcard .jobwrap input { padding: 9px 10px 9px 33px; }
+  .addcard .jobwrap.set input, ol.items li.editing .editrow .jobwrap.set input { padding-right: 30px; }
+  .jobwrap input::-webkit-calendar-picker-indicator { opacity: .4; width: 9px; height: 9px; margin: 0; cursor: pointer; }
+  .jobwrap input:hover::-webkit-calendar-picker-indicator { opacity: .8; }
+  .jobwrap.set input::-webkit-calendar-picker-indicator { display: none !important; }
+  .jobwrap.set input { border-color: var(--silver-soft); background: var(--sheet-2); }
+  .jobwrap.set > .ic { color: var(--silver); }
+  .jobclear {
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: none;
+    place-items: center;
+    border: none;
+    background: none;
+    color: var(--faint);
+    padding: 4px;
+    border-radius: 6px;
+  }
+  .jobclear .ic svg { width: 12px; height: 12px; }
+  .jobclear:hover { color: var(--text); background: rgba(255, 255, 255, 0.07); }
+  .jobwrap.set .jobclear { display: grid; }
+  @media (max-width: 600px) {
+    .addcard { flex-wrap: wrap; }
+    .addcard .jobwrap { flex: 1 1 100%; }
+  }
+
+  /* job pill — the job an entry belongs to; click to see all its work */
+  .jobpill {
+    flex-shrink: 1;
+    min-width: 0;
+    max-width: 38%;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    border: 1px solid var(--silver-soft);
+    background: var(--ghost);
+    color: var(--silver);
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.5;
+    border-radius: 999px;
+    padding: 1px 9px 1px 7px;
+    white-space: nowrap;
+  }
+  .jobpill .ic svg { width: 11px; height: 11px; }
+  .jobpill .jn { overflow: hidden; text-overflow: ellipsis; }
+  .jobpill:hover { border-color: var(--silver); color: #eef1f5; background: rgba(201, 208, 217, 0.14); }
+  .wday ul li > span:first-of-type { flex: 1 1 auto; min-width: 0; }
+  .wday ul li .jobpill { align-self: center; font-size: 10.5px; padding: 0 8px 0 6px; }
+
   /* the ledger sheet: ruled rows behind a silver margin line */
   .sheet {
     position: relative;
@@ -469,6 +537,14 @@
     transition: color .15s;
   }
   ol.items li.entry:hover .num { color: #eef1f5; }
+  ol.items li.entry .body {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  ol.items li.entry .body .jobpill { max-width: 45%; }
   ol.items li.entry .txt {
     flex: 1;
     white-space: pre-wrap;
@@ -520,7 +596,9 @@
     margin-bottom: 10px;
   }
   ol.items li.editing input:focus { outline: none; border-color: var(--silver); box-shadow: 0 0 0 3px var(--ghost); }
-  .editrow { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .editrow { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 10px; }
+  ol.items li.editing .editrow input { margin: 0; padding: 7px 10px 7px 32px; }
+  .editrow .jobwrap { position: relative; display: flex; min-width: 0; }
   .editrow button {
     border: none;
     border-radius: 8px;
@@ -608,7 +686,7 @@
   .mlegend i.l3 { background: rgba(222, 228, 235, 0.38); border-color: rgba(222, 228, 235, 0.46); }
 
   /* week view — ruled day sections */
-  .weekview { display: flex; flex-direction: column; gap: 10px; }
+  .weekview, .jobview { display: flex; flex-direction: column; gap: 10px; }
   .wday {
     display: flex;
     gap: 14px;
@@ -715,7 +793,8 @@
     padding: 14px;
   }
   .monthview .view-sum { margin: 2px 2px 12px; }
-  .weekview .view-sum { margin: -2px 0 0; }
+  .weekview .view-sum, .jobview .view-sum { margin: -2px 0 0; }
+  .jobview .stats { margin-bottom: 4px; }
   .mgrid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
@@ -1064,6 +1143,82 @@
   ul.wishlist .wbtn.send:hover { color: #eef1f5; background: var(--ghost); }
   ul.wishlist .wbtn.kill:hover { color: var(--danger); background: rgba(224, 112, 112, 0.1); }
   .wish-hint { padding: 8px 8px 0; color: var(--faint); font-size: 11px; user-select: none; }
+
+  /* jobs list */
+  ul.joblist {
+    list-style: none;
+    margin: 0;
+    padding: 0 2px;
+    max-height: 214px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--line) transparent;
+  }
+  ul.joblist li { display: flex; align-items: center; gap: 1px; border-radius: 7px; }
+  ul.joblist li + li { margin-top: 2px; }
+  ul.joblist li.row:hover { background: rgba(255, 255, 255, 0.05); }
+  ul.joblist .jobrow {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: none;
+    background: none;
+    color: var(--muted);
+    font-size: 12.5px;
+    text-align: left;
+    padding: 6px 7px;
+    border-radius: 7px;
+  }
+  ul.joblist .jobrow > .ic { color: var(--faint); }
+  ul.joblist .jobrow > .ic svg { width: 13px; height: 13px; }
+  ul.joblist .jobrow .jn { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  ul.joblist li.row:hover .jobrow { color: var(--text); }
+  ul.joblist .count {
+    flex-shrink: 0;
+    color: var(--muted);
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+    background: rgba(255, 255, 255, 0.07);
+    border-radius: 20px;
+    padding: 1px 7px;
+  }
+  ul.joblist li.current { background: var(--ghost); box-shadow: inset 2.5px 0 0 var(--silver); }
+  ul.joblist li.current .jobrow { color: var(--text); font-weight: 600; }
+  ul.joblist li.current .jobrow > .ic { color: var(--silver); }
+  ul.joblist li.current .count { color: #eef1f5; background: rgba(222, 228, 235, 0.14); }
+  ul.joblist .wbtn {
+    display: none;
+    place-items: center;
+    border: none;
+    background: none;
+    color: var(--faint);
+    padding: 3px;
+    border-radius: 6px;
+    opacity: 0;
+  }
+  ul.joblist .wbtn .ic svg { width: 13px; height: 13px; }
+  ul.joblist li:hover .wbtn, ul.joblist li:focus-within .wbtn { display: grid; opacity: 1; }
+  ul.joblist li.row:hover .count, ul.joblist li.row:focus-within .count { display: none; }
+  ul.joblist .wbtn.ren:hover { color: #eef1f5; background: var(--ghost); }
+  ul.joblist .wbtn.kill:hover { color: var(--danger); background: rgba(224, 112, 112, 0.1); }
+  ul.joblist .jobedit {
+    flex: 1;
+    min-width: 0;
+    font: inherit;
+    font-size: 12.5px;
+    color: var(--text);
+    background: var(--sheet);
+    border: 1px solid var(--silver);
+    border-radius: 7px;
+    padding: 5px 9px;
+    box-shadow: 0 0 0 3px var(--ghost);
+  }
+  ul.joblist .jobedit:focus { outline: none; }
+  @media (pointer: coarse) {
+    ul.joblist .wbtn { display: grid; padding: 7px; opacity: 1; }
+  }
   .side h2 .qcount { color: var(--silver); font-weight: 600; }
 
   /* backup / data buttons */
@@ -1284,6 +1439,15 @@
     .stat.wide { flex: 1 1 100%; border-left: none; border-top: 1px solid var(--line-soft); }
     .keys { display: none; }
   }
+  /* phones: an entry's job pill drops under its text instead of squeezing it */
+  @media (max-width: 600px) {
+    ol.items li.entry .body { flex-direction: column; align-items: flex-start; gap: 4px; }
+    ol.items li.entry .txt { align-self: stretch; }
+    ol.items li.entry .body .jobpill { max-width: 100%; }
+    .wday ul li { flex-wrap: wrap; }
+    .wday ul li > span:first-of-type { flex-basis: calc(100% - 20px); }
+    .wday ul li .jobpill { margin: 1px 0 2px 14px; max-width: calc(100% - 14px); }
+  }
 </style>
 </head>
 <body>
@@ -1311,6 +1475,16 @@
     <section class="grow">
       <h2>Recent days</h2>
       <ul class="daylist" id="dayList"></ul>
+    </section>
+
+    <section>
+      <h2>Jobs <span class="qcount" id="jobCount"></span></h2>
+      <div class="wish-add">
+        <input type="text" id="newJobSide" placeholder="New job…" autocomplete="off" maxlength="60" aria-label="New job name">
+        <button id="addJobBtn" data-tip="Add a job" aria-label="Add a job">+</button>
+      </div>
+      <ul class="joblist" id="jobList"></ul>
+      <div class="wish-hint">Click a job to see every entry logged against it</div>
     </section>
 
     <section>
@@ -1353,13 +1527,14 @@
         <button class="arrow" id="prevDay" data-tip="Previous day — shortcut: ←" aria-label="Previous"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></span></button>
         <div class="datewrap">
           <button type="button" class="bigdate" id="navDate" data-tip="Pick a date from the calendar" aria-label="Pick a date"></button>
-          <input type="date" id="datePick" tabindex="-1">
+          <input type="date" id="datePick" tabindex="-1" aria-label="Date">
         </div>
         <button class="arrow" id="nextDay" data-tip="Next day — shortcut: →" aria-label="Next"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></span></button>
       </div>
       <div class="side-actions">
         <button id="copyDay" data-tip="Date heading + bulleted list — ready to paste into an email or invoice. Shortcut: C"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span><span id="copyDayLabel">Copy Day to Clipboard</span></button>
         <button id="copyPlain" data-tip="Just the lines, one per line — no date heading"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg></span>Copy Items Only</button>
+        <button id="logJobBtn" style="display:none" data-tip="Set this as the job and start logging on the open day — shortcut: N"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span>Log Work on This Job</button>
         <button id="todayBtn" data-tip="Back to today — shortcut: T"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M12 14h.01"/></svg></span>Jump to Today</button>
       </div>
     </section>
@@ -1376,11 +1551,16 @@
       </div>
 
       <div class="addcard">
+        <div class="jobwrap" id="jobWrap" data-tip="Job — entries you add go against it, and it stays set so you can log several in a row. Shortcut: J">
+          <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span>
+          <input type="text" id="newJob" list="jobOptions" placeholder="Job (optional)" autocomplete="off" maxlength="60" aria-label="Job for new entries (optional)">
+          <button type="button" class="jobclear" id="jobClear" data-tip="Stop logging against this job" aria-label="Clear job"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></span></button>
+        </div>
         <div class="inwrap">
-          <input type="text" id="newItem" placeholder="What did you do?" autocomplete="off">
+          <input type="text" id="newItem" placeholder="What did you do?" autocomplete="off" aria-label="What did you do?">
           <kbd class="enterhint">Enter ↵</kbd>
         </div>
-        <button id="addBtn"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>Add</button>
+        <button id="addBtn" aria-label="Add entry"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>Add</button>
       </div>
 
       <div class="sheet" id="sheet"><ol class="items" id="itemList"></ol></div>
@@ -1398,12 +1578,15 @@
 
     <div class="weekview" id="weekView" style="display:none"></div>
 
+    <div class="jobview" id="jobView" style="display:none"></div>
+    <datalist id="jobOptions"></datalist>
+
     <div class="monthview" id="monthView" style="display:none">
       <div class="view-sum"><span id="monthSum"></span><span class="mlegend" aria-hidden="true">less <i></i><i class="l1"></i><i class="l2"></i><i class="l3"></i> more</span></div>
       <div class="mgrid" id="monthGrid"></div>
     </div>
 
-    <div class="keys" aria-hidden="true"><kbd>←</kbd><kbd>→</kbd> move &nbsp;·&nbsp; <kbd>T</kbd> today &nbsp;·&nbsp; <kbd>D</kbd><kbd>W</kbd><kbd>M</kbd> views &nbsp;·&nbsp; <kbd>N</kbd> new entry &nbsp;·&nbsp; <kbd>C</kbd> copy &nbsp;·&nbsp; <kbd>?</kbd> guide</div>
+    <div class="keys" aria-hidden="true"><kbd>←</kbd><kbd>→</kbd> move &nbsp;·&nbsp; <kbd>T</kbd> today &nbsp;·&nbsp; <kbd>D</kbd><kbd>W</kbd><kbd>M</kbd> views &nbsp;·&nbsp; <kbd>N</kbd> new entry &nbsp;·&nbsp; <kbd>J</kbd> job &nbsp;·&nbsp; <kbd>C</kbd> copy &nbsp;·&nbsp; <kbd>?</kbd> guide</div>
   </main>
 </div>
 
@@ -1430,6 +1613,15 @@
         <li><b>Recent Days</b> in the sidebar lists every day that has entries, grouped by month — click a month name to fold or unfold it, and the <b>▦</b> icon opens that month in the calendar.</li>
       </ul>
 
+      <h3><span class="tick">●</span> Jobs — group work under one heading</h3>
+      <ul>
+        <li>Doing several things for the same client, site or project? Type its name in the <b>Job</b> box left of the entry box (or pick one from its list) — every entry you add goes against that job.</li>
+        <li>The job <b>stays set</b>, so you can log a run of entries in a row. Click its <b>✕</b> (or empty the box) to stop.</li>
+        <li>Entries show their job as a small pill — <b>click the pill</b>, or the job in the sidebar's <b>Jobs</b> list, to open the <b>Job view</b>: every entry on that job, across every day, with totals.</li>
+        <li>In the Job view, <b>Copy Job</b> gives you the job name plus each day's work — ready for an invoice.</li>
+        <li>Change an entry's job with the <b>✎ pencil</b>. Rename or delete a job from the sidebar; deleting a job keeps its entries.</li>
+      </ul>
+
       <h3><span class="tick">●</span> Copy &amp; paste</h3>
       <ul>
         <li><b>Copy Day to Clipboard</b> copies the date plus a bulleted list — ready to paste into an email, timesheet or invoice.</li>
@@ -1448,7 +1640,8 @@
       <ul>
         <li><kbd>←</kbd> <kbd>→</kbd> — previous / next day (steps by week or month in those views)</li>
         <li><kbd>T</kbd> — jump to today &nbsp;·&nbsp; <kbd>D</kbd> <kbd>W</kbd> <kbd>M</kbd> — switch to Day, Week or Month view</li>
-        <li><kbd>N</kbd> — start typing a new entry &nbsp;·&nbsp; <kbd>C</kbd> — copy the open day, week or month</li>
+        <li><kbd>N</kbd> — start typing a new entry &nbsp;·&nbsp; <kbd>J</kbd> — pick the job for new entries</li>
+        <li><kbd>C</kbd> — copy the open day, week, month or job</li>
         <li><kbd>?</kbd> — open this guide &nbsp;·&nbsp; <kbd>Esc</kbd> — close it</li>
       </ul>
 
@@ -1467,12 +1660,12 @@
       </ul>
 
       <h3><span class="tick">●</span> CSV import / export (Excel)</h3>
-      <p>Bulk-load the month to date from a spreadsheet. One entry per row: date first, task second.</p>
-      <pre>Date,Task
-2026-07-01,"Installed blinds, lounge"
-02/07/2026,Quoted new office fit-out</pre>
+      <p>Bulk-load the month to date from a spreadsheet. One entry per row: date first, task second, and optionally a job third.</p>
+      <pre>Date,Task,Job
+2026-07-01,"Installed blinds, lounge",Smith House
+02/07/2026,Quoted new office fit-out,</pre>
       <ul>
-        <li>The header row is optional. Dates can be <b>2026-07-01</b> or <b>01/07/2026</b> style (day-first).</li>
+        <li>The header row is optional — but to import jobs, include it with <b>Job</b> as the third heading. Dates can be <b>2026-07-01</b> or <b>01/07/2026</b> style (day-first).</li>
         <li>Comma, semicolon or tab delimited — detected automatically.</li>
         <li>Re-importing is safe: duplicates and unreadable rows are skipped and reported.</li>
         <li><b>Export CSV</b> writes the same format, so you can export → edit in Excel → import back.</li>
@@ -1481,7 +1674,7 @@
       <h3><span class="tick">●</span> Backups &amp; where your data lives</h3>
       <ul>
         <li>Data is stored by <b>this browser, on this computer</b>. Stick to one browser (e.g. always Edge).</li>
-        <li><b>Export JSON</b> saves everything — including the wishlist — to a file; <b>Import JSON</b> merges it back in. Use it to move to another browser or PC, or as a safety net.</li>
+        <li><b>Export JSON</b> saves everything — including jobs and the wishlist — to a file; <b>Import JSON</b> merges it back in. Use it to move to another browser or PC, or as a safety net.</li>
         <li>Clearing the browser's site data erases the log — keep an occasional export.</li>
       </ul>
 
@@ -1505,10 +1698,13 @@
   var WISH_KEY = "track.wishlist.v1";
   var REC_KEY = "track.recurring.v1";
   var VIEW_KEY = "track.view.v1";
-  var data = load();          // { "YYYY-MM-DD": [{id, text}, ...] }
+  var JOB_KEY = "track.jobs.v1";
+  var data = load();          // { "YYYY-MM-DD": [{id, text, job?}, ...] } — job is a job id
   var wishlist = loadList(WISH_KEY);  // [{id, text}, ...]
   var recurring = loadList(REC_KEY);  // [{id, text}, ...]
+  var jobs = loadList(JOB_KEY);       // [{id, text}, ...] — text is the job's name
   var currentDate = todayISO();
+  var currentJob = null;      // job id shown by the Job view
   var editingId = null;
   var view = (function () {
     var v = localStorage.getItem(VIEW_KEY);
@@ -1569,6 +1765,58 @@
   }
   function saveRecurring() {
     writeStore(REC_KEY, JSON.stringify(recurring));
+  }
+  function saveJobs() {
+    writeStore(JOB_KEY, JSON.stringify(jobs));
+  }
+
+  // ---------- jobs ----------
+  // A job groups entries across days (a client, site or project). Entries
+  // point at a job by id, so renaming a job never touches the log itself.
+  var JOB_MAX = 60;
+  function cleanJobName(name) {
+    return String(name || "").replace(/\s+/g, " ").trim().slice(0, JOB_MAX);
+  }
+  function jobById(id) {
+    if (!id) return null;
+    for (var i = 0; i < jobs.length; i++) if (jobs[i].id === id) return jobs[i];
+    return null;
+  }
+  function jobByName(name) {
+    var n = cleanJobName(name).toLowerCase();
+    if (n === "") return null;
+    for (var i = 0; i < jobs.length; i++) if (jobs[i].text.toLowerCase() === n) return jobs[i];
+    return null;
+  }
+  // Name → id, creating the job the first time a name is used ("" → null).
+  function ensureJob(name) {
+    var clean = cleanJobName(name);
+    if (clean === "") return null;
+    var found = jobByName(clean);
+    if (found) return found.id;
+    var job = { id: newId(), text: clean };
+    jobs.push(job);
+    saveJobs();
+    return job.id;
+  }
+  function jobName(entry) {
+    var j = entry && jobById(entry.job);
+    return j ? j.text : "";
+  }
+  // One pass over the log: per job, entry count, days worked, first/last day.
+  function jobStats() {
+    var stats = {};
+    Object.keys(data).forEach(function (d) {
+      (data[d] || []).forEach(function (it) {
+        if (!it.job || !jobById(it.job)) return;
+        var st = stats[it.job] || (stats[it.job] = { n: 0, days: [], first: d, last: d });
+        st.n++;
+        if (st.days.indexOf(d) === -1) st.days.push(d);
+        if (d < st.first) st.first = d;
+        if (d > st.last) st.last = d;
+      });
+    });
+    return stats;
   }
   var pulseTimer;
   function pulseSaved() {
@@ -1679,6 +1927,7 @@
     pencil: '<path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>',
     x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
     send: '<polyline points="15 10 20 15 15 20"/><path d="M4 4v7a4 4 0 0 0 4 4h12"/>',
+    job: '<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>',
     grid: '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>'
   };
   function icon(name) {
@@ -1686,6 +1935,33 @@
     s.className = "ic";
     s.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ICONS[name] + '</svg>';
     return s;
+  }
+
+  // The small job tag on an entry; clicking it opens everything on that job.
+  function jobPill(entry) {
+    var j = jobById(entry.job);
+    if (!j) return null;
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "jobpill";
+    b.appendChild(icon("job"));
+    var n = document.createElement("span");
+    n.className = "jn";
+    n.textContent = j.text;
+    b.appendChild(n);
+    b.dataset.tip = "Job: " + j.text + " — click to see all its work";
+    b.setAttribute("aria-label", "Open job " + j.text);
+    b.addEventListener("click", function (e) {
+      e.stopPropagation();
+      openJob(j.id);
+    });
+    return b;
+  }
+
+  function openJob(id) {
+    if (!jobById(id)) return;
+    currentJob = id;
+    setView("job");
   }
 
   function items() {
@@ -1723,15 +1999,16 @@
 
   function setView(v) {
     view = v;
-    try { localStorage.setItem(VIEW_KEY, v); } catch (e) {}
+    if (v !== "job") { try { localStorage.setItem(VIEW_KEY, v); } catch (e) {} }
     editingId = null;
     render();
   }
 
   function render() {
     hideTip();
+    if (view === "job" && !jobById(currentJob)) view = "day"; // its job was deleted
     $("datePick").value = currentDate;
-    var renderKey = view + "|" + currentDate;
+    var renderKey = view + "|" + (view === "job" ? currentJob : currentDate);
     staggerNext = renderKey !== lastRenderKey;
     lastRenderKey = renderKey;
 
@@ -1744,9 +2021,21 @@
     $("prevDay").dataset.tip = "Previous " + unit + " — shortcut: ←";
     $("nextDay").dataset.tip = "Next " + unit + " — shortcut: →";
     $("todayBtn").disabled = currentDate === todayISO();
+    var inJob = view === "job";
+    $("prevDay").classList.toggle("gone", inJob);
+    $("nextDay").classList.toggle("gone", inJob);
+    $("prevDay").disabled = $("nextDay").disabled = inJob;
+    $("navDate").disabled = inJob;
+    $("navDate").dataset.tip = inJob ? "Every entry logged against this job" : "Pick a date from the calendar";
+    $("todayBtn").style.display = inJob ? "none" : "";
+    $("logJobBtn").style.display = inJob ? "" : "none";
 
     // The heading names the view; the navigator below it owns the date.
-    if (view === "week") {
+    if (inJob) {
+      $("dayTitle").textContent = "Job";
+      $("navDate").textContent = jobById(currentJob).text;
+      $("copyDayLabel").textContent = "Copy Job to Clipboard";
+    } else if (view === "week") {
       $("dayTitle").textContent = "Weekly Overview";
       $("navDate").textContent = weekLabel(currentDate).replace("Week of ", "");
       $("copyDayLabel").textContent = "Copy Week to Clipboard";
@@ -1763,12 +2052,15 @@
     $("logPanel").style.display = view === "day" ? "" : "none";
     $("weekView").style.display = view === "week" ? "" : "none";
     $("monthView").style.display = view === "month" ? "" : "none";
+    $("jobView").style.display = inJob ? "" : "none";
 
     if (view === "day") renderDay();
     if (view === "week") renderWeek();
     if (view === "month") renderMonth();
+    if (inJob) renderJob();
 
     renderSidebar();
+    renderJobs();
     renderWishlist();
     renderRecurring();
     markScrollable();
@@ -1893,7 +2185,11 @@
           var ul = document.createElement("ul");
           list.forEach(function (it) {
             var li = document.createElement("li");
-            li.textContent = it.text;
+            var t = document.createElement("span");
+            t.textContent = it.text;
+            li.appendChild(t);
+            var pill = jobPill(it);
+            if (pill) li.appendChild(pill);
             ul.appendChild(li);
           });
           main.appendChild(ul);
@@ -1995,6 +2291,116 @@
     }
   }
 
+  // Everything logged against one job, oldest day first — the order an
+  // invoice reads in.
+  function renderJob() {
+    var wrap = $("jobView");
+    wrap.innerHTML = "";
+    var job = jobById(currentJob);
+    var st = jobStats()[currentJob] || { n: 0, days: [], first: null, last: null };
+    var days = st.days.slice().sort();
+
+    var stats = document.createElement("div");
+    stats.className = "stats";
+    function stat(value, label, tipText) {
+      var el = document.createElement("div");
+      el.className = "stat";
+      el.dataset.tip = tipText;
+      var sn = document.createElement("span");
+      sn.className = "sn";
+      sn.textContent = value;
+      var sl = document.createElement("span");
+      sl.className = "sl";
+      sl.textContent = label;
+      el.appendChild(sn);
+      el.appendChild(sl);
+      stats.appendChild(el);
+    }
+    function shortDate(iso) {
+      var dd = dateObj(iso);
+      return dd.getDate() + " " + MON[dd.getMonth()];
+    }
+    stat(st.n, "Entries", "Entries logged against " + job.text);
+    stat(days.length, days.length === 1 ? "Day worked" : "Days worked", "Days with at least one entry on this job");
+    stat(st.last ? shortDate(st.last) : "—", "Last logged",
+      st.last ? "Most recent work: " + prettyDate(st.last) : "Nothing logged yet");
+    wrap.appendChild(stats);
+
+    if (days.length === 0) {
+      var empty = document.createElement("div");
+      empty.className = "empty";
+      empty.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ICONS.job + '</svg>';
+      var e1 = document.createElement("p");
+      e1.className = "e1";
+      e1.textContent = "Nothing logged against this job yet";
+      var e2 = document.createElement("p");
+      e2.className = "e2";
+      e2.textContent = "Click “Log Work on This Job” above — new entries will go against it.";
+      empty.appendChild(e1);
+      empty.appendChild(e2);
+      wrap.appendChild(empty);
+      return;
+    }
+
+    var sum = document.createElement("div");
+    sum.className = "view-sum";
+    var sumText = document.createElement("span");
+    sumText.textContent = st.first === st.last ? prettyDate(st.first)
+      : prettyDate(st.first) + " – " + prettyDate(st.last);
+    sum.appendChild(sumText);
+    wrap.appendChild(sum);
+
+    days.forEach(function (d) {
+      var list = (data[d] || []).filter(function (it) { return it.job === currentJob; });
+      var dd = dateObj(d);
+      var card = document.createElement("div");
+      card.className = "wday" + (d === todayISO() ? " today" : "");
+
+      var chip = document.createElement("div");
+      chip.className = "wchip";
+      chip.dataset.tip = "Open " + prettyDate(d);
+      chip.addEventListener("click", function () { currentDate = d; setView("day"); });
+      var wd = document.createElement("span");
+      wd.className = "wd";
+      wd.textContent = MON[dd.getMonth()];
+      var wn = document.createElement("span");
+      wn.className = "wn";
+      wn.textContent = dd.getDate();
+      chip.appendChild(wd);
+      chip.appendChild(wn);
+      card.appendChild(chip);
+
+      var main = document.createElement("div");
+      main.className = "wday-main";
+      var head = document.createElement("div");
+      head.className = "wday-head";
+      var btn = document.createElement("button");
+      btn.textContent = LONGDOW[dd.getDay()];
+      btn.dataset.tip = "Open " + prettyDate(d);
+      btn.addEventListener("click", function () { currentDate = d; setView("day"); });
+      head.appendChild(btn);
+      var sub = document.createElement("span");
+      sub.className = "wsub";
+      sub.textContent = dd.getDate() + " " + MON[dd.getMonth()] + " " + dd.getFullYear();
+      head.appendChild(sub);
+      var count = document.createElement("span");
+      count.className = "count";
+      count.textContent = list.length;
+      head.appendChild(count);
+      main.appendChild(head);
+
+      var ul = document.createElement("ul");
+      list.forEach(function (it) {
+        var li = document.createElement("li");
+        li.textContent = it.text;
+        ul.appendChild(li);
+      });
+      main.appendChild(ul);
+      card.appendChild(main);
+      wrap.appendChild(card);
+    });
+  }
+
   function buildEntry(item, idx) {
     var li = document.createElement("li");
     li.className = "entry";
@@ -2022,8 +2428,14 @@
     del.appendChild(icon("x"));
     del.addEventListener("click", function () { removeItem(item.id); });
 
+    var body = document.createElement("div");
+    body.className = "body";
+    body.appendChild(txt);
+    var pill = jobPill(item);
+    if (pill) body.appendChild(pill);
+
     li.appendChild(num);
-    li.appendChild(txt);
+    li.appendChild(body);
     li.appendChild(edit);
     li.appendChild(del);
     return li;
@@ -2036,25 +2448,50 @@
     var input = document.createElement("input");
     input.type = "text";
     input.value = item.text;
+    input.setAttribute("aria-label", "Entry text");
+
+    var jobWrap = document.createElement("div");
+    jobWrap.className = "jobwrap";
+    jobWrap.appendChild(icon("job"));
+    var jobInput = document.createElement("input");
+    jobInput.type = "text";
+    jobInput.setAttribute("list", "jobOptions");
+    jobInput.maxLength = JOB_MAX;
+    jobInput.placeholder = "No job";
+    jobInput.autocomplete = "off";
+    jobInput.value = jobName(item);
+    jobInput.setAttribute("aria-label", "Job for this entry");
+    jobWrap.dataset.tip = "The job this entry belongs to — pick one, type a new name, or leave empty";
+    jobWrap.appendChild(jobInput);
 
     function commit() {
       var v = input.value.trim();
       editingId = null;
       if (v === "") { removeItem(item.id); return; }
-      if (v !== item.text) { item.text = v; save(); }
+      var changed = false;
+      if (v !== item.text) { item.text = v; changed = true; }
+      var jid = ensureJob(jobInput.value);
+      if ((item.job || null) !== jid) {
+        if (jid) item.job = jid; else delete item.job;
+        changed = true;
+      }
+      if (changed) save();
       render();
     }
     function cancel() {
       editingId = null;
       render();
     }
-    input.addEventListener("keydown", function (e) {
-      if (e.key === "Enter") commit();
-      if (e.key === "Escape") cancel();
+    [input, jobInput].forEach(function (el) {
+      el.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") commit();
+        if (e.key === "Escape") cancel();
+      });
     });
 
     var row = document.createElement("div");
     row.className = "editrow";
+    row.appendChild(jobWrap);
     var saveBtn = document.createElement("button");
     saveBtn.className = "save";
     saveBtn.textContent = "Save";
@@ -2188,6 +2625,180 @@
         ul.appendChild(li);
       });
     });
+  }
+
+  // ---------- jobs sidebar ----------
+  var renamingJob = null;
+
+  // Most recently worked jobs first; jobs with nothing logged sit at the end.
+  function renderJobs() {
+    var stats = jobStats();
+    $("jobCount").textContent = jobs.length ? "· " + jobs.length : "";
+
+    var opts = $("jobOptions");
+    opts.innerHTML = "";
+    var sorted = jobs.slice().sort(function (a, b) {
+      var la = stats[a.id] ? stats[a.id].last : "", lb = stats[b.id] ? stats[b.id].last : "";
+      if (la !== lb) return la < lb ? 1 : -1;
+      return a.text.localeCompare(b.text);
+    });
+    sorted.forEach(function (j) {
+      var o = document.createElement("option");
+      o.value = j.text;
+      opts.appendChild(o);
+    });
+
+    var ul = $("jobList");
+    ul.innerHTML = "";
+    if (jobs.length === 0) {
+      var li0 = document.createElement("li");
+      var span = document.createElement("span");
+      span.className = "nothing";
+      span.textContent = "No jobs yet — type one in the Job box";
+      li0.appendChild(span);
+      ul.appendChild(li0);
+      return;
+    }
+
+    sorted.forEach(function (j) {
+      var st = stats[j.id];
+      var li = document.createElement("li");
+      li.className = "row" + (view === "job" && currentJob === j.id ? " current" : "");
+
+      if (renamingJob === j.id) {
+        var input = document.createElement("input");
+        input.type = "text";
+        input.className = "jobedit";
+        input.value = j.text;
+        input.maxLength = JOB_MAX;
+        input.setAttribute("aria-label", "Rename job " + j.text);
+        var done = false;
+        var finish = function (keep) {
+          if (done) return;
+          done = true;
+          renamingJob = null;
+          if (keep) renameJob(j.id, input.value);
+          render();
+        };
+        input.addEventListener("keydown", function (e) {
+          if (e.key === "Enter") { e.preventDefault(); finish(true); }
+          if (e.key === "Escape") { e.preventDefault(); finish(false); }
+        });
+        input.addEventListener("blur", function () { finish(true); });
+        li.appendChild(input);
+        ul.appendChild(li);
+        setTimeout(function () { input.focus(); input.select(); }, 0);
+        return;
+      }
+
+      var row = document.createElement("button");
+      row.className = "jobrow";
+      row.appendChild(icon("job"));
+      var name = document.createElement("span");
+      name.className = "jn";
+      name.textContent = j.text;
+      row.appendChild(name);
+      if (st) {
+        var count = document.createElement("span");
+        count.className = "count";
+        count.textContent = st.n;
+        row.appendChild(count);
+      }
+      row.dataset.tip = st
+        ? st.n + " entr" + (st.n === 1 ? "y" : "ies") + " over " + st.days.length + " day" + (st.days.length === 1 ? "" : "s") + " — click to see them all"
+        : "Nothing logged on " + j.text + " yet — click to open it";
+      row.setAttribute("aria-label", "Open job " + j.text + (st ? ", " + st.n + " entries" : ""));
+      row.addEventListener("click", function () { openJob(j.id); });
+
+      var ren = document.createElement("button");
+      ren.className = "wbtn ren";
+      ren.appendChild(icon("pencil"));
+      ren.dataset.tip = "Rename this job";
+      ren.setAttribute("aria-label", "Rename job " + j.text);
+      ren.addEventListener("click", function () {
+        renamingJob = j.id;
+        renderJobs();
+      });
+
+      var kill = document.createElement("button");
+      kill.className = "wbtn kill";
+      kill.appendChild(icon("x"));
+      kill.dataset.tip = "Delete this job — its entries stay in the log. You can Undo";
+      kill.setAttribute("aria-label", "Delete job " + j.text);
+      kill.addEventListener("click", function () { removeJob(j.id); });
+
+      li.appendChild(row);
+      li.appendChild(ren);
+      li.appendChild(kill);
+      ul.appendChild(li);
+    });
+  }
+
+  function addJobFromSide() {
+    var input = $("newJobSide");
+    var name = cleanJobName(input.value);
+    if (name === "") return;
+    if (jobByName(name)) {
+      toast("“" + jobByName(name).text + "” is already a job");
+    } else {
+      ensureJob(name);
+      toast("Job added — pick it in the Job box to log against it");
+    }
+    input.value = "";
+    renderJobs();
+    input.focus();
+  }
+
+  function renameJob(id, name) {
+    var j = jobById(id);
+    var clean = cleanJobName(name);
+    if (!j || clean === "" || clean === j.text) return;
+    var other = jobByName(clean);
+    if (other && other.id !== id) { toast("There's already a job called “" + other.text + "”"); return; }
+    var wasActive = jobByName($("newJob").value) === j;
+    j.text = clean;
+    saveJobs();
+    if (wasActive) setJobBox(clean);
+  }
+
+  function removeJob(id) {
+    var i = jobs.findIndex(function (j) { return j.id === id; });
+    if (i === -1) return;
+    var gone = jobs.splice(i, 1)[0];
+    var touched = [];
+    Object.keys(data).forEach(function (d) {
+      (data[d] || []).forEach(function (it) {
+        if (it.job === id) { touched.push(it); delete it.job; }
+      });
+    });
+    // the Job box shouldn't keep offering a job that no longer exists
+    if (cleanJobName($("newJob").value).toLowerCase() === gone.text.toLowerCase()) setJobBox("");
+    saveJobs();
+    save();
+    render();
+    toast("Job deleted" + (touched.length ? " — its " + touched.length + " entr" + (touched.length === 1 ? "y stays" : "ies stay") + " in the log" : ""), function () {
+      jobs.splice(Math.min(i, jobs.length), 0, gone);
+      touched.forEach(function (it) { it.job = gone.id; });
+      saveJobs();
+      save();
+      render();
+    });
+  }
+
+  // The Job box above the log: sticky, so a run of entries share a job.
+  function setJobBox(name) {
+    $("newJob").value = name;
+    syncJobBox();
+  }
+  function syncJobBox() {
+    var v = cleanJobName($("newJob").value);
+    var wrap = $("jobWrap");
+    wrap.classList.toggle("set", v !== "");
+    var known = jobByName(v);
+    wrap.dataset.tip = v === ""
+      ? "Job — entries you add go against it, and it stays set so you can log several in a row. Shortcut: J"
+      : (known ? "New entries go against “" + known.text + "”" : "New job “" + v + "” — created when you add an entry") +
+        " · ✕ to stop";
   }
 
   // ---------- wishlist & recurring ----------
@@ -2410,7 +3021,13 @@
     var input = $("newItem");
     var v = input.value.trim();
     if (v === "") return;
-    items().push({ id: newId(), text: v });
+    var entry = { id: newId(), text: v };
+    var jid = ensureJob($("newJob").value);
+    if (jid) {
+      entry.job = jid;
+      setJobBox(jobById(jid).text); // tidy the box to the job's canonical name
+    }
+    items().push(entry);
     input.value = "";
     save();
     render();
@@ -2436,9 +3053,14 @@
     });
   }
 
-  function dayAsText(iso, withHeading) {
-    var list = data[iso] || [];
-    var lines = list.map(function (it) { return (withHeading ? "- " : "") + it.text; });
+  // Entries carry their job in brackets — except in the Job view, where
+  // every line belongs to the job named in the heading.
+  function dayAsText(iso, withHeading, onlyJob) {
+    var list = (data[iso] || []).filter(function (it) { return !onlyJob || it.job === onlyJob; });
+    var lines = list.map(function (it) {
+      var j = onlyJob ? "" : jobName(it);
+      return (withHeading ? "- " : "") + it.text + (j ? " (" + j + ")" : "");
+    });
     if (withHeading) lines.unshift(prettyDate(iso), "");
     return lines.join("\n");
   }
@@ -2446,6 +3068,14 @@
   // What the copy buttons copy follows the active view: day, week, or month.
   function viewAsText(withHeading) {
     var days;
+    if (view === "job") {
+      var st = jobStats()[currentJob];
+      if (!st) return "";
+      var body = st.days.slice().sort().map(function (iso) {
+        return dayAsText(iso, withHeading, currentJob);
+      }).join(withHeading ? "\n\n" : "\n");
+      return withHeading ? jobById(currentJob).text + "\n\n" + body : body;
+    }
     if (view === "week") {
       days = [];
       for (var i = 0; i < 7; i++) days.push(shiftDay(weekStart(currentDate), i));
@@ -2558,10 +3188,10 @@
   function exportCSV() {
     var days = Object.keys(data).sort();
     if (days.length === 0) { toast("Nothing to export"); return; }
-    var lines = ["Date,Task"];
+    var lines = ["Date,Task,Job"];
     days.forEach(function (d) {
       data[d].forEach(function (it) {
-        lines.push(d + "," + csvQuote(it.text));
+        lines.push(d + "," + csvQuote(it.text) + "," + csvQuote(jobName(it)));
       });
     });
     // BOM so Excel opens it as UTF-8
@@ -2570,25 +3200,33 @@
   }
 
   // Expected shape: one entry per row — date in the first column, task in the
-  // second (extra columns are appended to the task). Merges, skips duplicates.
+  // second (extra columns are appended to the task). A header row naming the
+  // third column "Job" (or Project/Client) makes that column the entry's job.
+  // Merges, skips duplicates.
   function importCSV(file) {
     var reader = new FileReader();
     reader.onload = function () {
       var rows = parseCSV(String(reader.result));
       if (rows.length === 0) { toast("CSV is empty"); return; }
       var start = parseDateFlexible(rows[0][0]) ? 0 : 1; // skip header row
+      var jobCol = start === 1 && /^(job|project|client|group)$/i.test(String(rows[0][2] || "").trim());
       var added = 0, skipped = 0, daysTouched = {};
       for (var i = start; i < rows.length; i++) {
         var day = parseDateFlexible(rows[i][0]);
-        var text = rows[i].slice(1)
-          .map(function (f) { return f.trim(); })
+        var cells = rows[i].map(function (f) { return f.trim(); });
+        var jobText = jobCol ? cleanJobName(cells[2]) : "";
+        if (jobCol) cells.splice(2, 1);
+        var text = cells.slice(1)
           .filter(function (f) { return f !== ""; })
           .join(", ");
         if (!day || text === "") { skipped++; continue; }
         if (!data[day]) data[day] = [];
         var dup = data[day].some(function (it) { return it.text === text; });
         if (dup) { skipped++; continue; }
-        data[day].push({ id: newId(), text: text });
+        var row = { id: newId(), text: text };
+        var jid = ensureJob(jobText);
+        if (jid) row.job = jid;
+        data[day].push(row);
         daysTouched[day] = true;
         added++;
       }
@@ -2612,6 +3250,7 @@
     Object.keys(data).forEach(function (d) { payload[d] = data[d]; });
     payload._wishlist = wishlist;
     payload._recurring = recurring;
+    payload._jobs = jobs;
     downloadFile("docket-backup-" + todayISO() + ".json",
       JSON.stringify(payload, null, 2), "application/json");
     toast("Backup exported");
@@ -2642,6 +3281,16 @@
         }
         mergeQueue(incoming._wishlist, wishlist, saveWishlist);
         mergeQueue(incoming._recurring, recurring, saveRecurring);
+        // Jobs merge by name; the backup's job ids are mapped onto local ones.
+        var jobMap = {};
+        if (Array.isArray(incoming._jobs)) {
+          incoming._jobs.forEach(function (j) {
+            if (!j || typeof j.text !== "string" || typeof j.id !== "string") return;
+            var had = !!jobByName(j.text);
+            var local = ensureJob(j.text);
+            if (local) { jobMap[j.id] = local; if (!had) added++; }
+          });
+        }
         Object.keys(incoming).forEach(function (day) {
           if (!/^\d{4}-\d{2}-\d{2}$/.test(day) || !Array.isArray(incoming[day])) return;
           if (!data[day]) data[day] = [];
@@ -2650,7 +3299,9 @@
             var text = (it && typeof it.text === "string") ? it.text
                      : (typeof it === "string") ? it : null;
             if (text && existing.indexOf(text) === -1) {
-              data[day].push({ id: newId(), text: text });
+              var entry = { id: newId(), text: text };
+              if (it && jobMap[it.job]) entry.job = jobMap[it.job];
+              data[day].push(entry);
               existing.push(text);
               added++;
             }
@@ -2675,6 +3326,34 @@
     if (e.key === "Enter") addWish();
   });
   $("addBtn").addEventListener("click", addItem);
+  $("newJob").addEventListener("input", syncJobBox);
+  $("newJob").addEventListener("change", syncJobBox);
+  $("newJob").addEventListener("keydown", function (e) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      // with words already typed, Enter adds them; otherwise move on to typing
+      if ($("newItem").value.trim() !== "") addItem(); else $("newItem").focus();
+    }
+    if (e.key === "Escape") { setJobBox(""); }
+  });
+  $("newJob").addEventListener("blur", function () {
+    var known = jobByName(this.value);
+    if (known) setJobBox(known.text); // match the job's exact spelling
+    else setJobBox(cleanJobName(this.value));
+  });
+  $("jobClear").addEventListener("click", function () {
+    setJobBox("");
+    $("newJob").focus();
+  });
+  $("addJobBtn").addEventListener("click", addJobFromSide);
+  $("newJobSide").addEventListener("keydown", function (e) {
+    if (e.key === "Enter") addJobFromSide();
+  });
+  $("logJobBtn").addEventListener("click", function () {
+    var j = jobById(currentJob);
+    if (j) setJobBox(j.text);
+    focusNewItem();
+  });
   $("newItem").addEventListener("keydown", function (e) {
     if (e.key === "Enter") addItem();
   });
@@ -2687,6 +3366,7 @@
     input.click();
   });
   function shiftForView(dir) {
+    if (view === "job") return; // a job isn't a stretch of dates
     if (view === "week") currentDate = shiftDay(currentDate, 7 * dir);
     else if (view === "month") currentDate = shiftMonth(currentDate, dir);
     else currentDate = shiftDay(currentDate, dir);
@@ -2698,7 +3378,7 @@
   function goToday() {
     currentDate = todayISO();
     editingId = null;
-    render();
+    if (view === "job") setView("day"); else render();
   }
   $("todayBtn").addEventListener("click", goToday);
   var tabBtns = document.querySelectorAll("#viewTabs button");
@@ -2712,7 +3392,7 @@
   }
   $("fab").addEventListener("click", focusNewItem);
   function copyView(withHeading) {
-    var noun = view === "week" ? "week" : view === "month" ? "month" : "day";
+    var noun = view === "week" ? "week" : view === "month" ? "month" : view === "job" ? "job" : "day";
     var empty = "Nothing to copy — this " + noun + " has no entries";
     if (withHeading) {
       copyText(viewAsText(true), noun.charAt(0).toUpperCase() + noun.slice(1) + " copied to clipboard", empty);
@@ -2808,7 +3488,14 @@
       case "d": case "D": setView("day"); break;
       case "w": case "W": setView("week"); break;
       case "m": case "M": setView("month"); break;
-      case "n": case "N": case "/": e.preventDefault(); focusNewItem(); break;
+      case "n": case "N": case "/": e.preventDefault();
+        if (view === "job") $("logJobBtn").click(); else focusNewItem();
+        break;
+      case "j": case "J": e.preventDefault();
+        if (view !== "day") setView("day");
+        $("newJob").focus();
+        $("newJob").select();
+        break;
       case "c": case "C": copyView(true); break;
       case "?": openHelp(); break;
     }
