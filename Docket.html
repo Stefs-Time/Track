@@ -1242,6 +1242,87 @@
   .tools-grid button .ic svg { width: 13px; height: 13px; }
   .tools-grid button:hover { color: var(--text); border-color: var(--silver); background: var(--ghost); }
   .tools-grid button:hover .ic { opacity: 1; }
+  .clearall {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    width: 100%;
+    margin-top: 7px;
+    border: 1px dashed var(--line);
+    border-radius: 8px;
+    background: none;
+    color: var(--faint);
+    padding: 7px 4px;
+    font-size: 11.5px;
+    font-weight: 600;
+  }
+  .clearall .ic svg { width: 13px; height: 13px; }
+  .clearall:hover { color: var(--danger); border-color: rgba(224, 112, 112, 0.55); border-style: solid; background: rgba(224, 112, 112, 0.07); }
+
+  /* clear-data dialog */
+  .modal.modal-sm { max-width: 470px; }
+  .modal-head.danger::before { background: linear-gradient(90deg, #e07070, #b85a5a); }
+  .clearopts { display: flex; flex-direction: column; gap: 6px; margin: 12px 0 4px; }
+  .copt {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 9px 12px;
+    border: 1px solid var(--line-soft);
+    border-radius: 8px;
+    background: var(--sheet-2);
+    cursor: pointer;
+    transition: border-color .15s, background .15s;
+  }
+  .copt:hover { border-color: var(--line); }
+  .copt:has(input:checked) { border-color: rgba(224, 112, 112, 0.4); background: rgba(224, 112, 112, 0.05); }
+  .copt input { width: 16px; height: 16px; margin: 0; accent-color: #e07070; cursor: pointer; flex-shrink: 0; }
+  .copt .ct { display: flex; flex-direction: column; line-height: 1.35; min-width: 0; }
+  .copt .ct b { color: var(--text); font-weight: 600; font-size: 13px; }
+  .copt .ct span { color: var(--faint); font-size: 11.5px; }
+  .clearwarn { margin: 10px 2px 0; color: var(--faint); font-size: 12px; min-height: 1em; }
+  .backupnote {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--ghost);
+    border: 1px solid var(--silver-soft);
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-top: 14px;
+    font-size: 12.5px;
+  }
+  .backupnote > span { flex: 1; }
+  .backupnote button {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    background: var(--sheet);
+    color: var(--text);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 11px;
+    white-space: nowrap;
+  }
+  .backupnote button .ic svg { width: 13px; height: 13px; }
+  .backupnote button:hover { border-color: var(--silver); background: var(--sheet-2); }
+  .backupnote button.done { border-color: rgba(88, 192, 122, 0.5); color: var(--green); }
+  .modal-foot { gap: 10px; }
+  .modal-foot button.ghostbtn { background: #343941; color: var(--text); }
+  .modal-foot button.ghostbtn:hover { filter: brightness(1.15); }
+  .modal-foot button.dangerbtn { background: #c45c5c; color: #fff; }
+  .modal-foot button.dangerbtn:hover { filter: brightness(1.1); }
+  .modal-foot button:disabled { opacity: .4; pointer-events: none; }
+  #clearOverlay .modal-foot button { white-space: nowrap; }
+  @media (max-width: 480px) {
+    .backupnote { flex-direction: column; align-items: stretch; }
+    #clearOverlay .modal-foot button { padding: 9px 16px; }
+    #clearOverlay .modal-foot .dangerbtn { flex: 1; }
+  }
 
   /* help modal */
   .overlay {
@@ -1515,6 +1596,7 @@
         <button id="csvExportBtn" data-tip="Export every entry as a CSV that opens straight in Excel"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M12 18v-6"/><path d="m9 15 3 3 3-3"/></svg></span>Export CSV</button>
         <button id="csvImportBtn" data-tip="Bulk-load entries from a spreadsheet CSV — date first, task second"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M12 12v6"/><path d="m9 15 3-3 3 3"/></svg></span>Import CSV</button>
       </div>
+      <button class="clearall" id="clearAllBtn" data-tip="Wipe the log, jobs, wishlist or recurring tasks — e.g. to start fresh and re-import a backup. You choose what goes, and can Undo"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></span>Clear data…</button>
       <input type="file" id="importFile" accept=".json,application/json" hidden>
       <input type="file" id="csvFile" accept=".csv,text/csv,text/plain" hidden>
     </section>
@@ -1676,6 +1758,9 @@
         <li>Data is stored by <b>this browser, on this computer</b>. Stick to one browser (e.g. always Edge).</li>
         <li><b>Export JSON</b> saves everything — including jobs and the wishlist — to a file; <b>Import JSON</b> merges it back in. Use it to move to another browser or PC, or as a safety net.</li>
         <li>Clearing the browser's site data erases the log — keep an occasional export.</li>
+        <li><b>Clear data…</b> wipes the log, jobs, wishlist and/or recurring tasks — you tick which. Use it to start fresh,
+          e.g. clear everything then <b>Import JSON</b> to reload a backup cleanly. It offers to export a backup first, and an <b>Undo</b> pops up afterwards.</li>
+        <li><b>JSON</b> is the complete backup (log, jobs, wishlist, recurring). <b>CSV</b> holds the log and jobs — the wishlist and recurring tasks aren't in it.</li>
       </ul>
 
       <div class="note"><b>Tip:</b> right-click the Docket.html file → <i>Send to</i> → <i>Desktop (create shortcut)</i>
@@ -1683,6 +1768,33 @@
     </div>
     <div class="modal-foot">
       <button id="helpDone">Got it</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="clearOverlay">
+  <div class="modal modal-sm" role="dialog" aria-modal="true" aria-labelledby="clearTitle" aria-describedby="clearDesc">
+    <div class="modal-head danger">
+      <h2 id="clearTitle">Clear data</h2>
+      <button class="close" id="clearClose" data-tip="Close — Esc works too" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body">
+      <p id="clearDesc" style="margin-top:12px">Start fresh — for example before re-importing a backup. Tick what to remove:</p>
+      <div class="clearopts">
+        <label class="copt"><input type="checkbox" id="clrLog" checked><span class="ct"><b>Daily log</b><span id="clrLogN"></span></span></label>
+        <label class="copt"><input type="checkbox" id="clrJobs" checked><span class="ct"><b>Jobs</b><span id="clrJobsN"></span></span></label>
+        <label class="copt"><input type="checkbox" id="clrWish" checked><span class="ct"><b>Wishlist</b><span id="clrWishN"></span></span></label>
+        <label class="copt"><input type="checkbox" id="clrRec" checked><span class="ct"><b>Recurring tasks</b><span id="clrRecN"></span></span></label>
+      </div>
+      <p class="clearwarn" id="clearWarn"></p>
+      <div class="backupnote">
+        <span><b>Keep a copy first.</b> The JSON backup holds everything above, so Import JSON puts it all back.</span>
+        <button id="clearBackup" type="button"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg></span><span>Export JSON</span></button>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="ghostbtn" id="clearCancel">Cancel</button>
+      <button class="dangerbtn" id="clearGo">Clear selected</button>
     </div>
   </div>
 </div>
@@ -3116,7 +3228,7 @@
 
   var toastTimer;
   // Pass an undo function to get an Undo button; those toasts linger longer.
-  function toast(msg, undo) {
+  function toast(msg, undo, ms) {
     var t = $("toast");
     t.textContent = "";
     t.appendChild(document.createTextNode(msg));
@@ -3133,7 +3245,7 @@
     }
     t.classList.add("show");
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(function () { t.classList.remove("show"); }, undo ? 6000 : 2600);
+    toastTimer = setTimeout(function () { t.classList.remove("show"); }, ms || (undo ? 6000 : 2600));
   }
 
   function downloadFile(name, content, mime) {
@@ -3187,12 +3299,18 @@
 
   function exportCSV() {
     var days = Object.keys(data).sort();
-    if (days.length === 0) { toast("Nothing to export"); return; }
+    if (days.length === 0 && jobs.length === 0) { toast("Nothing to export"); return; }
     var lines = ["Date,Task,Job"];
     days.forEach(function (d) {
       data[d].forEach(function (it) {
         lines.push(d + "," + csvQuote(it.text) + "," + csvQuote(jobName(it)));
       });
+    });
+    // Jobs with nothing logged yet still belong in the export: a row with
+    // only the Job column recreates them on import.
+    var stats = jobStats();
+    jobs.forEach(function (j) {
+      if (!stats[j.id]) lines.push(",," + csvQuote(j.text));
     });
     // BOM so Excel opens it as UTF-8
     downloadFile("docket-export-" + todayISO() + ".csv", "﻿" + lines.join("\r\n"), "text/csv");
@@ -3211,6 +3329,7 @@
       var start = parseDateFlexible(rows[0][0]) ? 0 : 1; // skip header row
       var jobCol = start === 1 && /^(job|project|client|group)$/i.test(String(rows[0][2] || "").trim());
       var added = 0, skipped = 0, daysTouched = {};
+      var jobsBefore = jobs.length;
       for (var i = start; i < rows.length; i++) {
         var day = parseDateFlexible(rows[i][0]);
         var cells = rows[i].map(function (f) { return f.trim(); });
@@ -3219,6 +3338,8 @@
         var text = cells.slice(1)
           .filter(function (f) { return f !== ""; })
           .join(", ");
+        // a job-only row (no date, no task) is a job with nothing logged yet
+        if (jobText && cells[0] === "" && text === "") { ensureJob(jobText); continue; }
         if (!day || text === "") { skipped++; continue; }
         if (!data[day]) data[day] = [];
         var dup = data[day].some(function (it) { return it.text === text; });
@@ -3233,11 +3354,13 @@
       save();
       render();
       var dayCount = Object.keys(daysTouched).length;
+      var newJobs = jobs.length - jobsBefore;
+      var jobNote = newJobs ? " · " + newJobs + " new job" + (newJobs === 1 ? "" : "s") : "";
       if (added === 0) {
-        toast("Nothing imported — " + skipped + " row" + (skipped === 1 ? "" : "s") + " skipped (duplicate or unreadable)");
+        toast("Nothing imported — " + skipped + " row" + (skipped === 1 ? "" : "s") + " skipped (duplicate or unreadable)" + jobNote);
       } else {
         toast("Imported " + added + " entr" + (added === 1 ? "y" : "ies") +
-          " across " + dayCount + " day" + (dayCount === 1 ? "" : "s") +
+          " across " + dayCount + " day" + (dayCount === 1 ? "" : "s") + jobNote +
           (skipped ? " — " + skipped + " skipped" : ""));
       }
     };
@@ -3251,6 +3374,7 @@
     payload._wishlist = wishlist;
     payload._recurring = recurring;
     payload._jobs = jobs;
+    payload._docket = { version: 2, exported: new Date().toISOString() };
     downloadFile("docket-backup-" + todayISO() + ".json",
       JSON.stringify(payload, null, 2), "application/json");
     toast("Backup exported");
@@ -3433,6 +3557,119 @@
     this.value = "";
   });
 
+  // ---------- clear data ----------
+  // Wipes the chosen stores so a backup can be re-imported onto a clean
+  // slate. A snapshot backs the Undo, since this is the one big-red-button.
+  var clearOpener = null;
+  var CLEAR_OPTS = [
+    { box: "clrLog", key: "log" },
+    { box: "clrJobs", key: "jobs" },
+    { box: "clrWish", key: "wish" },
+    { box: "clrRec", key: "rec" }
+  ];
+  function plural(n, one, many) { return n + " " + (n === 1 ? one : many); }
+  function entryTotals() {
+    var n = 0, days = 0;
+    Object.keys(data).forEach(function (d) {
+      var c = (data[d] || []).length;
+      n += c;
+      if (c) days++;
+    });
+    return { n: n, days: days };
+  }
+  function clearPicks() {
+    var picks = {};
+    CLEAR_OPTS.forEach(function (o) { picks[o.key] = $(o.box).checked; });
+    return picks;
+  }
+  function syncClearDialog() {
+    var t = entryTotals();
+    var counts = { log: t.n, jobs: jobs.length, wish: wishlist.length, rec: recurring.length };
+    $("clrLogN").textContent = t.n ? plural(t.n, "entry", "entries") + " over " + plural(t.days, "day", "days") : "empty";
+    $("clrJobsN").textContent = jobs.length ? plural(jobs.length, "job", "jobs") : "empty";
+    $("clrWishN").textContent = wishlist.length ? plural(wishlist.length, "item", "items") : "empty";
+    $("clrRecN").textContent = recurring.length ? plural(recurring.length, "task", "tasks") : "empty";
+    var p = clearPicks();
+    var anything = CLEAR_OPTS.some(function (o) { return p[o.key] && counts[o.key] > 0; });
+    $("clearGo").disabled = !anything;
+    var all = CLEAR_OPTS.every(function (o) { return p[o.key]; });
+    $("clearGo").textContent = all ? "Clear everything" : "Clear selected";
+    $("clearWarn").textContent = p.jobs && !p.log && t.n
+      ? "Entries you keep will lose their job — the entries themselves stay."
+      : (!anything ? "Nothing to clear with that selection." : "");
+  }
+  function openClear() {
+    clearOpener = document.activeElement;
+    CLEAR_OPTS.forEach(function (o) { $(o.box).checked = true; });
+    var b = $("clearBackup");
+    b.classList.remove("done");
+    b.lastChild.textContent = "Export JSON";
+    syncClearDialog();
+    $("clearOverlay").classList.add("open");
+    $("clearCancel").focus();
+  }
+  function closeClear() {
+    $("clearOverlay").classList.remove("open");
+    var back = clearOpener && document.contains(clearOpener) && clearOpener.offsetParent !== null
+      ? clearOpener : $("clearAllBtn");
+    clearOpener = null;
+    if (back) back.focus();
+  }
+  function clearData(p) {
+    var snap = JSON.stringify({ data: data, jobs: jobs, wishlist: wishlist, recurring: recurring });
+    var gone = [];
+    var t = entryTotals();
+    if (p.log && t.n) { data = {}; gone.push(plural(t.n, "entry", "entries")); }
+    if (p.jobs && jobs.length) {
+      gone.push(plural(jobs.length, "job", "jobs"));
+      jobs = [];
+      Object.keys(data).forEach(function (d) {
+        (data[d] || []).forEach(function (it) { delete it.job; });
+      });
+      setJobBox("");
+    }
+    if (p.wish && wishlist.length) { gone.push(plural(wishlist.length, "wishlist item", "wishlist items")); wishlist = []; }
+    if (p.rec && recurring.length) { gone.push(plural(recurring.length, "recurring task", "recurring tasks")); recurring = []; }
+    if (gone.length === 0) return;
+    editingId = null;
+    renamingJob = null;
+    save();
+    saveJobs();
+    saveWishlist();
+    saveRecurring();
+    render();
+    toast("Cleared " + gone.join(", "), function () {
+      var s = JSON.parse(snap);
+      data = s.data;
+      jobs = s.jobs;
+      wishlist = s.wishlist;
+      recurring = s.recurring;
+      save();
+      saveJobs();
+      saveWishlist();
+      saveRecurring();
+      render();
+      toast("Restored — everything is back");
+    }, 15000);
+  }
+  $("clearAllBtn").addEventListener("click", openClear);
+  $("clearClose").addEventListener("click", closeClear);
+  $("clearCancel").addEventListener("click", closeClear);
+  $("clearOverlay").addEventListener("click", function (e) {
+    if (e.target === this) closeClear();
+  });
+  CLEAR_OPTS.forEach(function (o) { $(o.box).addEventListener("change", syncClearDialog); });
+  $("clearBackup").addEventListener("click", function () {
+    exportData();
+    this.classList.add("done");
+    this.lastChild.textContent = "Backup saved ✓";
+  });
+  $("clearGo").addEventListener("click", function () {
+    var p = clearPicks();
+    closeClear();
+    clearData(p);
+  });
+
   // ---------- help ----------
   var HELP_KEY = "track.helpseen.v1";
   var helpOpener = null;
@@ -3454,7 +3691,7 @@
   }
   // aria-modal="true" is a promise to assistive tech that the rest of the
   // page is out of reach; without a trap, Tab broke that promise immediately.
-  $("helpOverlay").addEventListener("keydown", function (e) {
+  function trapFocus(e) {
     if (e.key !== "Tab") return;
     var f = this.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
     var list = [];
@@ -3465,7 +3702,9 @@
     var first = list[0], last = list[list.length - 1];
     if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
     else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
-  });
+  }
+  $("helpOverlay").addEventListener("keydown", trapFocus);
+  $("clearOverlay").addEventListener("keydown", trapFocus);
   $("helpBtn").addEventListener("click", openHelp);
   $("helpClose").addEventListener("click", closeHelp);
   $("helpDone").addEventListener("click", closeHelp);
@@ -3477,6 +3716,10 @@
   document.addEventListener("keydown", function (e) {
     var helpOpen = $("helpOverlay").classList.contains("open");
     if (e.key === "Escape" && helpOpen) { closeHelp(); return; }
+    if ($("clearOverlay").classList.contains("open")) {
+      if (e.key === "Escape") closeClear();
+      return; // no shortcuts behind an open dialog
+    }
     if (e.ctrlKey || e.metaKey || e.altKey) return;
     var a = document.activeElement;
     if (a && (a.tagName === "INPUT" || a.tagName === "TEXTAREA" || a.isContentEditable)) return;

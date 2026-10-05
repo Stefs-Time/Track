@@ -27,7 +27,8 @@ Tip: right-click `Docket.html` → *Send to* → *Desktop (create shortcut)* so 
 - **Hover hints** — every button and control explains itself when you hover over it, or when you Tab to it with the keyboard.
 - **Auto-save** — everything is stored in the browser's local storage on your machine, instantly, as you type.
 - **CSV import/export** — bulk-load the month to date from a spreadsheet, or export everything for Excel.
-- **Backup** — Export saves all your data (including jobs, wishlist and recurring tasks) to a JSON file; Import merges a backup back in (no duplicates).
+- **Backup** — Export JSON saves all your data (log, jobs, wishlist and recurring tasks) to a file; Import JSON merges a backup back in (no duplicates). Export CSV holds the log and jobs, including jobs with nothing logged yet. The wishlist and recurring tasks are only in the JSON backup.
+- **Clear data** — the **Clear data…** button under Backup & data wipes the log, jobs, wishlist and/or recurring tasks; you tick which. It shows what each will remove, offers a one-click JSON backup first, and pops up an **Undo** afterwards. To reload cleanly, clear everything, then Import JSON (or Import CSV).
 
 ## CSV format
 
@@ -46,6 +47,8 @@ The import is forgiving:
 - Dates can be `2026-07-01`, `01/07/2026`, `1/7/2026`, `01-07-2026` or `01.07.2026` (day-first assumed).
 - Comma, semicolon, or tab delimited — detected automatically, so Excel's regional "Save as CSV" quirks are fine.
 - Duplicate entries (same date + same text) and unreadable rows are skipped, and the import tells you how many.
+
+- A row with only a Job (no date, no task) creates that job. Export uses this for jobs with nothing logged yet, so they survive a round trip.
 
 **Export CSV** produces this exact format, so you can export, edit in Excel, and re-import.
 
