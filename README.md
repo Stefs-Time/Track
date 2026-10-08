@@ -14,12 +14,13 @@ Tip: right-click `Docket.html` → *Send to* → *Desktop (create shortcut)* so 
 
 ## Features
 
-- **Jobs** — group work under one heading (a client, site or project). Type a name in the **Job** box beside the entry box and every entry you add goes against it; it stays set so you can log a run of entries in a row. Each entry shows its job as a pill — click it (or the job in the sidebar's **Jobs** list) to open the **Job view**: every entry on that job across every day, with totals and a **Copy Job** button that's ready for an invoice. Change an entry's job with the pencil; rename or delete jobs from the sidebar (deleting a job keeps its entries).
+- **Jobs** — group work under one heading (a client, site or project). Type a name in the **Job** box beside the entry box and every entry you add goes against it; it stays set so you can log a run of entries in a row. Each entry shows its job as a pill — click it (or the job in the sidebar's **Jobs** list) to open the **Job view**: every entry on that job across every day, with totals and a **Copy Job** button that's ready for an invoice. Change an entry's job with the pencil; rename or delete jobs from the sidebar (deleting a job keeps everything that was on it).
+- **Jobs on the Wishlist and Recurring too** — click into either list's add box and a **Job** box appears beneath it (sticky, like the main one). The ✎ pencil on a list item edits its text and job. Logging an item on a day (↳ or drag) carries its job onto the entry, and the Job view lists the job's wishlist and recurring items above its logged work, each with a ↳ to log it on the open day.
 - **Per-day lists** — use the date picker or ‹ › buttons to move between days; the sidebar groups every logged day by month, with old months folded away.
 - **Day, Week and Month views** — a weekly overview and a monthly calendar with entry counts; click any day to open it, and the copy buttons follow the view (Copy Month = the whole month-to-date, ready to paste).
 - **Activity at a glance** — stat tiles count the open day, its week and its month; a clickable 14-day activity chart sits beside them, and the month calendar shades busier days like a heatmap.
 - **Copy & paste** — "Copy Day to Clipboard" copies the date plus a bulleted list, ready to paste into an email, timesheet or invoice; entries on a job carry it in brackets. "Copy Items Only" copies just the lines.
-- **Wishlist** — queue things that still need doing, then drag them onto a day (or click ↳) when they're done.
+- **Wishlist** — queue things that still need doing, then drag them onto a day (or click ↳) when they're done. Undo is there if you send one to the wrong day.
 - **Recurring tasks** — keep often-repeated tasks in the sidebar and drag (or ↳) them onto any day; they stay in the list for next time, and duplicates on the same day are skipped.
 - **Edit in place** — hover an entry and click the pencil to edit (Save/Cancel), or ✕ to delete.
 - **Undo** — deleting an entry, a wishlist/recurring item, or clearing a whole day pops up an **Undo** button for a few seconds, so nothing is lost to a slipped click.
@@ -27,7 +28,7 @@ Tip: right-click `Docket.html` → *Send to* → *Desktop (create shortcut)* so 
 - **Hover hints** — every button and control explains itself when you hover over it, or when you Tab to it with the keyboard.
 - **Auto-save** — everything is stored in the browser's local storage on your machine, instantly, as you type.
 - **CSV import/export** — bulk-load the month to date from a spreadsheet, or export everything for Excel.
-- **Backup** — Export JSON saves all your data (log, jobs, wishlist and recurring tasks) to a file; Import JSON merges a backup back in (no duplicates). Export CSV holds the log and jobs, including jobs with nothing logged yet. The wishlist and recurring tasks are only in the JSON backup.
+- **Backup** — Export JSON saves all your data (log, jobs, wishlist and recurring tasks, each with its job) to a file; Import JSON merges a backup back in (no duplicates). Export CSV holds the same things in spreadsheet form — see below.
 - **Clear data** — the **Clear data…** button under Backup & data wipes the log, jobs, wishlist and/or recurring tasks; you tick which. It shows what each will remove, offers a one-click JSON backup first, and pops up an **Undo** afterwards. To reload cleanly, clear everything, then Import JSON (or Import CSV).
 
 ## CSV format
@@ -39,6 +40,9 @@ Date,Task,Job
 2026-07-01,"Installed blinds, lounge",Smith House
 2026-07-01,Collected payment,Smith House
 02/07/2026,Quoted new office fit-out,
+Wishlist,Order paint,Smith House
+Recurring,Timesheet,
+,,Garden shed
 ```
 
 The import is forgiving:
@@ -48,7 +52,9 @@ The import is forgiving:
 - Comma, semicolon, or tab delimited — detected automatically, so Excel's regional "Save as CSV" quirks are fine.
 - Duplicate entries (same date + same text) and unreadable rows are skipped, and the import tells you how many.
 
-- A row with only a Job (no date, no task) creates that job. Export uses this for jobs with nothing logged yet, so they survive a round trip.
+- `Wishlist` or `Recurring` in the Date column puts the row on that list instead of the log.
+- A row with only a Job (no date, no task) creates that job. Export uses this for jobs nothing points at yet, so they survive a round trip.
+- Duplicates: in a file with a Job column, the same task on two different jobs is two items, and a job in the file fills in the job on a matching item that has none. In a file without one, the same task on the same day is a duplicate, as before.
 
 **Export CSV** produces this exact format, so you can export, edit in Excel, and re-import.
 

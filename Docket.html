@@ -1097,7 +1097,7 @@
     list-style: none;
     margin: 0;
     padding: 0 2px;
-    max-height: 150px;
+    max-height: 210px;
     overflow-y: auto;
     scrollbar-width: thin;
     scrollbar-color: var(--line) transparent;
@@ -1125,7 +1125,7 @@
   ul.wishlist li:hover .wtxt { color: var(--text); }
   ul.wishlist .wtxt:focus { outline: none; background: var(--ghost); box-shadow: inset 0 -1px 0 var(--silver); }
   ul.wishlist .wbtn {
-    display: grid;
+    display: none;
     place-items: center;
     border: none;
     background: none;
@@ -1137,12 +1137,116 @@
   ul.wishlist .wbtn .ic svg { width: 13px; height: 13px; }
   @media (pointer: coarse) {
     /* fingers need more than the 19px the hover-only layout gets away with */
-    ul.wishlist .wbtn { padding: 7px; opacity: 1; }
+    ul.wishlist .wbtn { display: grid; padding: 7px; opacity: 1; }
   }
-  ul.wishlist li:hover .wbtn, ul.wishlist .wbtn:focus-visible { opacity: 1; }
+  ul.wishlist li:hover .wbtn, ul.wishlist li:focus-within .wbtn { display: grid; opacity: 1; }
+  ul.wishlist .wbtn.edit:hover { color: #eef1f5; background: var(--ghost); }
   ul.wishlist .wbtn.send:hover { color: #eef1f5; background: var(--ghost); }
   ul.wishlist .wbtn.kill:hover { color: var(--danger); background: rgba(224, 112, 112, 0.1); }
   .wish-hint { padding: 8px 8px 0; color: var(--faint); font-size: 11px; user-select: none; }
+
+  /* list items carry a job too: a job box under the add box (shown while
+     adding, or while a job is set), a pill under the text, and an editor */
+  .wish-add { flex-wrap: wrap; }
+  .wish-add .jobwrap { position: relative; flex: 1 1 100%; display: none; min-width: 0; }
+  .wish-add:focus-within .jobwrap, .wish-add .jobwrap.set { display: flex; }
+  .wish-add .jobwrap > .ic { left: 10px; }
+  .wish-add .jobwrap > .ic svg { width: 13px; height: 13px; }
+  .wish-add .jobwrap input { font-size: 12px; padding: 5px 10px 5px 29px; }
+  .wish-add .jobwrap.set input { padding-right: 28px; }
+  .wish-add .jobclear { width: auto; background: none; color: var(--faint); font-size: inherit; line-height: normal; }
+  .wish-add .jobclear:hover { filter: none; color: var(--text); background: rgba(255, 255, 255, 0.07); }
+  ul.wishlist .wbody { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 3px; }
+  ul.wishlist .wbody .wtxt { align-self: stretch; cursor: text; }
+  ul.wishlist .wbody .jobpill { max-width: 100%; font-size: 10.5px; padding: 0 8px 0 6px; }
+  ul.wishlist li.qediting { display: block; cursor: default; background: var(--sheet-2); padding: 8px; }
+  ul.wishlist li.qediting:hover { background: var(--sheet-2); }
+  ul.wishlist li.qediting input {
+    width: 100%;
+    font: inherit;
+    font-size: 12.5px;
+    color: var(--text);
+    background: var(--sheet);
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    padding: 6px 10px;
+  }
+  ul.wishlist li.qediting input:focus { outline: none; border-color: var(--silver); box-shadow: 0 0 0 3px var(--ghost); }
+  ul.wishlist li.qediting .jobwrap { position: relative; display: flex; margin-top: 6px; }
+  ul.wishlist li.qediting .jobwrap > .ic { left: 10px; }
+  ul.wishlist li.qediting .jobwrap > .ic svg { width: 13px; height: 13px; }
+  ul.wishlist li.qediting .jobwrap input { font-size: 12px; padding-left: 29px; }
+  .qrow { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 7px; }
+  .qrow button {
+    border: none;
+    border-radius: 7px;
+    padding: 6px 0;
+    font-weight: 650;
+    font-size: 11px;
+    letter-spacing: .6px;
+    text-transform: uppercase;
+  }
+  .qrow .save { background: var(--chrome); color: var(--on-chrome); }
+  .qrow .save:hover { filter: brightness(1.08); }
+  .qrow .cancel { background: #343941; color: var(--text); }
+  .qrow .cancel:hover { filter: brightness(1.15); }
+
+  /* Job view: the job's wishlist and recurring items */
+  .jobq { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
+  .jobq-col {
+    background: var(--sheet);
+    border: 1px solid var(--line-soft);
+    border-radius: 6px;
+    box-shadow: var(--shadow), var(--hi);
+    padding: 10px 14px 8px;
+    min-width: 0;
+  }
+  .jobq h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 4px;
+    font-size: 10.5px;
+    font-weight: 650;
+    letter-spacing: 1.6px;
+    text-transform: uppercase;
+    color: var(--faint);
+  }
+  .jobq h3 .count {
+    margin-left: auto;
+    color: var(--muted);
+    font-size: 11px;
+    letter-spacing: 0;
+    font-variant-numeric: tabular-nums;
+    background: rgba(255, 255, 255, 0.07);
+    border-radius: 20px;
+    padding: 0 8px;
+  }
+  .jobq ul { list-style: none; margin: 0; padding: 0; }
+  .jobq li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--muted);
+    padding: 3px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  }
+  .jobq li:last-child { border-bottom: none; }
+  .jobq li .qt { flex: 1; min-width: 0; word-break: break-word; }
+  .jobq li .qg { color: var(--faint); font-size: 11px; width: 12px; flex-shrink: 0; text-align: center; }
+  .jobq li button {
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    border: none;
+    background: none;
+    color: var(--faint);
+    padding: 4px;
+    border-radius: 6px;
+  }
+  .jobq li button .ic svg { width: 13px; height: 13px; }
+  .jobq li button:hover { color: #eef1f5; background: var(--ghost); }
 
   /* jobs list */
   ul.joblist {
@@ -1565,14 +1669,19 @@
         <button id="addJobBtn" data-tip="Add a job" aria-label="Add a job">+</button>
       </div>
       <ul class="joblist" id="jobList"></ul>
-      <div class="wish-hint">Click a job to see every entry logged against it</div>
+      <div class="wish-hint">Click a job to see everything on it — logged and still to do</div>
     </section>
 
     <section>
       <h2>Wishlist <span class="qcount" id="wishCount"></span></h2>
       <div class="wish-add">
-        <input type="text" id="newWish" placeholder="Needs doing…" autocomplete="off">
+        <input type="text" id="newWish" placeholder="Needs doing…" autocomplete="off" aria-label="New wishlist item">
         <button id="addWishBtn" data-tip="Add to the wishlist" aria-label="Add to the wishlist">+</button>
+        <div class="jobwrap" id="wishJobWrap">
+          <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span>
+          <input type="text" id="wishJob" list="jobOptions" placeholder="Job (optional)" autocomplete="off" maxlength="60" aria-label="Job for new wishlist items (optional)">
+          <button type="button" class="jobclear" id="wishJobClear" data-tip="Stop adding to this job" aria-label="Clear job"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></span></button>
+        </div>
       </div>
       <ul class="wishlist" id="wishList"></ul>
       <div class="wish-hint">Drag onto the log or a day · ↳ sends to open day</div>
@@ -1581,8 +1690,13 @@
     <section>
       <h2>Recurring <span class="qcount" id="recCount"></span></h2>
       <div class="wish-add">
-        <input type="text" id="newRec" placeholder="Happens often…" autocomplete="off">
+        <input type="text" id="newRec" placeholder="Happens often…" autocomplete="off" aria-label="New recurring task">
         <button id="addRecBtn" data-tip="Add a recurring task" aria-label="Add a recurring task">+</button>
+        <div class="jobwrap" id="recJobWrap">
+          <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span>
+          <input type="text" id="recJob" list="jobOptions" placeholder="Job (optional)" autocomplete="off" maxlength="60" aria-label="Job for new recurring items (optional)">
+          <button type="button" class="jobclear" id="recJobClear" data-tip="Stop adding to this job" aria-label="Clear job"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></span></button>
+        </div>
       </div>
       <ul class="wishlist" id="recList"></ul>
       <div class="wish-hint">Drag or ↳ to log it on a day — it stays in this list</div>
@@ -1591,10 +1705,10 @@
     <section class="tools">
       <h2>Backup &amp; data</h2>
       <div class="tools-grid">
-        <button id="exportBtn" data-tip="Back up everything — entries, wishlist and recurring — to a JSON file"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg></span>Export JSON</button>
+        <button id="exportBtn" data-tip="Back up everything — log, jobs, wishlist and recurring — to a JSON file"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg></span>Export JSON</button>
         <button id="importBtn" data-tip="Merge a JSON backup back in — duplicates are skipped"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 8 5-5 5 5"/><path d="M12 3v12"/></svg></span>Import JSON</button>
-        <button id="csvExportBtn" data-tip="Export every entry as a CSV that opens straight in Excel"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M12 18v-6"/><path d="m9 15 3 3 3-3"/></svg></span>Export CSV</button>
-        <button id="csvImportBtn" data-tip="Bulk-load entries from a spreadsheet CSV — date first, task second"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M12 12v6"/><path d="m9 15 3-3 3 3"/></svg></span>Import CSV</button>
+        <button id="csvExportBtn" data-tip="Export the log, jobs, wishlist and recurring as a CSV that opens straight in Excel"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M12 18v-6"/><path d="m9 15 3 3 3-3"/></svg></span>Export CSV</button>
+        <button id="csvImportBtn" data-tip="Bulk-load from a spreadsheet CSV — date first, task second, job third (optional). Duplicates are skipped"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M12 12v6"/><path d="m9 15 3-3 3 3"/></svg></span>Import CSV</button>
       </div>
       <button class="clearall" id="clearAllBtn" data-tip="Wipe the log, jobs, wishlist or recurring tasks — e.g. to start fresh and re-import a backup. You choose what goes, and can Undo"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></span>Clear data…</button>
       <input type="file" id="importFile" accept=".json,application/json" hidden>
@@ -1701,7 +1815,9 @@
         <li>The job <b>stays set</b>, so you can log a run of entries in a row. Click its <b>✕</b> (or empty the box) to stop.</li>
         <li>Entries show their job as a small pill — <b>click the pill</b>, or the job in the sidebar's <b>Jobs</b> list, to open the <b>Job view</b>: every entry on that job, across every day, with totals.</li>
         <li>In the Job view, <b>Copy Job</b> gives you the job name plus each day's work — ready for an invoice.</li>
-        <li>Change an entry's job with the <b>✎ pencil</b>. Rename or delete a job from the sidebar; deleting a job keeps its entries.</li>
+        <li>Wishlist and recurring items take a job too — the <b>Job</b> box appears under their add box when you click into it, and their <b>✎ pencil</b> changes it. Logging one on a day carries its job onto the entry.</li>
+        <li>The Job view lists the job's <b>wishlist and recurring items</b> above its logged work — click <b>↳</b> to log one on the open day.</li>
+        <li>Change an entry's job with the <b>✎ pencil</b>. Rename or delete a job from the sidebar; deleting a job keeps everything that was on it.</li>
       </ul>
 
       <h3><span class="tick">●</span> Copy &amp; paste</h3>
@@ -1731,25 +1847,28 @@
       <ul>
         <li>Queue things that still need doing in the sidebar's <b>Wishlist</b>.</li>
         <li>When one gets done, <b>drag it onto the log or onto a day</b> — in Recent Days, or straight onto a Week or Month cell. It becomes an entry there.</li>
-        <li>Or hover it and click <b>↳</b> to log it on the day you have open. Click its text to edit, <b>✕</b> to remove.</li>
+        <li>Or hover it and click <b>↳</b> to log it on the day you have open. Click its text or <b>✎</b> to edit it or set its job, <b>✕</b> to remove.</li>
       </ul>
 
       <h3><span class="tick">●</span> Recurring tasks</h3>
       <ul>
         <li>Add tasks you do again and again to <b>Recurring</b> in the sidebar.</li>
         <li>Drag one onto any day (or click <b>↳</b> for the open day) to log it — <b>it stays in the list</b> so you can use it next time.</li>
-        <li>If it's already on that day, Docket skips the duplicate and tells you.</li>
+        <li>If it's already on that day (same job), Docket skips the duplicate and tells you.</li>
       </ul>
 
       <h3><span class="tick">●</span> CSV import / export (Excel)</h3>
-      <p>Bulk-load the month to date from a spreadsheet. One entry per row: date first, task second, and optionally a job third.</p>
+      <p>Bulk-load the month to date from a spreadsheet. One entry per row: date first, task second, and optionally a job third.
+        Put <b>Wishlist</b> or <b>Recurring</b> in the date column to load those lists instead.</p>
       <pre>Date,Task,Job
 2026-07-01,"Installed blinds, lounge",Smith House
-02/07/2026,Quoted new office fit-out,</pre>
+02/07/2026,Quoted new office fit-out,
+Wishlist,Order paint,Smith House
+Recurring,Timesheet,</pre>
       <ul>
         <li>The header row is optional — but to import jobs, include it with <b>Job</b> as the third heading. Dates can be <b>2026-07-01</b> or <b>01/07/2026</b> style (day-first).</li>
         <li>Comma, semicolon or tab delimited — detected automatically.</li>
-        <li>Re-importing is safe: duplicates and unreadable rows are skipped and reported.</li>
+        <li>Re-importing is safe: duplicates and unreadable rows are skipped and reported. The same task on two different jobs isn't a duplicate.</li>
         <li><b>Export CSV</b> writes the same format, so you can export → edit in Excel → import back.</li>
       </ul>
 
@@ -1760,7 +1879,7 @@
         <li>Clearing the browser's site data erases the log — keep an occasional export.</li>
         <li><b>Clear data…</b> wipes the log, jobs, wishlist and/or recurring tasks — you tick which. Use it to start fresh,
           e.g. clear everything then <b>Import JSON</b> to reload a backup cleanly. It offers to export a backup first, and an <b>Undo</b> pops up afterwards.</li>
-        <li><b>JSON</b> is the complete backup (log, jobs, wishlist, recurring). <b>CSV</b> holds the log and jobs — the wishlist and recurring tasks aren't in it.</li>
+        <li>Both <b>JSON</b> and <b>CSV</b> hold everything — the log, jobs, wishlist and recurring tasks, each with its job. JSON is the exact backup; CSV is the one to open in Excel.</li>
       </ul>
 
       <div class="note"><b>Tip:</b> right-click the Docket.html file → <i>Send to</i> → <i>Desktop (create shortcut)</i>
@@ -1788,7 +1907,7 @@
       </div>
       <p class="clearwarn" id="clearWarn"></p>
       <div class="backupnote">
-        <span><b>Keep a copy first.</b> The JSON backup holds everything above, so Import JSON puts it all back.</span>
+        <span><b>Keep a copy first.</b> A backup holds everything above, so Import JSON puts it all back.</span>
         <button id="clearBackup" type="button"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg></span><span>Export JSON</span></button>
       </div>
     </div>
@@ -2438,6 +2557,51 @@
       st.last ? "Most recent work: " + prettyDate(st.last) : "Nothing logged yet");
     wrap.appendChild(stats);
 
+    // what's still to do on this job sits above what's been done
+    var todo = wishlist.filter(function (it) { return it.job === currentJob; });
+    var reps = recurring.filter(function (it) { return it.job === currentJob; });
+    if (todo.length || reps.length) {
+      var q = document.createElement("div");
+      q.className = "jobq";
+      function queueCol(kind, title, items, glyph, sendTip) {
+        if (!items.length) return;
+        var col = document.createElement("div");
+        col.className = "jobq-col";
+        var h = document.createElement("h3");
+        h.textContent = title;
+        var c = document.createElement("span");
+        c.className = "count";
+        c.textContent = items.length;
+        h.appendChild(c);
+        col.appendChild(h);
+        var ul = document.createElement("ul");
+        items.forEach(function (it) {
+          var li = document.createElement("li");
+          var g = document.createElement("span");
+          g.className = "qg";
+          g.textContent = glyph;
+          g.setAttribute("aria-hidden", "true");
+          var t = document.createElement("span");
+          t.className = "qt";
+          t.textContent = it.text;
+          var b = document.createElement("button");
+          b.appendChild(icon("send"));
+          b.dataset.tip = sendTip + " (" + shortDow(currentDate) + " " + currentDate + ")";
+          b.setAttribute("aria-label", sendTip + ": " + it.text);
+          b.addEventListener("click", function () { sendQueueItem(kind, it.id, currentDate); });
+          li.appendChild(g);
+          li.appendChild(t);
+          li.appendChild(b);
+          ul.appendChild(li);
+        });
+        col.appendChild(ul);
+        q.appendChild(col);
+      }
+      queueCol("w", "Wishlist", todo, "⣿", "Log on open day");
+      queueCol("r", "Recurring", reps, "⟳", "Log on open day, keep in Recurring");
+      wrap.appendChild(q);
+    }
+
     if (days.length === 0) {
       var empty = document.createElement("div");
       empty.className = "empty";
@@ -2447,7 +2611,9 @@
       e1.textContent = "Nothing logged against this job yet";
       var e2 = document.createElement("p");
       e2.className = "e2";
-      e2.textContent = "Click “Log Work on This Job” above — new entries will go against it.";
+      e2.textContent = todo.length || reps.length
+        ? "Log an item above with ↳, or click “Log Work on This Job”."
+        : "Click “Log Work on This Job” above — new entries will go against it.";
       empty.appendChild(e1);
       empty.appendChild(e2);
       wrap.appendChild(empty);
@@ -2816,9 +2982,12 @@
         count.textContent = st.n;
         row.appendChild(count);
       }
-      row.dataset.tip = st
-        ? st.n + " entr" + (st.n === 1 ? "y" : "ies") + " over " + st.days.length + " day" + (st.days.length === 1 ? "" : "s") + " — click to see them all"
-        : "Nothing logged on " + j.text + " yet — click to open it";
+      var open = wishlist.filter(function (it) { return it.job === j.id; }).length +
+        recurring.filter(function (it) { return it.job === j.id; }).length;
+      row.dataset.tip = (st
+        ? st.n + " entr" + (st.n === 1 ? "y" : "ies") + " over " + st.days.length + " day" + (st.days.length === 1 ? "" : "s")
+        : "Nothing logged yet") +
+        (open ? " · " + open + " on the wishlist/recurring" : "") + " — click to see it all";
       row.setAttribute("aria-label", "Open job " + j.text + (st ? ", " + st.n + " entries" : ""));
       row.addEventListener("click", function () { openJob(j.id); });
 
@@ -2867,50 +3036,98 @@
     if (!j || clean === "" || clean === j.text) return;
     var other = jobByName(clean);
     if (other && other.id !== id) { toast("There's already a job called “" + other.text + "”"); return; }
-    var wasActive = jobByName($("newJob").value) === j;
+    var old = j.text;
     j.text = clean;
     saveJobs();
-    if (wasActive) setJobBox(clean);
+    retargetJobBoxes(old, clean);
   }
 
   function removeJob(id) {
     var i = jobs.findIndex(function (j) { return j.id === id; });
     if (i === -1) return;
     var gone = jobs.splice(i, 1)[0];
+    // entries, wishlist and recurring items all keep their place, minus the job
     var touched = [];
-    Object.keys(data).forEach(function (d) {
-      (data[d] || []).forEach(function (it) {
-        if (it.job === id) { touched.push(it); delete it.job; }
-      });
-    });
-    // the Job box shouldn't keep offering a job that no longer exists
-    if (cleanJobName($("newJob").value).toLowerCase() === gone.text.toLowerCase()) setJobBox("");
-    saveJobs();
-    save();
+    function strip(it) { if (it.job === id) { touched.push(it); delete it.job; } }
+    Object.keys(data).forEach(function (d) { (data[d] || []).forEach(strip); });
+    wishlist.forEach(strip);
+    recurring.forEach(strip);
+    // job boxes shouldn't keep offering a job that no longer exists
+    retargetJobBoxes(gone.text, "");
+    function saveAll() { saveJobs(); save(); saveWishlist(); saveRecurring(); }
+    saveAll();
     render();
-    toast("Job deleted" + (touched.length ? " — its " + touched.length + " entr" + (touched.length === 1 ? "y stays" : "ies stay") + " in the log" : ""), function () {
+    toast("Job deleted" + (touched.length ? " — the " + touched.length + " item" + (touched.length === 1 ? "" : "s") + " on it stay, without the job" : ""), function () {
       jobs.splice(Math.min(i, jobs.length), 0, gone);
       touched.forEach(function (it) { it.job = gone.id; });
-      saveJobs();
-      save();
+      saveAll();
       render();
     });
   }
 
-  // The Job box above the log: sticky, so a run of entries share a job.
-  function setJobBox(name) {
-    $("newJob").value = name;
-    syncJobBox();
+  // Every "Job (optional)" box behaves the same: it stays set between adds,
+  // matches an existing job whatever the case, and ✕ clears it. The boxes
+  // are registered so a rename or delete reaches all of them.
+  var jobBoxes = {};
+  function registerJobBox(key, input, wrap, clearBtn, tips) {
+    var box = { input: input, wrap: wrap, tips: tips };
+    jobBoxes[key] = box;
+    input.addEventListener("input", function () { syncJobInput(box); });
+    input.addEventListener("change", function () { syncJobInput(box); });
+    input.addEventListener("blur", function () {
+      var known = jobByName(input.value);
+      setJobInput(box, known ? known.text : cleanJobName(input.value)); // the job's exact spelling
+    });
+    clearBtn.addEventListener("click", function () {
+      setJobInput(box, "");
+      input.focus();
+    });
+    syncJobInput(box);
+    return box;
   }
-  function syncJobBox() {
-    var v = cleanJobName($("newJob").value);
-    var wrap = $("jobWrap");
-    wrap.classList.toggle("set", v !== "");
+  function syncJobInput(box) {
+    var v = cleanJobName(box.input.value);
+    box.wrap.classList.toggle("set", v !== "");
     var known = jobByName(v);
-    wrap.dataset.tip = v === ""
-      ? "Job — entries you add go against it, and it stays set so you can log several in a row. Shortcut: J"
-      : (known ? "New entries go against “" + known.text + "”" : "New job “" + v + "” — created when you add an entry") +
-        " · ✕ to stop";
+    box.wrap.dataset.tip = v === "" ? box.tips.empty
+      : (known ? box.tips.set + " “" + known.text + "”" : "New job “" + v + "” — created when you add") + " · ✕ to stop";
+  }
+  function setJobInput(box, name) {
+    box.input.value = name;
+    syncJobInput(box);
+  }
+  function setJobBox(name) { setJobInput(jobBoxes.main, name); }
+  // After a rename (newName) or delete (""), boxes showing the old name follow.
+  function retargetJobBoxes(oldName, newName) {
+    Object.keys(jobBoxes).forEach(function (k) {
+      var box = jobBoxes[k];
+      if (cleanJobName(box.input.value).toLowerCase() === oldName.toLowerCase()) setJobInput(box, newName);
+    });
+  }
+
+  // Import merging. A file that carries jobs (ctx.jobAware) treats the same
+  // words on different jobs as different items; a file from before jobs
+  // can't tell, so the same words count as a duplicate whatever the job.
+  // A job in the file fills in a job-less item that was already here — so
+  // re-importing a newer backup upgrades older copies — but never one this
+  // same import just added, which keeps a backup's own rows apart.
+  // Returns "added", "updated" or "dup".
+  function newImport(jobAware) { return { jobAware: jobAware, fresh: {} }; }
+  function mergeItem(list, text, jobId, ctx) {
+    var same = list.filter(function (it) { return it.text === text; });
+    var jobOf = function (it) { return jobById(it.job) ? it.job : null; };
+    if (!ctx.jobAware) {
+      if (same.length) return "dup";
+    } else {
+      if (same.some(function (it) { return jobOf(it) === (jobId || null); })) return "dup";
+      var bare = jobId && same.find(function (it) { return !jobOf(it) && !ctx.fresh[it.id]; });
+      if (bare) { bare.job = jobId; return "updated"; }
+    }
+    var item = { id: newId(), text: text };
+    if (jobId) item.job = jobId;
+    list.push(item);
+    ctx.fresh[item.id] = true;
+    return "added";
   }
 
   // ---------- wishlist & recurring ----------
@@ -2930,21 +3147,45 @@
       e.stopPropagation();
       el.classList.remove("droptarget");
       var payload = e.dataTransfer.getData("text/plain");
-      if (payload.indexOf("w:") === 0) moveWishToDay(payload.slice(2), getDay());
-      else if (payload.indexOf("r:") === 0) assignRecurringToDay(payload.slice(2), getDay());
+      if (payload.indexOf("w:") === 0 || payload.indexOf("r:") === 0) {
+        sendQueueItem(payload.charAt(0), payload.slice(2), getDay());
+      }
     });
+  }
+
+  // The two sidebar lists share everything but what logging does:
+  // "w" (wishlist) moves the item onto the day, "r" (recurring) copies it.
+  var QUEUE = {
+    w: { input: "newWish", noun: "wishlist item", removed: "Removed from wishlist" },
+    r: { input: "newRec", noun: "recurring task", removed: "Recurring task deleted" }
+  };
+  function queueList(kind) { return kind === "w" ? wishlist : recurring; }
+  function saveQueue(kind) { if (kind === "w") saveWishlist(); else saveRecurring(); }
+  function removeEntryById(day, entryId) {
+    var list = data[day] || [];
+    var k = list.findIndex(function (it) { return it.id === entryId; });
+    if (k !== -1) list.splice(k, 1);
   }
 
   function assignRecurringToDay(id, day) {
     var item = recurring.find(function (it) { return it.id === id; });
     if (!item) return;
     if (!data[day]) data[day] = [];
-    var dup = data[day].some(function (it) { return it.text === item.text; });
+    var job = jobById(item.job) ? item.job : null;
+    var dup = data[day].some(function (it) {
+      return it.text === item.text && (jobById(it.job) ? it.job : null) === job;
+    });
     if (dup) { toast("Already logged on " + shortDow(day) + " " + day); return; }
-    data[day].push({ id: newId(), text: item.text });
+    var entry = { id: newId(), text: item.text };
+    if (job) entry.job = job;
+    data[day].push(entry);
     save();
     render();
-    toast("Logged on " + shortDow(day) + " " + day + " — kept in Recurring");
+    toast("Logged on " + shortDow(day) + " " + day + " — kept in Recurring", function () {
+      removeEntryById(day, entry.id);
+      save();
+      render();
+    });
   }
 
   function moveWishToDay(id, day) {
@@ -2952,53 +3193,157 @@
     if (i === -1) return;
     var item = wishlist.splice(i, 1)[0];
     if (!data[day]) data[day] = [];
-    data[day].push({ id: newId(), text: item.text });
+    var entry = { id: newId(), text: item.text };
+    if (jobById(item.job)) entry.job = item.job;
+    data[day].push(entry);
     saveWishlist();
     save();
     render();
-    toast("Moved to " + shortDow(day) + " " + day);
-  }
-
-  function addWish() {
-    var input = $("newWish");
-    var v = input.value.trim();
-    if (v === "") return;
-    wishlist.push({ id: newId(), text: v });
-    input.value = "";
-    saveWishlist();
-    renderWishlist();
-    input.focus();
-  }
-
-  function removeWish(id) {
-    var i = wishlist.findIndex(function (it) { return it.id === id; });
-    if (i === -1) return;
-    var gone = wishlist.splice(i, 1)[0];
-    saveWishlist();
-    renderWishlist();
-    toast("Removed from wishlist", function () {
-      wishlist.splice(Math.min(i, wishlist.length), 0, gone);
+    toast("Moved to " + shortDow(day) + " " + day, function () {
+      removeEntryById(day, entry.id);
+      wishlist.splice(Math.min(i, wishlist.length), 0, item);
       saveWishlist();
-      renderWishlist();
+      save();
+      render();
     });
   }
 
+  function sendQueueItem(kind, id, day) {
+    if (kind === "w") moveWishToDay(id, day); else assignRecurringToDay(id, day);
+  }
+
+  function addQueueItem(kind) {
+    var input = $(QUEUE[kind].input);
+    var v = input.value.trim();
+    if (v === "") return;
+    var item = { id: newId(), text: v };
+    var box = jobBoxes[kind];
+    var jid = ensureJob(box.input.value);
+    if (jid) {
+      item.job = jid;
+      setJobInput(box, jobById(jid).text);
+    }
+    queueList(kind).push(item);
+    input.value = "";
+    saveQueue(kind);
+    render(); // a new job shows up in the Jobs list and Job view too
+    input.focus();
+  }
+
+  function removeQueueItem(kind, id) {
+    var list = queueList(kind);
+    var i = list.findIndex(function (it) { return it.id === id; });
+    if (i === -1) return;
+    var gone = list.splice(i, 1)[0];
+    if (queueEdit && queueEdit.id === id) queueEdit = null;
+    saveQueue(kind);
+    render();
+    toast(QUEUE[kind].removed, function () {
+      var l = queueList(kind);
+      l.splice(Math.min(i, l.length), 0, gone);
+      saveQueue(kind);
+      render();
+    });
+  }
+
+  // The list item being edited: { kind, id }; focus is taken once, on open,
+  // so unrelated re-renders don't pull the cursor into the sidebar.
+  var queueEdit = null;
+  var queueEditFocus = false;
+  function startQueueEdit(kind, id) {
+    queueEdit = { kind: kind, id: id };
+    queueEditFocus = true;
+    render();
+  }
+
+  function buildQueueEditor(kind, item) {
+    var li = document.createElement("li");
+    li.className = "qediting";
+
+    var input = document.createElement("input");
+    input.type = "text";
+    input.value = item.text;
+    input.setAttribute("aria-label", "Edit " + QUEUE[kind].noun);
+
+    var jobWrap = document.createElement("div");
+    jobWrap.className = "jobwrap";
+    jobWrap.dataset.tip = "The job this belongs to — pick one, type a new name, or leave empty";
+    jobWrap.appendChild(icon("job"));
+    var jobInput = document.createElement("input");
+    jobInput.type = "text";
+    jobInput.setAttribute("list", "jobOptions");
+    jobInput.maxLength = JOB_MAX;
+    jobInput.placeholder = "No job";
+    jobInput.autocomplete = "off";
+    jobInput.value = jobName(item);
+    jobInput.setAttribute("aria-label", "Job for this " + QUEUE[kind].noun);
+    jobWrap.appendChild(jobInput);
+
+    function commit() {
+      var v = input.value.trim();
+      queueEdit = null;
+      if (v === "") { removeQueueItem(kind, item.id); return; }
+      item.text = v;
+      var jid = ensureJob(jobInput.value);
+      if (jid) item.job = jid; else delete item.job;
+      saveQueue(kind);
+      render();
+    }
+    function cancel() {
+      queueEdit = null;
+      render();
+    }
+    [input, jobInput].forEach(function (el) {
+      el.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") { e.preventDefault(); commit(); }
+        if (e.key === "Escape") { e.preventDefault(); cancel(); }
+      });
+    });
+
+    var row = document.createElement("div");
+    row.className = "qrow";
+    var saveBtn = document.createElement("button");
+    saveBtn.className = "save";
+    saveBtn.textContent = "Save";
+    saveBtn.addEventListener("click", commit);
+    var cancelBtn = document.createElement("button");
+    cancelBtn.className = "cancel";
+    cancelBtn.textContent = "Cancel";
+    cancelBtn.addEventListener("click", cancel);
+    row.appendChild(saveBtn);
+    row.appendChild(cancelBtn);
+
+    li.appendChild(input);
+    li.appendChild(jobWrap);
+    li.appendChild(row);
+    if (queueEditFocus) {
+      queueEditFocus = false;
+      setTimeout(function () { input.focus(); input.select(); }, 0);
+    }
+    return li;
+  }
+
   // Shared renderer for the two sidebar queues (wishlist + recurring).
-  function renderQueue(ul, list, cfg) {
+  function renderQueue(kind, ul, cfg) {
+    var list = queueList(kind);
     ul.innerHTML = "";
 
     if (list.length === 0) {
-      var li = document.createElement("li");
-      li.style.cursor = "default";
+      var li0 = document.createElement("li");
+      li0.style.cursor = "default";
       var span = document.createElement("span");
       span.className = "nothing";
       span.textContent = cfg.emptyText;
-      li.appendChild(span);
-      ul.appendChild(li);
+      li0.appendChild(span);
+      ul.appendChild(li0);
       return;
     }
 
     list.forEach(function (item) {
+      if (queueEdit && queueEdit.kind === kind && queueEdit.id === item.id) {
+        ul.appendChild(buildQueueEditor(kind, item));
+        return;
+      }
       var li = document.createElement("li");
       li.draggable = true;
 
@@ -3006,16 +3351,22 @@
       grip.className = "grip";
       grip.textContent = cfg.grip;
 
+      var body = document.createElement("div");
+      body.className = "wbody";
       var txt = document.createElement("div");
       txt.className = "wtxt";
       txt.textContent = item.text;
-      txt.spellcheck = false;
       txt.dataset.tip = "Click to edit · drag onto the log or any day";
+      txt.addEventListener("click", function () { startQueueEdit(kind, item.id); });
+      body.appendChild(txt);
+      var pill = jobPill(item);
+      if (pill) {
+        pill.draggable = false;
+        body.appendChild(pill);
+      }
 
       li.addEventListener("dragstart", function (e) {
-        // an active edit means the user is typing, not dragging
-        if (txt.isContentEditable) { e.preventDefault(); return; }
-        e.dataTransfer.setData("text/plain", cfg.prefix + item.id);
+        e.dataTransfer.setData("text/plain", kind + ":" + item.id);
         e.dataTransfer.effectAllowed = "move";
         li.classList.add("dragging");
       });
@@ -3023,54 +3374,31 @@
         li.classList.remove("dragging");
       });
 
-      // Editable only on click: an always-on contenteditable hijacks
-      // mouse-drags into text selection and makes the li undraggable.
-      txt.addEventListener("click", function (e) {
-        if (txt.isContentEditable) return;
-        txt.contentEditable = "plaintext-only";
-        if (!txt.isContentEditable) txt.contentEditable = "true";
-        txt.focus();
-        if (document.caretRangeFromPoint) {
-          var r = document.caretRangeFromPoint(e.clientX, e.clientY);
-          if (r) {
-            var sel = window.getSelection();
-            sel.removeAllRanges();
-            sel.addRange(r);
-          }
-        }
-      });
-      txt.addEventListener("blur", function () {
-        txt.contentEditable = "false";
-        var v = txt.textContent.trim();
-        if (v === "") {
-          cfg.remove(item.id);
-        } else if (v !== item.text) {
-          item.text = v;
-          cfg.saveList();
-        }
-      });
-      txt.addEventListener("keydown", function (e) {
-        if (e.key === "Enter") { e.preventDefault(); txt.blur(); }
-        if (e.key === "Escape") { txt.textContent = item.text; txt.blur(); }
-      });
-
       var send = document.createElement("button");
       send.className = "wbtn send";
       send.appendChild(icon("send"));
       send.dataset.tip = cfg.sendTitle + " (" + shortDow(currentDate) + " " + currentDate + ")";
       send.setAttribute("aria-label", cfg.sendTitle);
-      send.addEventListener("click", function () { cfg.send(item.id, currentDate); });
+      send.addEventListener("click", function () { sendQueueItem(kind, item.id, currentDate); });
+
+      var edit = document.createElement("button");
+      edit.className = "wbtn edit";
+      edit.appendChild(icon("pencil"));
+      edit.dataset.tip = "Edit the text or set its job";
+      edit.setAttribute("aria-label", "Edit " + QUEUE[kind].noun);
+      edit.addEventListener("click", function () { startQueueEdit(kind, item.id); });
 
       var kill = document.createElement("button");
       kill.className = "wbtn kill";
       kill.appendChild(icon("x"));
       kill.dataset.tip = cfg.killTitle + " — you can Undo";
       kill.setAttribute("aria-label", cfg.killTitle);
-      kill.addEventListener("click", function () { cfg.remove(item.id); });
+      kill.addEventListener("click", function () { removeQueueItem(kind, item.id); });
 
       li.appendChild(grip);
-      li.appendChild(txt);
+      li.appendChild(body);
       li.appendChild(send);
+      li.appendChild(edit);
       li.appendChild(kill);
       ul.appendChild(li);
     });
@@ -3078,53 +3406,21 @@
 
   function renderWishlist() {
     $("wishCount").textContent = wishlist.length ? "· " + wishlist.length : "";
-    renderQueue($("wishList"), wishlist, {
-      prefix: "w:",
+    renderQueue("w", $("wishList"), {
       grip: "⣿",
       emptyText: "Nothing queued",
       sendTitle: "Log on open day",
-      killTitle: "Delete from wishlist",
-      send: moveWishToDay,
-      remove: removeWish,
-      saveList: saveWishlist
+      killTitle: "Delete from wishlist"
     });
   }
 
   function renderRecurring() {
     $("recCount").textContent = recurring.length ? "· " + recurring.length : "";
-    renderQueue($("recList"), recurring, {
-      prefix: "r:",
+    renderQueue("r", $("recList"), {
       grip: "⟳",
       emptyText: "No recurring tasks",
       sendTitle: "Log on open day, keep here",
-      killTitle: "Delete recurring task",
-      send: assignRecurringToDay,
-      remove: removeRec,
-      saveList: saveRecurring
-    });
-  }
-
-  function addRec() {
-    var input = $("newRec");
-    var v = input.value.trim();
-    if (v === "") return;
-    recurring.push({ id: newId(), text: v });
-    input.value = "";
-    saveRecurring();
-    renderRecurring();
-    input.focus();
-  }
-
-  function removeRec(id) {
-    var i = recurring.findIndex(function (it) { return it.id === id; });
-    if (i === -1) return;
-    var gone = recurring.splice(i, 1)[0];
-    saveRecurring();
-    renderRecurring();
-    toast("Recurring task deleted", function () {
-      recurring.splice(Math.min(i, recurring.length), 0, gone);
-      saveRecurring();
-      renderRecurring();
+      killTitle: "Delete recurring task"
     });
   }
 
@@ -3299,18 +3595,26 @@
 
   function exportCSV() {
     var days = Object.keys(data).sort();
-    if (days.length === 0 && jobs.length === 0) { toast("Nothing to export"); return; }
+    if (days.length === 0 && jobs.length === 0 && wishlist.length === 0 && recurring.length === 0) {
+      toast("Nothing to export");
+      return;
+    }
     var lines = ["Date,Task,Job"];
+    var used = {};
+    function row(first, it) {
+      if (jobById(it.job)) used[it.job] = true;
+      lines.push(first + "," + csvQuote(it.text) + "," + csvQuote(jobName(it)));
+    }
     days.forEach(function (d) {
-      data[d].forEach(function (it) {
-        lines.push(d + "," + csvQuote(it.text) + "," + csvQuote(jobName(it)));
-      });
+      data[d].forEach(function (it) { row(d, it); });
     });
-    // Jobs with nothing logged yet still belong in the export: a row with
-    // only the Job column recreates them on import.
-    var stats = jobStats();
+    // The lists ride along with "Wishlist" / "Recurring" in the Date column.
+    wishlist.forEach(function (it) { row("Wishlist", it); });
+    recurring.forEach(function (it) { row("Recurring", it); });
+    // Jobs nothing points at still belong in the export: a row with only
+    // the Job column recreates them on import.
     jobs.forEach(function (j) {
-      if (!stats[j.id]) lines.push(",," + csvQuote(j.text));
+      if (!used[j.id]) lines.push(",," + csvQuote(j.text));
     });
     // BOM so Excel opens it as UTF-8
     downloadFile("docket-export-" + todayISO() + ".csv", "﻿" + lines.join("\r\n"), "text/csv");
@@ -3326,9 +3630,13 @@
     reader.onload = function () {
       var rows = parseCSV(String(reader.result));
       if (rows.length === 0) { toast("CSV is empty"); return; }
-      var start = parseDateFlexible(rows[0][0]) ? 0 : 1; // skip header row
+      var LIST_ROW = /^(wishlist|recurring)$/i;
+      var first = String(rows[0][0] || "").trim();
+      var start = parseDateFlexible(first) || LIST_ROW.test(first) ? 0 : 1; // skip header row
       var jobCol = start === 1 && /^(job|project|client|group)$/i.test(String(rows[0][2] || "").trim());
-      var added = 0, skipped = 0, daysTouched = {};
+      var added = 0, skipped = 0, filled = 0, daysTouched = {};
+      var ctx = newImport(jobCol);
+      var listAdded = { w: 0, r: 0 };
       var jobsBefore = jobs.length;
       for (var i = start; i < rows.length; i++) {
         var day = parseDateFlexible(rows[i][0]);
@@ -3340,23 +3648,29 @@
           .join(", ");
         // a job-only row (no date, no task) is a job with nothing logged yet
         if (jobText && cells[0] === "" && text === "") { ensureJob(jobText); continue; }
-        if (!day || text === "") { skipped++; continue; }
-        if (!data[day]) data[day] = [];
-        var dup = data[day].some(function (it) { return it.text === text; });
-        if (dup) { skipped++; continue; }
-        var row = { id: newId(), text: text };
-        var jid = ensureJob(jobText);
-        if (jid) row.job = jid;
-        data[day].push(row);
+        var listKind = LIST_ROW.test(cells[0]) ? cells[0].charAt(0).toLowerCase() : null;
+        if ((!day && !listKind) || text === "") { skipped++; continue; }
+        var target = listKind ? queueList(listKind) : (data[day] || (data[day] = []));
+        var result = mergeItem(target, text, ensureJob(jobText), ctx);
+        if (result === "dup") { skipped++; continue; }
+        if (result === "updated") { filled++; continue; }
+        if (listKind) { listAdded[listKind]++; continue; }
         daysTouched[day] = true;
         added++;
       }
       save();
+      saveWishlist();
+      saveRecurring();
       render();
       var dayCount = Object.keys(daysTouched).length;
       var newJobs = jobs.length - jobsBefore;
-      var jobNote = newJobs ? " · " + newJobs + " new job" + (newJobs === 1 ? "" : "s") : "";
-      if (added === 0) {
+      var jobNote = (newJobs ? " · " + newJobs + " new job" + (newJobs === 1 ? "" : "s") : "") +
+        (listAdded.w ? " · " + listAdded.w + " to the wishlist" : "") +
+        (listAdded.r ? " · " + listAdded.r + " recurring" : "") +
+        (filled ? " · " + filled + " given their job" : "");
+      if (added === 0 && (newJobs || listAdded.w || listAdded.r || filled)) {
+        toast("Imported" + jobNote.replace(/^ ·/, "") + (skipped ? " — " + skipped + " skipped" : ""));
+      } else if (added === 0) {
         toast("Nothing imported — " + skipped + " row" + (skipped === 1 ? "" : "s") + " skipped (duplicate or unreadable)" + jobNote);
       } else {
         toast("Imported " + added + " entr" + (added === 1 ? "y" : "ies") +
@@ -3388,23 +3702,8 @@
         if (!incoming || typeof incoming !== "object" || Array.isArray(incoming)) {
           throw new Error("bad format");
         }
-        var added = 0;
-        function mergeQueue(incomingList, target, saveFn) {
-          if (!Array.isArray(incomingList)) return;
-          var texts = target.map(function (it) { return it.text; });
-          incomingList.forEach(function (it) {
-            var text = (it && typeof it.text === "string") ? it.text
-                     : (typeof it === "string") ? it : null;
-            if (text && texts.indexOf(text) === -1) {
-              target.push({ id: newId(), text: text });
-              texts.push(text);
-              added++;
-            }
-          });
-          saveFn();
-        }
-        mergeQueue(incoming._wishlist, wishlist, saveWishlist);
-        mergeQueue(incoming._recurring, recurring, saveRecurring);
+        var added = 0, filled = 0;
+        var ctx = newImport(Array.isArray(incoming._jobs));
         // Jobs merge by name; the backup's job ids are mapped onto local ones.
         var jobMap = {};
         if (Array.isArray(incoming._jobs)) {
@@ -3415,27 +3714,33 @@
             if (local) { jobMap[j.id] = local; if (!had) added++; }
           });
         }
+        // Entries, wishlist and recurring all merge by the same rule.
+        function mergeAll(incomingList, target) {
+          if (!Array.isArray(incomingList)) return;
+          incomingList.forEach(function (it) {
+            var text = (it && typeof it.text === "string") ? it.text
+                     : (typeof it === "string") ? it : null;
+            if (!text) return;
+            var r = mergeItem(target, text, (it && jobMap[it.job]) || null, ctx);
+            if (r === "added") added++;
+            if (r === "updated") filled++;
+          });
+        }
+        mergeAll(incoming._wishlist, wishlist);
+        mergeAll(incoming._recurring, recurring);
         Object.keys(incoming).forEach(function (day) {
           if (!/^\d{4}-\d{2}-\d{2}$/.test(day) || !Array.isArray(incoming[day])) return;
           if (!data[day]) data[day] = [];
-          var existing = data[day].map(function (it) { return it.text; });
-          incoming[day].forEach(function (it) {
-            var text = (it && typeof it.text === "string") ? it.text
-                     : (typeof it === "string") ? it : null;
-            if (text && existing.indexOf(text) === -1) {
-              var entry = { id: newId(), text: text };
-              if (it && jobMap[it.job]) entry.job = jobMap[it.job];
-              data[day].push(entry);
-              existing.push(text);
-              added++;
-            }
-          });
+          mergeAll(incoming[day], data[day]);
         });
         save();
+        saveWishlist();
+        saveRecurring();
         render();
-        toast(added === 0
-          ? "Nothing new — every entry in that backup is already in your log"
-          : "Imported " + added + " item" + (added === 1 ? "" : "s"));
+        toast(added === 0 && filled === 0
+          ? "Nothing new — everything in that backup is already here"
+          : "Imported " + added + " item" + (added === 1 ? "" : "s") +
+            (filled ? " · " + filled + " given their job" : ""));
       } catch (e) {
         toast("Import failed — not a valid Docket backup file");
       }
@@ -3445,13 +3750,34 @@
 
   // ---------- wiring ----------
   makeDropTarget($("logPanel"), function () { return currentDate; });
-  $("addWishBtn").addEventListener("click", addWish);
-  $("newWish").addEventListener("keydown", function (e) {
-    if (e.key === "Enter") addWish();
+  registerJobBox("main", $("newJob"), $("jobWrap"), $("jobClear"), {
+    empty: "Job — entries you add go against it, and it stays set so you can log several in a row. Shortcut: J",
+    set: "New entries go against"
+  });
+  registerJobBox("w", $("wishJob"), $("wishJobWrap"), $("wishJobClear"), {
+    empty: "Job for new wishlist items (optional) — it stays set for the next one",
+    set: "New wishlist items go against"
+  });
+  registerJobBox("r", $("recJob"), $("recJobWrap"), $("recJobClear"), {
+    empty: "Job for new recurring tasks (optional) — it stays set for the next one",
+    set: "New recurring tasks go against"
+  });
+  // Enter in a list's job box adds what's typed, or moves on to typing it.
+  ["w", "r"].forEach(function (kind) {
+    var input = $(QUEUE[kind].input);
+    $(kind === "w" ? "addWishBtn" : "addRecBtn").addEventListener("click", function () { addQueueItem(kind); });
+    input.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") addQueueItem(kind);
+    });
+    jobBoxes[kind].input.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        if (input.value.trim() !== "") addQueueItem(kind); else input.focus();
+      }
+      if (e.key === "Escape") setJobInput(jobBoxes[kind], "");
+    });
   });
   $("addBtn").addEventListener("click", addItem);
-  $("newJob").addEventListener("input", syncJobBox);
-  $("newJob").addEventListener("change", syncJobBox);
   $("newJob").addEventListener("keydown", function (e) {
     if (e.key === "Enter") {
       e.preventDefault();
@@ -3459,15 +3785,6 @@
       if ($("newItem").value.trim() !== "") addItem(); else $("newItem").focus();
     }
     if (e.key === "Escape") { setJobBox(""); }
-  });
-  $("newJob").addEventListener("blur", function () {
-    var known = jobByName(this.value);
-    if (known) setJobBox(known.text); // match the job's exact spelling
-    else setJobBox(cleanJobName(this.value));
-  });
-  $("jobClear").addEventListener("click", function () {
-    setJobBox("");
-    $("newJob").focus();
   });
   $("addJobBtn").addEventListener("click", addJobFromSide);
   $("newJobSide").addEventListener("keydown", function (e) {
@@ -3526,10 +3843,6 @@
   }
   $("copyDay").addEventListener("click", function () { copyView(true); });
   $("copyPlain").addEventListener("click", function () { copyView(false); });
-  $("addRecBtn").addEventListener("click", addRec);
-  $("newRec").addEventListener("keydown", function (e) {
-    if (e.key === "Enter") addRec();
-  });
   $("clearDay").addEventListener("click", function () {
     var day = currentDate;
     var gone = data[day] || [];
@@ -3594,8 +3907,9 @@
     $("clearGo").disabled = !anything;
     var all = CLEAR_OPTS.every(function (o) { return p[o.key]; });
     $("clearGo").textContent = all ? "Clear everything" : "Clear selected";
-    $("clearWarn").textContent = p.jobs && !p.log && t.n
-      ? "Entries you keep will lose their job — the entries themselves stay."
+    var keptWithJobs = (!p.log && t.n) || (!p.wish && wishlist.length) || (!p.rec && recurring.length);
+    $("clearWarn").textContent = p.jobs && jobs.length && keptWithJobs
+      ? "Anything you keep will lose its job — the items themselves stay."
       : (!anything ? "Nothing to clear with that selection." : "");
   }
   function openClear() {
@@ -3626,13 +3940,16 @@
       Object.keys(data).forEach(function (d) {
         (data[d] || []).forEach(function (it) { delete it.job; });
       });
-      setJobBox("");
+      wishlist.forEach(function (it) { delete it.job; });
+      recurring.forEach(function (it) { delete it.job; });
+      Object.keys(jobBoxes).forEach(function (k) { setJobInput(jobBoxes[k], ""); });
     }
     if (p.wish && wishlist.length) { gone.push(plural(wishlist.length, "wishlist item", "wishlist items")); wishlist = []; }
     if (p.rec && recurring.length) { gone.push(plural(recurring.length, "recurring task", "recurring tasks")); recurring = []; }
     if (gone.length === 0) return;
     editingId = null;
     renamingJob = null;
+    queueEdit = null;
     save();
     saveJobs();
     saveWishlist();
