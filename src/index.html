@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#0a0b0e">
+<meta name="description" content="Docket — a black-and-silver daily work log. Record what you did each day, group it by job, and copy it straight into an email, timesheet or invoice. Works offline; your data stays on your device.">
+<meta name="application-name" content="Docket">
+<meta name="apple-mobile-web-app-title" content="Docket">
+<title>Docket — Daily Work Log</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230a0b0e'/%3E%3Crect x='9' y='6' width='14' height='21' rx='2.5' fill='none' stroke='%23c9d0d9' stroke-width='2'/%3E%3Crect x='12' y='3.5' width='8' height='4.5' rx='1.5' fill='%23c9d0d9'/%3E%3Cpath d='M12 16l2.6 2.6 5.4-5.8' fill='none' stroke='%23c9d0d9' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230a0b0e'/%3E%3Crect x='9' y='6' width='14' height='21' rx='2.5' fill='none' stroke='%23c9d0d9' stroke-width='2'/%3E%3Crect x='12' y='3.5' width='8' height='4.5' rx='1.5' fill='%23c9d0d9'/%3E%3Cpath d='M12 16l2.6 2.6 5.4-5.8' fill='none' stroke='%23c9d0d9' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="mast">
+  <div class="brand">
+    <span class="glyph" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none"><rect x="9" y="6" width="14" height="21" rx="2.5" stroke="currentColor" stroke-width="2"/><rect x="12" y="3.5" width="8" height="4.5" rx="1.5" fill="currentColor" stroke="none"/><path d="M12 16l2.6 2.6 5.4-5.8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+    <span class="brand-text">
+      <span class="name">Docket</span>
+      <span class="sub">Daily work log</span>
+    </span>
+  </div>
+  <div class="tabs" id="viewTabs">
+    <button data-view="day" class="active" data-tip="One day at a time — shortcut: D">Day</button>
+    <button data-view="week" data-tip="The whole week at a glance — shortcut: W">Week</button>
+    <button data-view="month" data-tip="Calendar with entry counts — shortcut: M">Month</button>
+  </div>
+  <div class="head-right">
+    <button class="installbtn" id="installBtn" hidden data-tip="Install Docket as an app — its own window, Start menu / dock icon, and it works offline"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg></span>Install app</button>
+    <div class="saved-pill" id="savedPill" data-tip="Everything saves to this browser automatically — keep an occasional Export as a backup"><span class="dot">●</span> Auto-saved locally</div>
+    <button class="helpbtn" id="helpBtn" data-tip="How Docket works — shortcut: ?" aria-label="How Docket works">?</button>
+  </div>
+</header>
+<div class="app">
+
+  <aside class="side">
+    <section class="grow">
+      <h2>Recent days</h2>
+      <ul class="daylist" id="dayList"></ul>
+    </section>
+
+    <section>
+      <h2>Jobs <span class="qcount" id="jobCount"></span></h2>
+      <div class="wish-add">
+        <input type="text" id="newJobSide" placeholder="New job…" autocomplete="off" maxlength="60" aria-label="New job name">
+        <button id="addJobBtn" data-tip="Add a job" aria-label="Add a job">+</button>
+      </div>
+      <ul class="joblist" id="jobList"></ul>
+      <div class="wish-hint">Click a job to see everything on it — logged and still to do</div>
+    </section>
+
+    <section>
+      <h2>Wishlist <span class="qcount" id="wishCount"></span></h2>
+      <div class="wish-add">
+        <input type="text" id="newWish" placeholder="Needs doing…" autocomplete="off" aria-label="New wishlist item">
+        <button id="addWishBtn" data-tip="Add to the wishlist" aria-label="Add to the wishlist">+</button>
+        <div class="jobwrap" id="wishJobWrap">
+          <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span>
+          <input type="text" id="wishJob" list="jobOptions" placeholder="Job (optional)" autocomplete="off" maxlength="60" aria-label="Job for new wishlist items (optional)">
+          <button type="button" class="jobclear" id="wishJobClear" data-tip="Stop adding to this job" aria-label="Clear job"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></span></button>
+        </div>
+      </div>
+      <ul class="wishlist" id="wishList"></ul>
+      <div class="wish-hint">Drag onto the log or a day · ↳ sends to open day</div>
+    </section>
+
+    <section>
+      <h2>Recurring <span class="qcount" id="recCount"></span></h2>
+      <div class="wish-add">
+        <input type="text" id="newRec" placeholder="Happens often…" autocomplete="off" aria-label="New recurring task">
+        <button id="addRecBtn" data-tip="Add a recurring task" aria-label="Add a recurring task">+</button>
+        <div class="jobwrap" id="recJobWrap">
+          <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span>
+          <input type="text" id="recJob" list="jobOptions" placeholder="Job (optional)" autocomplete="off" maxlength="60" aria-label="Job for new recurring items (optional)">
+          <button type="button" class="jobclear" id="recJobClear" data-tip="Stop adding to this job" aria-label="Clear job"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></span></button>
+        </div>
+      </div>
+      <ul class="wishlist" id="recList"></ul>
+      <div class="wish-hint">Drag or ↳ to log it on a day — it stays in this list</div>
+    </section>
+
+    <section class="tools">
+      <h2>Backup &amp; data</h2>
+      <div class="tools-grid">
+        <button id="exportBtn" data-tip="Back up everything — log, jobs, wishlist and recurring — to a JSON file"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg></span>Export JSON</button>
+        <button id="importBtn" data-tip="Merge a JSON backup back in — duplicates are skipped"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 8 5-5 5 5"/><path d="M12 3v12"/></svg></span>Import JSON</button>
+        <button id="csvExportBtn" data-tip="Export the log, jobs, wishlist and recurring as a CSV that opens straight in Excel"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M12 18v-6"/><path d="m9 15 3 3 3-3"/></svg></span>Export CSV</button>
+        <button id="csvImportBtn" data-tip="Bulk-load from a spreadsheet CSV — date first, task second, job third (optional). Duplicates are skipped"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M12 12v6"/><path d="m9 15 3-3 3 3"/></svg></span>Import CSV</button>
+      </div>
+      <button class="clearall" id="clearAllBtn" data-tip="Wipe the log, jobs, wishlist or recurring tasks — e.g. to start fresh and re-import a backup. You choose what goes, and can Undo"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></span>Clear data…</button>
+      <input type="file" id="importFile" accept=".json,application/json" hidden>
+      <input type="file" id="csvFile" accept=".csv,text/csv,text/plain" hidden>
+    </section>
+  </aside>
+
+  <main class="main">
+    <section class="hero">
+      <p class="eyebrow" id="dayTitle"></p>
+      <div class="datenav">
+        <button class="arrow" id="prevDay" data-tip="Previous day — shortcut: ←" aria-label="Previous"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></span></button>
+        <div class="datewrap">
+          <button type="button" class="bigdate" id="navDate" data-tip="Pick a date from the calendar" aria-label="Pick a date"></button>
+          <input type="date" id="datePick" tabindex="-1" aria-label="Date">
+        </div>
+        <button class="arrow" id="nextDay" data-tip="Next day — shortcut: →" aria-label="Next"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></span></button>
+      </div>
+      <div class="side-actions">
+        <button id="copyDay" data-tip="Date heading + bulleted list — ready to paste into an email or invoice. Shortcut: C"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span><span id="copyDayLabel">Copy Day to Clipboard</span></button>
+        <button id="copyPlain" data-tip="Just the lines, one per line — no date heading"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg></span>Copy Items Only</button>
+        <button id="logJobBtn" style="display:none" data-tip="Set this as the job and start logging on the open day — shortcut: N"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span>Log Work on This Job</button>
+        <button id="todayBtn" data-tip="Back to today — shortcut: T"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M12 14h.01"/></svg></span>Jump to Today</button>
+      </div>
+    </section>
+
+    <div class="logzone" id="logPanel">
+      <div class="stats">
+        <div class="stat" data-tip="Entries logged on the open day"><span class="sn" id="statToday">0</span><span class="sl">This day</span></div>
+        <div class="stat" data-tip="Entries in the open day's week (Mon–Sun)"><span class="sn" id="statWeek">0</span><span class="sl">This week</span></div>
+        <div class="stat" data-tip="Entries in the open day's month"><span class="sn" id="statMonth">0</span><span class="sl">This month</span></div>
+        <div class="stat wide">
+          <div class="actstrip" id="actStrip"></div>
+          <span class="sl">Last 14 days</span>
+        </div>
+      </div>
+
+      <div class="addcard">
+        <div class="jobwrap" id="jobWrap" data-tip="Job — entries you add go against it, and it stays set so you can log several in a row. Shortcut: J">
+          <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span>
+          <input type="text" id="newJob" list="jobOptions" placeholder="Job (optional)" autocomplete="off" maxlength="60" aria-label="Job for new entries (optional)">
+          <button type="button" class="jobclear" id="jobClear" data-tip="Stop logging against this job" aria-label="Clear job"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></span></button>
+        </div>
+        <div class="inwrap">
+          <input type="text" id="newItem" placeholder="What did you do?" autocomplete="off" aria-label="What did you do?">
+          <kbd class="enterhint">Enter ↵</kbd>
+        </div>
+        <button id="addBtn" aria-label="Add entry"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>Add</button>
+      </div>
+
+      <div class="sheet" id="sheet"><ol class="items" id="itemList"></ol></div>
+      <div class="empty" id="emptyMsg">
+        <svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><rect x="9" y="6" width="14" height="21" rx="2.5" stroke="currentColor" stroke-width="1.6"/><rect x="12" y="3.5" width="8" height="4.5" rx="1.5" fill="currentColor" stroke="none"/><path d="M12 16l2.6 2.6 5.4-5.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <p class="e1">Nothing logged for this day yet</p>
+        <p class="e2">Type above and press Enter — or drag something in from the Wishlist.</p>
+      </div>
+
+      <div class="foot-actions">
+        <span class="spacer"></span>
+        <button class="clearday" id="clearDay" data-tip="Delete every entry on this day — Undo appears in case you slip">Clear this day</button>
+      </div>
+    </div>
+
+    <div class="weekview" id="weekView" style="display:none"></div>
+
+    <div class="jobview" id="jobView" style="display:none"></div>
+    <datalist id="jobOptions"></datalist>
+
+    <div class="monthview" id="monthView" style="display:none">
+      <div class="view-sum"><span id="monthSum"></span><span class="mlegend" aria-hidden="true">less <i></i><i class="l1"></i><i class="l2"></i><i class="l3"></i> more</span></div>
+      <div class="mgrid" id="monthGrid"></div>
+    </div>
+
+    <div class="keys" aria-hidden="true"><kbd>←</kbd><kbd>→</kbd> move &nbsp;·&nbsp; <kbd>T</kbd> today &nbsp;·&nbsp; <kbd>D</kbd><kbd>W</kbd><kbd>M</kbd> views &nbsp;·&nbsp; <kbd>N</kbd> new entry &nbsp;·&nbsp; <kbd>J</kbd> job &nbsp;·&nbsp; <kbd>C</kbd> copy &nbsp;·&nbsp; <kbd>?</kbd> guide</div>
+  </main>
+</div>
+
+<button class="fab" id="fab" data-tip="Add an entry — shortcut: N" aria-label="Add an entry">+</button>
+
+<div class="overlay" id="helpOverlay">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+    <div class="modal-head">
+      <h2 id="helpTitle">How Docket works</h2>
+      <button class="close" id="helpClose" data-tip="Close — Esc works too" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body">
+      <p>Docket is your daily record of work done. No account, nothing sent anywhere —
+        everything saves automatically, as you type, on this device.
+        Not sure what a button does? <b>Hover it</b> — or <kbd>Tab</kbd> to it — and it explains itself.</p>
+
+      <h3><span class="tick">●</span> The daily log</h3>
+      <ul>
+        <li>Type what you did in the box and press <kbd>Enter</kbd> — it's saved instantly.</li>
+        <li>The tiles above the log count the open day, its week and its month; the small bars chart the <b>last 14 days</b> — click a bar to jump to that day.</li>
+        <li>Move between days with the <b>‹ ›</b> arrows, or <b>click the big date</b> to open a calendar.</li>
+        <li>Hover an entry and click the <b>✎ pencil</b> to edit it (Save/Cancel), or <b>✕</b> to delete it — in the Day, Week and Job views alike.</li>
+        <li><b>Logged it on the wrong day?</b> Change the date in the editor, or drag the entry onto another day — in Recent days, a Week card or a Month cell. Undo pops up either way.</li>
+        <li>Deleted the wrong thing? An <b>Undo</b> button pops up for a few seconds — same for <b>Clear this day</b>.</li>
+        <li><b>Recent Days</b> in the sidebar lists every day that has entries, grouped by month — click a month name to fold or unfold it, and the <b>▦</b> icon opens that month in the calendar.</li>
+      </ul>
+
+      <h3><span class="tick">●</span> Jobs — group work under one heading</h3>
+      <ul>
+        <li>Doing several things for the same client, site or project? Type its name in the <b>Job</b> box left of the entry box (or pick one from its list) — every entry you add goes against that job.</li>
+        <li>The job <b>stays set</b>, so you can log a run of entries in a row. Click its <b>✕</b> (or empty the box) to stop.</li>
+        <li>Entries show their job as a small pill — <b>click the pill</b>, or the job in the sidebar's <b>Jobs</b> list, to open the <b>Job view</b>: every entry on that job, across every day, with totals.</li>
+        <li>In the Job view, <b>Copy Job</b> gives you the job name plus each day's work — ready for an invoice.</li>
+        <li>Wishlist and recurring items take a job too — the <b>Job</b> box appears under their add box when you click into it, and their <b>✎ pencil</b> changes it. Logging one on a day carries its job onto the entry.</li>
+        <li>The Job view lists the job's <b>wishlist and recurring items</b> above its logged work — click <b>↳</b> to log one on the open day.</li>
+        <li><b>Drag</b> an entry, wishlist or recurring item onto a job in the sidebar (or onto an open Job view) to link it to that job.</li>
+        <li>The <b>Month</b> calendar shows which job each day went to, busiest first.</li>
+        <li>Change an entry's job with the <b>✎ pencil</b>. Rename or delete a job from the sidebar; deleting a job keeps everything that was on it.</li>
+      </ul>
+
+      <h3><span class="tick">●</span> Copy &amp; paste</h3>
+      <ul>
+        <li><b>Copy Day to Clipboard</b> copies the date plus a bulleted list — ready to paste into an email, timesheet or invoice.</li>
+        <li><b>Copy Items Only</b> copies just the lines, no date heading.</li>
+      </ul>
+
+      <h3><span class="tick">●</span> Day · Week · Month views</h3>
+      <ul>
+        <li>Switch views with the <b>Day / Week / Month</b> tabs. The <b>‹ ›</b> arrows then step by day, week or month.</li>
+        <li><b>Week</b> shows the whole week's entries at a glance; <b>Month</b> is a calendar with counts per day.</li>
+        <li>Click any day in either view to open it. The copy buttons follow the view — in Month view, <b>Copy Month</b> gives you the full month-to-date list, ready to paste.</li>
+      </ul>
+
+      <h3><span class="tick">●</span> Keyboard shortcuts</h3>
+      <p>They work whenever you're not typing in a box:</p>
+      <ul>
+        <li><kbd>←</kbd> <kbd>→</kbd> — previous / next day (steps by week or month in those views)</li>
+        <li><kbd>T</kbd> — jump to today &nbsp;·&nbsp; <kbd>D</kbd> <kbd>W</kbd> <kbd>M</kbd> — switch to Day, Week or Month view</li>
+        <li><kbd>N</kbd> — start typing a new entry &nbsp;·&nbsp; <kbd>J</kbd> — pick the job for new entries</li>
+        <li><kbd>C</kbd> — copy the open day, week, month or job</li>
+        <li><kbd>?</kbd> — open this guide &nbsp;·&nbsp; <kbd>Esc</kbd> — close it</li>
+      </ul>
+
+      <h3><span class="tick">●</span> Wishlist</h3>
+      <ul>
+        <li>Queue things that still need doing in the sidebar's <b>Wishlist</b>.</li>
+        <li>When one gets done, <b>drag it onto the log or onto a day</b> — in Recent Days, or straight onto a Week or Month cell. It becomes an entry there.</li>
+        <li>Or hover it and click <b>↳</b> to log it on the day you have open. Click its text or <b>✎</b> to edit it or set its job, <b>✕</b> to remove.</li>
+      </ul>
+
+      <h3><span class="tick">●</span> Recurring tasks</h3>
+      <ul>
+        <li>Add tasks you do again and again to <b>Recurring</b> in the sidebar.</li>
+        <li>Drag one onto any day (or click <b>↳</b> for the open day) to log it — <b>it stays in the list</b> so you can use it next time.</li>
+        <li>If it's already on that day (same job), Docket skips the duplicate and tells you.</li>
+      </ul>
+
+      <h3><span class="tick">●</span> CSV import / export (Excel)</h3>
+      <p>Bulk-load the month to date from a spreadsheet. One entry per row: date first, task second, and optionally a job third.
+        Put <b>Wishlist</b> or <b>Recurring</b> in the date column to load those lists instead.</p>
+      <pre>Date,Task,Job
+2026-07-01,"Installed blinds, lounge",Smith House
+02/07/2026,Quoted new office fit-out,
+Wishlist,Order paint,Smith House
+Recurring,Timesheet,</pre>
+      <ul>
+        <li>The header row is optional — but to import jobs, include it with <b>Job</b> as the third heading. Dates can be <b>2026-07-01</b> or <b>01/07/2026</b> style (day-first).</li>
+        <li>Comma, semicolon or tab delimited — detected automatically.</li>
+        <li>Re-importing is safe: duplicates and unreadable rows are skipped and reported. The same task on two different jobs isn't a duplicate.</li>
+        <li><b>Export CSV</b> writes the same format, so you can export → edit in Excel → import back.</li>
+      </ul>
+
+      <h3><span class="tick">●</span> Backups &amp; where your data lives</h3>
+      <ul>
+        <li>Data is stored by <b>this browser, on this computer</b>. Stick to one browser (e.g. always Edge).</li>
+        <li><b>Export JSON</b> saves everything — including jobs and the wishlist — to a file; <b>Import JSON</b> merges it back in. Use it to move to another browser or PC, or as a safety net.</li>
+        <li>Clearing the browser's site data erases the log — keep an occasional export.</li>
+        <li><b>Clear data…</b> wipes the log, jobs, wishlist and/or recurring tasks — you tick which. Use it to start fresh,
+          e.g. clear everything then <b>Import JSON</b> to reload a backup cleanly. It offers to export a backup first, and an <b>Undo</b> pops up afterwards.</li>
+        <li>Both <b>JSON</b> and <b>CSV</b> hold everything — the log, jobs, wishlist and recurring tasks, each with its job. JSON is the exact backup; CSV is the one to open in Excel.</li>
+      </ul>
+
+      <h3><span class="tick">●</span> Install it as an app</h3>
+      <ul>
+        <li>Opened from the web, Docket can be <b>installed</b>: click <b>Install app</b> (top right), or the install icon in Edge's or Chrome's address bar. It gets its own window and Start menu / dock icon, and <b>works offline</b>.</li>
+        <li>Prefer a file? The single-file version runs by double-clicking — no install, no internet.</li>
+        <li><b>Moving between the two?</b> Each keeps its own data. <b>Export JSON</b> in the one you're leaving, then <b>Import JSON</b> in the other.</li>
+      </ul>
+
+      <div class="note"><b>Tip:</b> reopen this guide any time with the <b>?</b> button, top right.</div>
+    </div>
+    <div class="modal-foot">
+      <span class="appver" id="appVersion"></span>
+      <button id="helpDone">Got it</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="clearOverlay">
+  <div class="modal modal-sm" role="dialog" aria-modal="true" aria-labelledby="clearTitle" aria-describedby="clearDesc">
+    <div class="modal-head danger">
+      <h2 id="clearTitle">Clear data</h2>
+      <button class="close" id="clearClose" data-tip="Close — Esc works too" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body">
+      <p id="clearDesc" style="margin-top:12px">Start fresh — for example before re-importing a backup. Tick what to remove:</p>
+      <div class="clearopts">
+        <label class="copt"><input type="checkbox" id="clrLog" checked><span class="ct"><b>Daily log</b><span id="clrLogN"></span></span></label>
+        <label class="copt"><input type="checkbox" id="clrJobs" checked><span class="ct"><b>Jobs</b><span id="clrJobsN"></span></span></label>
+        <label class="copt"><input type="checkbox" id="clrWish" checked><span class="ct"><b>Wishlist</b><span id="clrWishN"></span></span></label>
+        <label class="copt"><input type="checkbox" id="clrRec" checked><span class="ct"><b>Recurring tasks</b><span id="clrRecN"></span></span></label>
+      </div>
+      <p class="clearwarn" id="clearWarn"></p>
+      <div class="backupnote">
+        <span><b>Keep a copy first.</b> A backup holds everything above, so Import JSON puts it all back.</span>
+        <button id="clearBackup" type="button"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg></span><span>Export JSON</span></button>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="ghostbtn" id="clearCancel">Cancel</button>
+      <button class="dangerbtn" id="clearGo">Clear selected</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+
+<script src="app.js"></script>
+</body>
+</html>

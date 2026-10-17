@@ -1,1926 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="color-scheme" content="dark">
-<meta name="theme-color" content="#0a0b0e">
-<meta name="description" content="Docket — a black-and-silver daily log of work done. Record what you did each day, then copy it straight into an email, timesheet or invoice. Runs locally, no server, single file.">
-<meta name="application-name" content="Docket">
-<meta name="apple-mobile-web-app-title" content="Docket">
-<title>Docket — Daily Work Log</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230a0b0e'/%3E%3Crect x='9' y='6' width='14' height='21' rx='2.5' fill='none' stroke='%23c9d0d9' stroke-width='2'/%3E%3Crect x='12' y='3.5' width='8' height='4.5' rx='1.5' fill='%23c9d0d9'/%3E%3Cpath d='M12 16l2.6 2.6 5.4-5.8' fill='none' stroke='%23c9d0d9' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
-<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230a0b0e'/%3E%3Crect x='9' y='6' width='14' height='21' rx='2.5' fill='none' stroke='%23c9d0d9' stroke-width='2'/%3E%3Crect x='12' y='3.5' width='8' height='4.5' rx='1.5' fill='%23c9d0d9'/%3E%3Cpath d='M12 16l2.6 2.6 5.4-5.8' fill='none' stroke='%23c9d0d9' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
-<style>
-  :root {
-    --bg: #0a0b0e;
-    --bg-2: #101216;
-    --sheet: #14161b;
-    --sheet-2: #1b1e24;
-    --text: #e9ebef;
-    --muted: #a7adb6;
-    --faint: #6b7280;
-    --line: rgba(255, 255, 255, 0.11);
-    --line-soft: rgba(255, 255, 255, 0.06);
-    --hi: inset 0 1px 0 rgba(255, 255, 255, 0.05);
-    --silver: #c9d0d9;
-    --silver-soft: rgba(201, 208, 217, 0.28);
-    --ghost: rgba(201, 208, 217, 0.08);
-    --chrome: linear-gradient(135deg, #f2f4f7 0%, #a7afbb 45%, #dfe3e9 100%);
-    --chrome-text: linear-gradient(160deg, #f5f7fa 10%, #b6bec9 55%, #e6eaef 90%);
-    --on-chrome: #14161a;
-    --green: #58c07a;
-    --danger: #e07070;
-    --radius: 10px;
-    --serif: Georgia, "Iowan Old Style", "Times New Roman", serif;
-    --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 12px 32px rgba(0, 0, 0, 0.45);
-    --shadow-lift: 0 2px 4px rgba(0, 0, 0, 0.45), 0 18px 44px rgba(0, 0, 0, 0.55);
-    --noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
-  }
-  * { box-sizing: border-box; }
-  html { color-scheme: dark; }
-  body {
-    margin: 0;
-    min-height: 100vh;
-    font-family: "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", sans-serif;
-    font-size: 14px;
-    background:
-      var(--noise),
-      radial-gradient(1200px 700px at 50% -25%, rgba(201, 208, 217, 0.08), transparent 65%),
-      var(--bg);
-    color: var(--text);
-    line-height: 1.5;
-    -webkit-font-smoothing: antialiased;
-  }
-  ::selection { background: var(--silver); color: #14161a; }
-  ::-webkit-scrollbar { width: 10px; height: 10px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: #2c3037; border-radius: 8px; border: 2px solid transparent; background-clip: content-box; }
-  ::-webkit-scrollbar-thumb:hover { background: #3d424b; background-clip: content-box; border: 2px solid transparent; }
-  button { font: inherit; cursor: pointer; transition: background .15s, border-color .15s, color .15s, filter .15s, transform .15s, box-shadow .15s, opacity .15s; }
-  button:focus-visible, input:focus-visible { outline: 2px solid var(--silver); outline-offset: 2px; }
-  input, [contenteditable] { caret-color: var(--silver); }
-  .addcard > button:active, .wish-add button:active, .tabs button:active { transform: scale(.96); }
-  @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after { animation: none !important; transition: none !important; }
-  }
-
-  /* inline SVG icons — sized by context */
-  .ic { display: inline-flex; flex-shrink: 0; }
-  .ic svg { width: 15px; height: 15px; display: block; }
-
-  /* ================= masthead ================= */
-  .mast {
-    position: sticky;
-    top: 0;
-    z-index: 6;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 12px 18px;
-    padding: 10px 26px;
-    background: rgba(10, 11, 14, 0.82);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--line-soft);
-    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.03);
-  }
-  .brand {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-right: auto;
-    user-select: none;
-  }
-  .brand .glyph {
-    display: grid;
-    place-items: center;
-    width: 34px;
-    height: 34px;
-    border-radius: 9px;
-    background: var(--chrome);
-    color: var(--on-chrome);
-    box-shadow: var(--shadow), var(--hi);
-  }
-  .brand .glyph svg { width: 20px; height: 20px; display: block; }
-  .brand-text { display: flex; flex-direction: column; line-height: 1.15; }
-  .brand .name { font-family: var(--serif); font-size: 19px; font-weight: 700; letter-spacing: .2px; }
-  .brand .sub {
-    font-size: 9px;
-    font-weight: 600;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--faint);
-  }
-  .head-right { display: flex; align-items: center; gap: 10px; }
-  .saved-pill {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    background: var(--sheet);
-    border: 1px solid var(--line-soft);
-    border-radius: 999px;
-    padding: 4px 13px;
-    font-size: 12px;
-    color: var(--muted);
-    box-shadow: var(--shadow), var(--hi);
-    user-select: none;
-    transition: border-color .3s;
-  }
-  .saved-pill .dot { color: var(--green); font-size: 13px; transition: text-shadow .3s; }
-  .saved-pill.pulse { border-color: rgba(88, 192, 122, 0.5); }
-  .saved-pill.failed { border-color: rgba(224, 112, 112, 0.55); color: var(--text); }
-  .saved-pill.failed .dot { color: var(--danger); }
-  .saved-pill.pulse .dot { animation: ping .8s ease; }
-  @keyframes ping {
-    0% { text-shadow: 0 0 0 rgba(88, 192, 122, 0.7); }
-    60% { text-shadow: 0 0 12px rgba(88, 192, 122, 0.9); }
-    100% { text-shadow: 0 0 0 rgba(88, 192, 122, 0); }
-  }
-  .helpbtn {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    border: 1px solid var(--line);
-    background: var(--sheet);
-    color: var(--muted);
-    font-size: 15px;
-    font-weight: 650;
-    box-shadow: var(--shadow);
-  }
-  .helpbtn:hover { color: var(--silver); border-color: var(--silver); }
-
-  /* view tabs — segmented, sliding chrome pill */
-  .tabs {
-    position: relative;
-    display: flex;
-    background: var(--sheet);
-    border: 1px solid var(--line);
-    border-radius: 999px;
-    padding: 3px;
-    box-shadow: var(--shadow), var(--hi);
-  }
-  .tabs button {
-    position: relative;
-    z-index: 1;
-    width: 76px;
-    border: none;
-    background: none;
-    color: var(--muted);
-    padding: 5px 0;
-    border-radius: 999px;
-    font-size: 13px;
-  }
-  .tabs button:not(.active):hover { color: var(--text); }
-  .tabs button.active {
-    background: var(--chrome);
-    color: var(--on-chrome);
-    font-weight: 650;
-  }
-  @supports selector(:has(*)) {
-    .tabs button.active { background: none; }
-    .tabs::before {
-      content: "";
-      position: absolute;
-      top: 3px;
-      bottom: 3px;
-      left: 3px;
-      width: 76px;
-      border-radius: 999px;
-      background: var(--chrome);
-      box-shadow: 0 2px 10px rgba(201, 208, 217, 0.2);
-      transition: transform .28s cubic-bezier(.3, .85, .3, 1.06);
-    }
-    .tabs:has(button:nth-of-type(2).active)::before { transform: translateX(76px); }
-    .tabs:has(button:nth-of-type(3).active)::before { transform: translateX(152px); }
-    .tabs:not(:has(button.active))::before { opacity: 0; }
-  }
-
-  .app { display: flex; align-items: stretch; min-height: calc(100vh - 55px); }
-
-  /* ================= main column ================= */
-  .main {
-    flex: 1 1 auto;
-    min-width: 0;
-    max-width: 860px;
-    margin: 0 auto;
-    padding: 30px 38px 90px;
-  }
-
-  /* editorial date hero */
-  .hero { text-align: center; margin-bottom: 22px; }
-  .eyebrow {
-    margin: 0 0 2px;
-    font-size: 11px;
-    font-weight: 650;
-    letter-spacing: 2.8px;
-    text-transform: uppercase;
-    color: var(--faint);
-  }
-  .datenav {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 14px;
-  }
-  .datenav .arrow {
-    flex-shrink: 0;
-    display: grid;
-    place-items: center;
-    width: 38px;
-    height: 38px;
-    border: 1px solid var(--line);
-    border-radius: 50%;
-    background: var(--sheet);
-    color: var(--muted);
-    box-shadow: var(--shadow), var(--hi);
-  }
-  .datenav .arrow .ic svg { width: 16px; height: 16px; }
-  .datenav .arrow:hover { border-color: var(--silver); color: var(--silver-bright, #eef1f5); background: var(--ghost); }
-  .datenav .arrow:active { transform: scale(.92); }
-  .datenav .datewrap { position: relative; min-width: 0; }
-  .datenav .bigdate {
-    appearance: none;
-    -webkit-appearance: none;
-    border: 0;
-    font: inherit;
-    text-align: center;
-    font-family: var(--serif);
-    font-size: 38px;
-    font-weight: 400;
-    letter-spacing: -.4px;
-    line-height: 1.15;
-    padding: 2px 10px;
-    cursor: pointer;
-    border-radius: 8px;
-    text-wrap: balance;
-    background: var(--chrome-text);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
-  .datenav .bigdate::after {
-    content: "▾";
-    font-size: 12px;
-    margin-left: 10px;
-    vertical-align: 6px;
-    -webkit-text-fill-color: #6b7280;
-  }
-  .datenav .bigdate:hover { filter: brightness(1.18); }
-  .datenav .bigdate:hover::after { -webkit-text-fill-color: #c9d0d9; }
-  .datenav .bigdate:disabled { cursor: default; filter: none; }
-  .datenav .bigdate:disabled::after { content: none; }
-  .datenav .arrow.gone { visibility: hidden; }
-  .datenav input[type="date"] {
-    position: absolute;
-    inset: 0;
-    opacity: 0;
-    border: none;
-    pointer-events: none; /* the .bigdate button below owns the click */
-  }
-  .side-actions {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 8px;
-    margin-top: 12px;
-  }
-  .side-actions button {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    border: 1px solid var(--line);
-    border-radius: 999px;
-    background: var(--sheet);
-    color: var(--text);
-    padding: 6px 15px;
-    font-size: 12.5px;
-    box-shadow: var(--shadow), var(--hi);
-    white-space: nowrap;
-  }
-  .side-actions button .ic { color: var(--faint); }
-  .side-actions button .ic svg { width: 13px; height: 13px; }
-  .side-actions button:hover {
-    border-color: var(--silver);
-    color: #eef1f5;
-    background: var(--ghost);
-  }
-  .side-actions button:hover .ic { color: var(--silver); }
-  .side-actions button:disabled { opacity: .4; pointer-events: none; box-shadow: none; }
-
-  /* views */
-  .logzone { border-radius: var(--radius); }
-  .logzone.droptarget { outline: 2px dashed var(--silver); outline-offset: 4px; }
-  .daylist button.droptarget { outline: 2px dashed var(--silver); outline-offset: -2px; }
-  .logzone, .weekview, .monthview, .jobview { animation: viewin .22s ease; }
-  @keyframes viewin {
-    from { opacity: 0; transform: translateY(4px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  /* stat strip — silver rules, engraved numbers */
-  .stats {
-    display: flex;
-    align-items: stretch;
-    border-top: 2px solid #aeb6c0;
-    border-bottom: 1px solid var(--line);
-    margin-bottom: 16px;
-  }
-  .stat {
-    flex: 1 1 0;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1px;
-    padding: 10px 16px 9px;
-  }
-  .stat + .stat { border-left: 1px solid var(--line-soft); }
-  .stat .sn {
-    font-family: var(--serif);
-    font-size: 28px;
-    line-height: 1.15;
-    font-variant-numeric: tabular-nums;
-    background: var(--chrome-text);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
-  .stat .sl {
-    font-size: 9.5px;
-    font-weight: 650;
-    letter-spacing: 1.4px;
-    text-transform: uppercase;
-    color: var(--faint);
-    white-space: nowrap;
-  }
-  .stat.wide { flex: 1.5 1 0; justify-content: flex-end; gap: 6px; }
-  .stat.wide .actstrip { width: 100%; height: 24px; }
-
-  /* activity bars — one bar per day, click to jump */
-  .actstrip { display: flex; align-items: flex-end; gap: 3px; height: 20px; }
-  .actstrip button {
-    flex: 1 1 0;
-    max-width: 10px;
-    min-height: 3px;
-    padding: 0;
-    border: none;
-    border-radius: 2px;
-    background: rgba(255, 255, 255, 0.1);
-  }
-  .actstrip button.hit { background: var(--silver); opacity: .65; }
-  .actstrip button.cur { opacity: 1; box-shadow: 0 0 0 1.5px rgba(201, 208, 217, 0.4); }
-  .actstrip button:hover { opacity: 1; transform: translateY(-1px); background: #eef1f5; }
-  .view-sum .actstrip { width: 92px; }
-
-  /* add card */
-  .addcard { display: flex; gap: 10px; margin-bottom: 14px; }
-  .addcard .inwrap { position: relative; flex: 1; min-width: 0; display: flex; }
-  .addcard input {
-    flex: 1;
-    min-width: 0;
-    font: inherit;
-    color: var(--text);
-    background: var(--sheet);
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    padding: 9px 78px 9px 13px;
-    box-shadow: var(--shadow), var(--hi);
-    transition: border-color .15s, box-shadow .15s;
-  }
-  .addcard input::placeholder { color: var(--faint); font-style: italic; }
-  .addcard input:focus {
-    outline: none;
-    border-color: var(--silver);
-    box-shadow: 0 0 0 3px var(--ghost);
-  }
-  .addcard .enterhint {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-family: Consolas, monospace;
-    font-size: 11px;
-    color: var(--faint);
-    background: var(--sheet-2);
-    border: 1px solid var(--line);
-    border-bottom-width: 2px;
-    border-radius: 6px;
-    padding: 1px 8px;
-    opacity: 0;
-    pointer-events: none;
-    user-select: none;
-    transition: opacity .15s;
-  }
-  .addcard input:not(:placeholder-shown) ~ .enterhint { opacity: 1; }
-  .addcard > button {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    border: none;
-    border-radius: 8px;
-    background: var(--chrome);
-    color: var(--on-chrome);
-    font-weight: 650;
-    padding: 0 20px;
-    box-shadow: var(--shadow);
-  }
-  .addcard > button .ic svg { width: 14px; height: 14px; }
-  .addcard > button:hover { filter: brightness(1.08); box-shadow: var(--shadow), 0 2px 14px rgba(201, 208, 217, 0.25); }
-
-  /* job box — sticky, so a run of entries all land on the same job */
-  .addcard .jobwrap { position: relative; flex: 0 0 196px; display: flex; min-width: 0; }
-  .jobwrap > .ic {
-    position: absolute;
-    left: 11px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--faint);
-    pointer-events: none;
-    transition: color .15s;
-  }
-  .jobwrap > .ic svg { width: 14px; height: 14px; }
-  .addcard .jobwrap input { padding: 9px 10px 9px 33px; }
-  .addcard .jobwrap.set input, ol.items li.editing .editrow .jobwrap.set input { padding-right: 30px; }
-  .jobwrap input::-webkit-calendar-picker-indicator { opacity: .4; width: 9px; height: 9px; margin: 0; cursor: pointer; }
-  .jobwrap input:hover::-webkit-calendar-picker-indicator { opacity: .8; }
-  .jobwrap.set input::-webkit-calendar-picker-indicator { display: none !important; }
-  .jobwrap.set input { border-color: var(--silver-soft); background: var(--sheet-2); }
-  .jobwrap.set > .ic { color: var(--silver); }
-  .jobclear {
-    position: absolute;
-    right: 5px;
-    top: 50%;
-    transform: translateY(-50%);
-    display: none;
-    place-items: center;
-    border: none;
-    background: none;
-    color: var(--faint);
-    padding: 4px;
-    border-radius: 6px;
-  }
-  .jobclear .ic svg { width: 12px; height: 12px; }
-  .jobclear:hover { color: var(--text); background: rgba(255, 255, 255, 0.07); }
-  .jobwrap.set .jobclear { display: grid; }
-  @media (max-width: 600px) {
-    .addcard { flex-wrap: wrap; }
-    .addcard .jobwrap { flex: 1 1 100%; }
-  }
-
-  /* job pill — the job an entry belongs to; click to see all its work */
-  .jobpill {
-    flex-shrink: 1;
-    min-width: 0;
-    max-width: 38%;
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    border: 1px solid var(--silver-soft);
-    background: var(--ghost);
-    color: var(--silver);
-    font-size: 11px;
-    font-weight: 600;
-    line-height: 1.5;
-    border-radius: 999px;
-    padding: 1px 9px 1px 7px;
-    white-space: nowrap;
-  }
-  .jobpill .ic svg { width: 11px; height: 11px; }
-  .jobpill .jn { overflow: hidden; text-overflow: ellipsis; }
-  .jobpill:hover { border-color: var(--silver); color: #eef1f5; background: rgba(201, 208, 217, 0.14); }
-  .wday ul li > span:first-of-type { flex: 1 1 auto; min-width: 0; }
-  .wday ul li .jobpill { align-self: center; font-size: 10.5px; padding: 0 8px 0 6px; }
-
-  /* the ledger sheet: ruled rows behind a silver margin line */
-  .sheet {
-    position: relative;
-    background: var(--sheet);
-    border: 1px solid var(--line-soft);
-    border-radius: 6px;
-    box-shadow: var(--shadow), var(--hi);
-    overflow: hidden;
-  }
-  .sheet::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 46px;
-    width: 1px;
-    background: var(--silver-soft);
-    pointer-events: none;
-  }
-  ol.items { list-style: none; margin: 0; padding: 0; }
-  ol.items li.entry {
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    min-height: 46px;
-    padding: 10px 14px 10px 60px;
-    border-bottom: 1px solid var(--line-soft);
-    transition: background .15s;
-  }
-  ol.items li:last-child { border-bottom: none; }
-  ol.items li.entry:hover { background: var(--sheet-2); }
-  ol.items li.entry .num {
-    position: absolute;
-    left: 0;
-    width: 38px;
-    text-align: right;
-    font-family: var(--serif);
-    font-size: 13px;
-    color: var(--faint);
-    font-variant-numeric: tabular-nums;
-    user-select: none;
-    transition: color .15s;
-  }
-  ol.items li.entry:hover .num { color: #eef1f5; }
-  ol.items li.entry .body {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  ol.items li.entry .body .jobpill { max-width: 45%; }
-  ol.items li.entry .txt {
-    flex: 1;
-    white-space: pre-wrap;
-    word-break: break-word;
-  }
-  ol.items li.entry .icon {
-    display: grid;
-    place-items: center;
-    border: none;
-    background: none;
-    color: var(--faint);
-    padding: 4px;
-    border-radius: 7px;
-    opacity: 0;
-  }
-  ol.items li.entry .icon .ic svg { width: 14px; height: 14px; }
-  ol.items li.entry:hover .icon, ol.items li.entry .icon:focus-visible { opacity: 1; }
-  ol.items li.entry .icon.edit:hover { color: #eef1f5; background: var(--ghost); }
-  ol.items li.entry .icon.del:hover { color: var(--danger); background: rgba(224, 112, 112, 0.1); }
-  ol.items li.new { animation: rise .25s ease; }
-  @keyframes rise {
-    from { opacity: 0; transform: translateY(6px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  /* opening a day staggers its entries in */
-  ol.items.stagger li.entry { animation: rise .3s ease backwards; }
-  ol.items.stagger li.entry:nth-child(2) { animation-delay: .04s; }
-  ol.items.stagger li.entry:nth-child(3) { animation-delay: .08s; }
-  ol.items.stagger li.entry:nth-child(4) { animation-delay: .12s; }
-  ol.items.stagger li.entry:nth-child(5) { animation-delay: .16s; }
-  ol.items.stagger li.entry:nth-child(6) { animation-delay: .2s; }
-  ol.items.stagger li.entry:nth-child(7) { animation-delay: .24s; }
-  ol.items.stagger li.entry:nth-child(n+8) { animation-delay: .28s; }
-
-  ol.items li.editing {
-    display: block;
-    padding: 12px 14px 12px 60px;
-    border-bottom: 1px solid var(--line-soft);
-    background: var(--sheet-2);
-  }
-  ol.items li.editing input {
-    width: 100%;
-    font: inherit;
-    color: var(--text);
-    background: #22262d;
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    padding: 9px 13px;
-    margin-bottom: 10px;
-  }
-  ol.items li.editing input:focus { outline: none; border-color: var(--silver); box-shadow: 0 0 0 3px var(--ghost); }
-  .editrow { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 10px; }
-  ol.items li.editing .editrow input { margin: 0; padding: 7px 10px 7px 32px; }
-  .editrow .jobwrap { position: relative; display: flex; min-width: 0; }
-  .editrow button {
-    border: none;
-    border-radius: 8px;
-    padding: 8px 0;
-    font-weight: 650;
-    font-size: 12.5px;
-    letter-spacing: .6px;
-    text-transform: uppercase;
-  }
-  .editrow .save { background: var(--chrome); color: var(--on-chrome); }
-  .editrow .save:hover { filter: brightness(1.08); }
-  .editrow .cancel { background: #343941; color: var(--text); }
-  .editrow .cancel:hover { filter: brightness(1.15); }
-
-  .empty {
-    text-align: center;
-    padding: 36px 12px 38px;
-    border: 1px dashed var(--line);
-    border-radius: 6px;
-    background: rgba(255, 255, 255, 0.012);
-  }
-  .empty svg { width: 40px; height: 40px; color: var(--faint); opacity: .8; animation: floaty 3.4s ease-in-out infinite alternate; }
-  @keyframes floaty { to { transform: translateY(-6px); } }
-  .empty .e1 { margin: 10px 0 3px; font-family: var(--serif); font-style: italic; color: var(--muted); font-size: 15.5px; }
-  .empty .e2 { margin: 0; color: var(--faint); font-size: 12.5px; }
-
-  .foot-actions { display: flex; margin-top: 12px; }
-  .foot-actions .spacer { flex: 1; }
-  .clearday {
-    border: none;
-    background: none;
-    color: var(--faint);
-    font-size: 12.5px;
-    padding: 4px 8px;
-    border-radius: 6px;
-  }
-  .clearday:hover { color: var(--danger); background: rgba(224, 112, 112, 0.08); }
-
-  /* floating add */
-  .fab {
-    position: fixed;
-    right: 30px;
-    bottom: 30px;
-    width: 54px;
-    height: 54px;
-    border-radius: 50%;
-    border: none;
-    background: var(--chrome);
-    color: var(--on-chrome);
-    font-size: 26px;
-    line-height: 1;
-    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.55), 0 2px 14px rgba(201, 208, 217, 0.18);
-    transition: transform .22s ease, filter .15s, box-shadow .22s;
-    z-index: 5;
-  }
-  .fab:hover { filter: brightness(1.08); transform: translateY(-2px) rotate(90deg); }
-  .fab:active { transform: translateY(0) rotate(90deg) scale(.95); }
-  @media (min-width: 861px) {
-    .fab { right: 300px; } /* clear of the right rail */
-  }
-  /* below 861px the rail stacks under the log, so the FAB floats over the
-     content: reserve a lane for it rather than letting it cover a button */
-  @media (max-width: 860px) {
-    .foot-actions { padding-right: 72px; }
-  }
-
-  /* week + month summary line */
-  .view-sum {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 6px 12px;
-    color: var(--faint);
-    font-size: 12.5px;
-    font-style: italic;
-    font-variant-numeric: tabular-nums;
-    padding: 0 2px;
-    user-select: none;
-  }
-  .mlegend { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-style: normal; color: var(--faint); }
-  .mlegend i { width: 9px; height: 9px; border-radius: 2px; background: var(--sheet-2); border: 1px solid var(--line-soft); }
-  .mlegend i.l1 { background: rgba(222, 228, 235, 0.1); border-color: rgba(222, 228, 235, 0.18); }
-  .mlegend i.l2 { background: rgba(222, 228, 235, 0.22); border-color: rgba(222, 228, 235, 0.3); }
-  .mlegend i.l3 { background: rgba(222, 228, 235, 0.38); border-color: rgba(222, 228, 235, 0.46); }
-
-  /* week view — ruled day sections */
-  .weekview, .jobview { display: flex; flex-direction: column; gap: 10px; }
-  .wday {
-    display: flex;
-    gap: 14px;
-    background: var(--sheet);
-    border: 1px solid var(--line-soft);
-    border-radius: 6px;
-    box-shadow: var(--shadow), var(--hi);
-    padding: 11px 14px;
-    transition: transform .15s ease, box-shadow .15s ease, opacity .15s ease;
-  }
-  .wday:hover { transform: translateY(-1px); box-shadow: var(--shadow-lift), var(--hi); }
-  /* days with no work fade back so logged days read at a glance */
-  .wday.vacant { opacity: .5; box-shadow: none; }
-  .wday.vacant:hover, .wday.vacant.droptarget { opacity: 1; }
-  .wday.today { border-color: var(--silver-soft); box-shadow: var(--shadow), 0 0 0 1px rgba(201, 208, 217, 0.15), var(--hi); }
-  .wday.today .wday-head button { color: #eef1f5; }
-  .wday.droptarget { outline: 2px dashed var(--silver); outline-offset: 2px; }
-  .wchip {
-    flex-shrink: 0;
-    width: 46px;
-    align-self: flex-start;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 0;
-    padding: 5px 0 6px;
-    border-radius: 8px;
-    background: var(--sheet-2);
-    border: 1px solid var(--line-soft);
-    user-select: none;
-    cursor: pointer;
-    transition: border-color .15s, transform .15s;
-  }
-  .wchip:hover { border-color: var(--silver); transform: translateY(-1px); }
-  .wchip .wd {
-    font-size: 8.5px;
-    font-weight: 700;
-    letter-spacing: 1.4px;
-    color: var(--faint);
-    text-transform: uppercase;
-  }
-  .wchip .wn {
-    font-family: var(--serif);
-    font-size: 19px;
-    line-height: 1.15;
-    color: var(--text);
-    font-variant-numeric: tabular-nums;
-  }
-  .wday.today .wchip { background: var(--chrome); border-color: transparent; box-shadow: 0 2px 10px rgba(201, 208, 217, 0.2); }
-  .wday.today .wchip .wd, .wday.today .wchip .wn { color: var(--on-chrome); }
-  .wday-main { flex: 1; min-width: 0; }
-  .wday-head { display: flex; align-items: center; gap: 9px; }
-  .wday-head button {
-    border: none;
-    background: none;
-    color: var(--text);
-    font-family: var(--serif);
-    font-weight: 600;
-    font-size: 15px;
-    padding: 2px 6px;
-    margin-left: -6px;
-    border-radius: 6px;
-  }
-  .wday-head button:hover { color: #ffffff; text-decoration: underline; text-underline-offset: 3px; }
-  .wday-head .wsub { color: var(--faint); font-size: 12px; }
-  .wday-head .count {
-    margin-left: auto;
-    color: var(--muted);
-    font-size: 11.5px;
-    font-variant-numeric: tabular-nums;
-    background: rgba(255, 255, 255, 0.07);
-    border-radius: 20px;
-    padding: 1px 8px;
-  }
-  .wday ul { list-style: none; margin: 5px 0 0; padding: 0; }
-  .wday ul li {
-    display: flex;
-    gap: 9px;
-    font-size: 13px;
-    color: var(--muted);
-    padding: 2.5px 6px 2.5px 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-  }
-  .wday ul li:last-child { border-bottom: none; }
-  .wday ul li::before {
-    content: "";
-    flex-shrink: 0;
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    background: var(--silver);
-    opacity: .6;
-    margin-top: 8px;
-  }
-  .wday .none { color: var(--faint); font-size: 12px; padding: 1px 0; font-style: italic; }
-
-  /* month view — engraved calendar */
-  .monthview {
-    background: var(--sheet);
-    border: 1px solid var(--line-soft);
-    border-radius: 6px;
-    box-shadow: var(--shadow), var(--hi);
-    padding: 14px;
-  }
-  .monthview .view-sum { margin: 2px 2px 12px; }
-  .weekview .view-sum, .jobview .view-sum { margin: -2px 0 0; }
-  .jobview .stats { margin-bottom: 4px; }
-  .mgrid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 1px;
-    background: var(--line-soft);
-    border: 1px solid var(--line-soft);
-  }
-  .mgrid .mhead {
-    text-align: center;
-    color: var(--faint);
-    font-size: 10.5px;
-    text-transform: uppercase;
-    letter-spacing: 1.4px;
-    padding: 6px 0;
-    background: var(--sheet-2);
-    user-select: none;
-  }
-  .mcell {
-    min-height: 80px;
-    background: var(--sheet);
-    border: none;
-    border-radius: 0;
-    padding: 6px 8px;
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    text-align: left;
-    color: var(--muted);
-    font: inherit;
-    min-width: 0;
-    overflow: hidden;
-    transition: background .12s, box-shadow .12s;
-  }
-  .mcell:hover { background: var(--ghost); box-shadow: inset 0 0 0 1.5px var(--silver); }
-  /* weekends sit back a touch so the working week reads first */
-  .mcell.wknd { background: var(--bg-2); }
-  /* heatmap: busier days shine brighter */
-  .mcell.d1 { background: rgba(222, 228, 235, 0.06); }
-  .mcell.d2 { background: rgba(222, 228, 235, 0.12); }
-  .mcell.d3 { background: rgba(222, 228, 235, 0.19); }
-  .mcell.d2 .snip, .mcell.d3 .snip { color: #b9c0c9; }
-  .mcell.blank { background: var(--sheet); cursor: default; }
-  .mcell.blank:hover { background: var(--sheet); box-shadow: none; }
-  .mcell.droptarget { outline: 2px dashed var(--silver); outline-offset: -2px; }
-  .mcell .dnum {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-family: var(--serif);
-    font-size: 13.5px;
-    font-variant-numeric: tabular-nums;
-    color: var(--text);
-  }
-  /* today: circled in silver, like a mark on an engraved calendar */
-  .mcell.today .dnum span:first-child {
-    display: grid;
-    place-items: center;
-    width: 23px;
-    height: 23px;
-    margin: -3px 0 -2px -4px;
-    border: 1.6px solid var(--silver);
-    border-radius: 50%;
-    color: #eef1f5;
-    font-weight: 700;
-    font-size: 12px;
-    box-shadow: 0 0 8px rgba(201, 208, 217, 0.25);
-  }
-  .mcell .dnum .count {
-    color: #dfe3e9;
-    background: rgba(222, 228, 235, 0.14);
-    font-family: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
-    font-size: 10.5px;
-    font-weight: 600;
-    border-radius: 20px;
-    padding: 0 7px;
-  }
-  .mcell .snip {
-    font-size: 11px;
-    color: var(--faint);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 100%;
-  }
-  @media (max-width: 900px) {
-    .datenav .bigdate { font-size: 26px; }
-    .mcell { min-height: 56px; }
-    .mcell .snip { display: none; }
-  }
-
-  /* keyboard hint footer */
-  .keys {
-    margin-top: 30px;
-    text-align: center;
-    color: var(--faint);
-    font-size: 11.5px;
-    user-select: none;
-  }
-  .keys kbd {
-    font-family: Consolas, monospace;
-    font-size: 11px;
-    background: var(--sheet-2);
-    border: 1px solid var(--line);
-    border-bottom-width: 2px;
-    border-radius: 5px;
-    padding: 0 6px;
-    color: var(--muted);
-    margin: 0 1px;
-  }
-
-  /* ================= right rail ================= */
-  .side {
-    order: 2; /* right rail — the log reads first */
-    width: 272px;
-    flex-shrink: 0;
-    position: sticky;
-    top: 55px;
-    height: calc(100vh - 55px);
-    overflow-y: auto;
-    background: transparent;
-    border-left: 1px solid var(--line-soft);
-    display: flex;
-    flex-direction: column;
-    padding: 20px 16px;
-    gap: 22px;
-    scrollbar-width: thin;
-    scrollbar-color: var(--line) transparent;
-  }
-  .side > * { animation: fadeup .45s ease backwards; }
-  .side > *:nth-child(2) { animation-delay: .05s; }
-  .side > *:nth-child(3) { animation-delay: .1s; }
-  .side > *:nth-child(4) { animation-delay: .15s; }
-  @keyframes fadeup { from { opacity: 0; transform: translateY(8px); } }
-  .side h2 {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin: 0 0 8px;
-    padding: 0 6px;
-    font-size: 10.5px;
-    font-weight: 650;
-    letter-spacing: 1.8px;
-    text-transform: uppercase;
-    color: var(--faint);
-    user-select: none;
-  }
-  .side h2::after {
-    content: "";
-    flex: 1;
-    height: 1px;
-    background: linear-gradient(90deg, var(--line), transparent);
-  }
-  .side section { min-height: 0; flex-shrink: 0; }
-  .side .grow { flex: 1 1 auto; min-height: 150px; overflow: hidden; display: flex; flex-direction: column; }
-  /* the list scrolls; a bottom fade stops a half-cut row from reading as a bug */
-  .side .grow.scrolls { position: relative; }
-  .side .grow.scrolls::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 34px;
-    background: linear-gradient(to top, var(--bg), rgba(10, 11, 14, 0));
-    pointer-events: none;
-  }
-
-  .daylist {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    flex: 1 1 auto;
-    min-height: 0;
-    overflow-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: var(--line) transparent;
-  }
-  .daylist li + li { margin-top: 2px; }
-  .mgroup { display: flex; align-items: center; gap: 2px; margin-top: 10px; }
-  .daylist li:first-child .mgroup { margin-top: 2px; }
-  .mtoggle {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    border: none;
-    background: none;
-    color: var(--faint);
-    font-size: 11px;
-    font-weight: 650;
-    letter-spacing: 1.2px;
-    text-transform: uppercase;
-    padding: 4px 6px;
-    border-radius: 6px;
-    text-align: left;
-    white-space: nowrap;
-  }
-  .mtoggle:hover { color: var(--text); }
-  .mtoggle .chev { font-size: 9px; width: 10px; flex-shrink: 0; transition: transform .18s ease; }
-  .mtoggle .chev.open { transform: rotate(90deg); }
-  .mtoggle .mbadge {
-    margin-left: auto;
-    color: var(--muted);
-    font-size: 10.5px;
-    font-weight: 600;
-    font-variant-numeric: tabular-nums;
-    background: rgba(255, 255, 255, 0.07);
-    border-radius: 20px;
-    padding: 1px 7px;
-    letter-spacing: 0;
-  }
-  .mgoto {
-    display: grid;
-    place-items: center;
-    border: none;
-    background: none;
-    color: var(--faint);
-    padding: 3px 7px;
-    border-radius: 6px;
-    opacity: 0;
-  }
-  .mgoto .ic svg { width: 13px; height: 13px; }
-  .mgroup:hover .mgoto, .mgoto:focus-visible { opacity: 1; }
-  .mgoto:hover { color: var(--silver); }
-  .daylist button.dayrow { padding-left: 22px; }
-  .daylist button {
-    width: 100%;
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 9px;
-    font-size: 13px;
-    border: none;
-    border-radius: 7px;
-    background: none;
-    text-align: left;
-    color: var(--muted);
-  }
-  .daylist button:hover { background: rgba(255, 255, 255, 0.05); color: var(--text); }
-  .daylist button.current {
-    background: var(--ghost);
-    box-shadow: inset 2.5px 0 0 var(--silver);
-    color: var(--text);
-    font-weight: 600;
-  }
-  .daylist .count {
-    margin-left: auto;
-    color: var(--muted);
-    font-size: 11px;
-    font-variant-numeric: tabular-nums;
-    background: rgba(255, 255, 255, 0.07);
-    border-radius: 20px;
-    padding: 1px 7px;
-  }
-  .daylist .tag {
-    color: var(--on-chrome);
-    background: var(--chrome);
-    font-size: 9px;
-    font-weight: 700;
-    letter-spacing: .8px;
-    text-transform: uppercase;
-    border-radius: 20px;
-    padding: 1px 7px;
-  }
-  .daylist button.current .count { color: #eef1f5; background: rgba(222, 228, 235, 0.14); }
-  .nothing { color: var(--faint); font-size: 12.5px; font-style: italic; padding: 4px 9px; }
-
-  /* wishlist + recurring */
-  .wish-add { display: flex; gap: 6px; padding: 0 2px 8px; }
-  .wish-add input {
-    flex: 1;
-    min-width: 0;
-    font: inherit;
-    font-size: 12.5px;
-    color: var(--text);
-    background: var(--sheet);
-    border: 1px solid var(--line);
-    border-radius: 7px;
-    padding: 6px 10px;
-    transition: border-color .15s, box-shadow .15s;
-  }
-  .wish-add input::placeholder { color: var(--faint); font-style: italic; }
-  .wish-add input:focus { outline: none; border-color: var(--silver); box-shadow: 0 0 0 3px var(--ghost); }
-  .wish-add button {
-    width: 31px;
-    border: none;
-    border-radius: 7px;
-    background: var(--chrome);
-    color: var(--on-chrome);
-    font-weight: 700;
-    font-size: 16px;
-    line-height: 1;
-  }
-  .wish-add button:hover { filter: brightness(1.08); }
-
-  ul.wishlist {
-    list-style: none;
-    margin: 0;
-    padding: 0 2px;
-    max-height: 210px;
-    overflow-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: var(--line) transparent;
-  }
-  ul.wishlist li {
-    display: flex;
-    align-items: flex-start;
-    gap: 7px;
-    padding: 6px 7px;
-    border-radius: 7px;
-    cursor: grab;
-  }
-  ul.wishlist li:hover { background: rgba(255, 255, 255, 0.05); }
-  ul.wishlist li.dragging { opacity: .35; }
-  ul.wishlist .grip { color: var(--faint); font-size: 11px; padding-top: 3px; user-select: none; }
-  ul.wishlist .wtxt {
-    flex: 1;
-    font-size: 12.5px;
-    color: var(--muted);
-    white-space: pre-wrap;
-    word-break: break-word;
-    border-radius: 5px;
-    padding: 0 2px;
-  }
-  ul.wishlist li:hover .wtxt { color: var(--text); }
-  ul.wishlist .wtxt:focus { outline: none; background: var(--ghost); box-shadow: inset 0 -1px 0 var(--silver); }
-  ul.wishlist .wbtn {
-    display: none;
-    place-items: center;
-    border: none;
-    background: none;
-    color: var(--faint);
-    padding: 3px;
-    border-radius: 6px;
-    opacity: 0;
-  }
-  ul.wishlist .wbtn .ic svg { width: 13px; height: 13px; }
-  @media (pointer: coarse) {
-    /* fingers need more than the 19px the hover-only layout gets away with */
-    ul.wishlist .wbtn { display: grid; padding: 7px; opacity: 1; }
-  }
-  ul.wishlist li:hover .wbtn, ul.wishlist li:focus-within .wbtn { display: grid; opacity: 1; }
-  ul.wishlist .wbtn.edit:hover { color: #eef1f5; background: var(--ghost); }
-  ul.wishlist .wbtn.send:hover { color: #eef1f5; background: var(--ghost); }
-  ul.wishlist .wbtn.kill:hover { color: var(--danger); background: rgba(224, 112, 112, 0.1); }
-  .wish-hint { padding: 8px 8px 0; color: var(--faint); font-size: 11px; user-select: none; }
-
-  /* list items carry a job too: a job box under the add box (shown while
-     adding, or while a job is set), a pill under the text, and an editor */
-  .wish-add { flex-wrap: wrap; }
-  .wish-add .jobwrap { position: relative; flex: 1 1 100%; display: none; min-width: 0; }
-  .wish-add:focus-within .jobwrap, .wish-add .jobwrap.set { display: flex; }
-  .wish-add .jobwrap > .ic { left: 10px; }
-  .wish-add .jobwrap > .ic svg { width: 13px; height: 13px; }
-  .wish-add .jobwrap input { font-size: 12px; padding: 5px 10px 5px 29px; }
-  .wish-add .jobwrap.set input { padding-right: 28px; }
-  .wish-add .jobclear { width: auto; background: none; color: var(--faint); font-size: inherit; line-height: normal; }
-  .wish-add .jobclear:hover { filter: none; color: var(--text); background: rgba(255, 255, 255, 0.07); }
-  ul.wishlist .wbody { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 3px; }
-  ul.wishlist .wbody .wtxt { align-self: stretch; cursor: text; }
-  ul.wishlist .wbody .jobpill { max-width: 100%; font-size: 10.5px; padding: 0 8px 0 6px; }
-  ul.wishlist li.qediting { display: block; cursor: default; background: var(--sheet-2); padding: 8px; }
-  ul.wishlist li.qediting:hover { background: var(--sheet-2); }
-  ul.wishlist li.qediting input {
-    width: 100%;
-    font: inherit;
-    font-size: 12.5px;
-    color: var(--text);
-    background: var(--sheet);
-    border: 1px solid var(--line);
-    border-radius: 7px;
-    padding: 6px 10px;
-  }
-  ul.wishlist li.qediting input:focus { outline: none; border-color: var(--silver); box-shadow: 0 0 0 3px var(--ghost); }
-  ul.wishlist li.qediting .jobwrap { position: relative; display: flex; margin-top: 6px; }
-  ul.wishlist li.qediting .jobwrap > .ic { left: 10px; }
-  ul.wishlist li.qediting .jobwrap > .ic svg { width: 13px; height: 13px; }
-  ul.wishlist li.qediting .jobwrap input { font-size: 12px; padding-left: 29px; }
-  .qrow { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 7px; }
-  .qrow button {
-    border: none;
-    border-radius: 7px;
-    padding: 6px 0;
-    font-weight: 650;
-    font-size: 11px;
-    letter-spacing: .6px;
-    text-transform: uppercase;
-  }
-  .qrow .save { background: var(--chrome); color: var(--on-chrome); }
-  .qrow .save:hover { filter: brightness(1.08); }
-  .qrow .cancel { background: #343941; color: var(--text); }
-  .qrow .cancel:hover { filter: brightness(1.15); }
-
-  /* Job view: the job's wishlist and recurring items */
-  .jobq { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
-  .jobq-col {
-    background: var(--sheet);
-    border: 1px solid var(--line-soft);
-    border-radius: 6px;
-    box-shadow: var(--shadow), var(--hi);
-    padding: 10px 14px 8px;
-    min-width: 0;
-  }
-  .jobq h3 {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin: 0 0 4px;
-    font-size: 10.5px;
-    font-weight: 650;
-    letter-spacing: 1.6px;
-    text-transform: uppercase;
-    color: var(--faint);
-  }
-  .jobq h3 .count {
-    margin-left: auto;
-    color: var(--muted);
-    font-size: 11px;
-    letter-spacing: 0;
-    font-variant-numeric: tabular-nums;
-    background: rgba(255, 255, 255, 0.07);
-    border-radius: 20px;
-    padding: 0 8px;
-  }
-  .jobq ul { list-style: none; margin: 0; padding: 0; }
-  .jobq li {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 13px;
-    color: var(--muted);
-    padding: 3px 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-  }
-  .jobq li:last-child { border-bottom: none; }
-  .jobq li .qt { flex: 1; min-width: 0; word-break: break-word; }
-  .jobq li .qg { color: var(--faint); font-size: 11px; width: 12px; flex-shrink: 0; text-align: center; }
-  .jobq li button {
-    flex-shrink: 0;
-    display: grid;
-    place-items: center;
-    border: none;
-    background: none;
-    color: var(--faint);
-    padding: 4px;
-    border-radius: 6px;
-  }
-  .jobq li button .ic svg { width: 13px; height: 13px; }
-  .jobq li button:hover { color: #eef1f5; background: var(--ghost); }
-
-  /* jobs list */
-  ul.joblist {
-    list-style: none;
-    margin: 0;
-    padding: 0 2px;
-    max-height: 214px;
-    overflow-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: var(--line) transparent;
-  }
-  ul.joblist li { display: flex; align-items: center; gap: 1px; border-radius: 7px; }
-  ul.joblist li + li { margin-top: 2px; }
-  ul.joblist li.row:hover { background: rgba(255, 255, 255, 0.05); }
-  ul.joblist .jobrow {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    border: none;
-    background: none;
-    color: var(--muted);
-    font-size: 12.5px;
-    text-align: left;
-    padding: 6px 7px;
-    border-radius: 7px;
-  }
-  ul.joblist .jobrow > .ic { color: var(--faint); }
-  ul.joblist .jobrow > .ic svg { width: 13px; height: 13px; }
-  ul.joblist .jobrow .jn { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  ul.joblist li.row:hover .jobrow { color: var(--text); }
-  ul.joblist .count {
-    flex-shrink: 0;
-    color: var(--muted);
-    font-size: 11px;
-    font-variant-numeric: tabular-nums;
-    background: rgba(255, 255, 255, 0.07);
-    border-radius: 20px;
-    padding: 1px 7px;
-  }
-  ul.joblist li.current { background: var(--ghost); box-shadow: inset 2.5px 0 0 var(--silver); }
-  ul.joblist li.current .jobrow { color: var(--text); font-weight: 600; }
-  ul.joblist li.current .jobrow > .ic { color: var(--silver); }
-  ul.joblist li.current .count { color: #eef1f5; background: rgba(222, 228, 235, 0.14); }
-  ul.joblist .wbtn {
-    display: none;
-    place-items: center;
-    border: none;
-    background: none;
-    color: var(--faint);
-    padding: 3px;
-    border-radius: 6px;
-    opacity: 0;
-  }
-  ul.joblist .wbtn .ic svg { width: 13px; height: 13px; }
-  ul.joblist li:hover .wbtn, ul.joblist li:focus-within .wbtn { display: grid; opacity: 1; }
-  ul.joblist li.row:hover .count, ul.joblist li.row:focus-within .count { display: none; }
-  ul.joblist .wbtn.ren:hover { color: #eef1f5; background: var(--ghost); }
-  ul.joblist .wbtn.kill:hover { color: var(--danger); background: rgba(224, 112, 112, 0.1); }
-  ul.joblist .jobedit {
-    flex: 1;
-    min-width: 0;
-    font: inherit;
-    font-size: 12.5px;
-    color: var(--text);
-    background: var(--sheet);
-    border: 1px solid var(--silver);
-    border-radius: 7px;
-    padding: 5px 9px;
-    box-shadow: 0 0 0 3px var(--ghost);
-  }
-  ul.joblist .jobedit:focus { outline: none; }
-  @media (pointer: coarse) {
-    ul.joblist .wbtn { display: grid; padding: 7px; opacity: 1; }
-  }
-  .side h2 .qcount { color: var(--silver); font-weight: 600; }
-
-  /* backup / data buttons */
-  .tools-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
-  .tools-grid button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 7px;
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    background: var(--sheet);
-    color: var(--muted);
-    padding: 8px 4px;
-    font-size: 11.5px;
-    font-weight: 600;
-    white-space: nowrap;
-    box-shadow: var(--hi);
-  }
-  .tools-grid button .ic { color: var(--silver); opacity: .8; }
-  .tools-grid button .ic svg { width: 13px; height: 13px; }
-  .tools-grid button:hover { color: var(--text); border-color: var(--silver); background: var(--ghost); }
-  .tools-grid button:hover .ic { opacity: 1; }
-  .clearall {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 7px;
-    width: 100%;
-    margin-top: 7px;
-    border: 1px dashed var(--line);
-    border-radius: 8px;
-    background: none;
-    color: var(--faint);
-    padding: 7px 4px;
-    font-size: 11.5px;
-    font-weight: 600;
-  }
-  .clearall .ic svg { width: 13px; height: 13px; }
-  .clearall:hover { color: var(--danger); border-color: rgba(224, 112, 112, 0.55); border-style: solid; background: rgba(224, 112, 112, 0.07); }
-
-  /* clear-data dialog */
-  .modal.modal-sm { max-width: 470px; }
-  .modal-head.danger::before { background: linear-gradient(90deg, #e07070, #b85a5a); }
-  .clearopts { display: flex; flex-direction: column; gap: 6px; margin: 12px 0 4px; }
-  .copt {
-    display: flex;
-    align-items: center;
-    gap: 11px;
-    padding: 9px 12px;
-    border: 1px solid var(--line-soft);
-    border-radius: 8px;
-    background: var(--sheet-2);
-    cursor: pointer;
-    transition: border-color .15s, background .15s;
-  }
-  .copt:hover { border-color: var(--line); }
-  .copt:has(input:checked) { border-color: rgba(224, 112, 112, 0.4); background: rgba(224, 112, 112, 0.05); }
-  .copt input { width: 16px; height: 16px; margin: 0; accent-color: #e07070; cursor: pointer; flex-shrink: 0; }
-  .copt .ct { display: flex; flex-direction: column; line-height: 1.35; min-width: 0; }
-  .copt .ct b { color: var(--text); font-weight: 600; font-size: 13px; }
-  .copt .ct span { color: var(--faint); font-size: 11.5px; }
-  .clearwarn { margin: 10px 2px 0; color: var(--faint); font-size: 12px; min-height: 1em; }
-  .backupnote {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: var(--ghost);
-    border: 1px solid var(--silver-soft);
-    border-radius: 8px;
-    padding: 10px 12px;
-    margin-top: 14px;
-    font-size: 12.5px;
-  }
-  .backupnote > span { flex: 1; }
-  .backupnote button {
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    border: 1px solid var(--line);
-    border-radius: 7px;
-    background: var(--sheet);
-    color: var(--text);
-    font-size: 12px;
-    font-weight: 600;
-    padding: 6px 11px;
-    white-space: nowrap;
-  }
-  .backupnote button .ic svg { width: 13px; height: 13px; }
-  .backupnote button:hover { border-color: var(--silver); background: var(--sheet-2); }
-  .backupnote button.done { border-color: rgba(88, 192, 122, 0.5); color: var(--green); }
-  .modal-foot { gap: 10px; }
-  .modal-foot button.ghostbtn { background: #343941; color: var(--text); }
-  .modal-foot button.ghostbtn:hover { filter: brightness(1.15); }
-  .modal-foot button.dangerbtn { background: #c45c5c; color: #fff; }
-  .modal-foot button.dangerbtn:hover { filter: brightness(1.1); }
-  .modal-foot button:disabled { opacity: .4; pointer-events: none; }
-  #clearOverlay .modal-foot button { white-space: nowrap; }
-  @media (max-width: 480px) {
-    .backupnote { flex-direction: column; align-items: stretch; }
-    #clearOverlay .modal-foot button { padding: 9px 16px; }
-    #clearOverlay .modal-foot .dangerbtn { flex: 1; }
-  }
-
-  /* help modal */
-  .overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.62);
-    backdrop-filter: blur(4px);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
-    z-index: 20;
-  }
-  .overlay.open { display: flex; animation: fadein .18s ease; }
-  @keyframes fadein { from { opacity: 0; } }
-  .overlay.open .modal { animation: pop .24s cubic-bezier(.2, .9, .35, 1.15); }
-  @keyframes pop {
-    from { opacity: 0; transform: translateY(12px) scale(.985); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
-  }
-  .modal {
-    background: var(--sheet);
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    border-top: none;
-    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
-    max-width: 660px;
-    width: 100%;
-    max-height: 84vh;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-  .modal-head {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 16px 22px;
-    border-bottom: 1px solid var(--line-soft);
-    position: relative;
-  }
-  .modal-head::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: var(--chrome);
-    border-radius: 12px 12px 0 0;
-  }
-  .modal-head h2 { margin: 0; font-family: var(--serif); font-size: 19px; font-weight: 650; margin-right: auto; }
-  .modal-head .close {
-    border: none;
-    background: none;
-    color: var(--faint);
-    font-size: 18px;
-    padding: 4px 8px;
-    border-radius: 8px;
-  }
-  .modal-head .close:hover { color: var(--text); background: rgba(255, 255, 255, 0.06); }
-  .modal-body {
-    padding: 6px 22px 22px;
-    overflow-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: var(--line) transparent;
-    font-size: 13.5px;
-    color: var(--muted);
-  }
-  .modal-body h3 {
-    color: var(--text);
-    font-size: 12.5px;
-    font-weight: 650;
-    text-transform: uppercase;
-    letter-spacing: 1.2px;
-    margin: 20px 0 6px;
-  }
-  .modal-body h3 .tick { color: var(--silver); }
-  .modal-body p { margin: 0 0 8px; }
-  .modal-body ul { margin: 0 0 8px; padding-left: 20px; }
-  .modal-body li { margin-bottom: 4px; }
-  .modal-body b { color: var(--text); font-weight: 600; }
-  .modal-body kbd {
-    font-family: Consolas, monospace;
-    font-size: 12px;
-    background: var(--sheet-2);
-    border: 1px solid var(--line);
-    border-bottom-width: 2px;
-    border-radius: 5px;
-    padding: 0 6px;
-    color: var(--text);
-  }
-  .modal-body pre {
-    background: var(--sheet-2);
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    padding: 10px 14px;
-    font-family: Consolas, monospace;
-    font-size: 12.5px;
-    color: var(--text);
-    overflow-x: auto;
-    margin: 6px 0 8px;
-  }
-  .modal-body .note {
-    background: var(--ghost);
-    border: 1px solid var(--silver-soft);
-    border-radius: 8px;
-    padding: 10px 14px;
-    margin-top: 16px;
-  }
-  .modal-foot {
-    padding: 14px 22px;
-    border-top: 1px solid var(--line-soft);
-    display: flex;
-    justify-content: flex-end;
-  }
-  .modal-foot button {
-    border: none;
-    border-radius: 8px;
-    background: var(--chrome);
-    color: var(--on-chrome);
-    font-weight: 650;
-    padding: 8px 26px;
-  }
-  .modal-foot button:hover { filter: brightness(1.08); }
-
-  /* toast — a silver plate on the black */
-  #toast {
-    position: fixed;
-    left: 50%;
-    bottom: 30px;
-    transform: translateX(-50%) translateY(12px);
-    background: #e9ebef;
-    border: 1px solid #f5f7fa;
-    color: #14161a;
-    padding: 9px 22px;
-    border-radius: 999px;
-    font-size: 13px;
-    font-weight: 500;
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6), 0 2px 14px rgba(201, 208, 217, 0.15);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity .2s ease, transform .25s cubic-bezier(.2, .9, .35, 1.2);
-    z-index: 10;
-  }
-  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto; }
-  #toast .undo {
-    border: none;
-    background: rgba(20, 22, 26, 0.12);
-    color: #14161a;
-    font-weight: 700;
-    font-size: 12.5px;
-    border-radius: 999px;
-    padding: 3px 13px;
-    margin-left: 12px;
-  }
-  #toast .undo:hover { background: rgba(20, 22, 26, 0.2); }
-
-  /* hover hints */
-  #tip {
-    position: fixed;
-    z-index: 40;
-    max-width: 280px;
-    background: #e9ebef;
-    border: 1px solid #f5f7fa;
-    color: #14161a;
-    font-size: 12px;
-    line-height: 1.45;
-    padding: 5px 11px;
-    border-radius: 7px;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity .15s ease;
-  }
-  #tip.show { opacity: 1; transition-delay: .35s; }
-
-  @media (max-width: 860px) {
-    .app { flex-direction: column; min-height: 0; }
-    .side {
-      width: 100%;
-      position: static;
-      height: auto;
-      overflow: visible;
-      border-left: none;
-      border-top: 1px solid var(--line);
-      padding: 20px 16px 30px;
-    }
-    .side .grow { min-height: 0; }
-    .daylist { max-height: 300px; }
-    .main { margin: 0; max-width: none; padding: 20px 16px 40px; }
-    .mast { padding: 8px 14px; gap: 8px 12px; }
-    .stats { flex-wrap: wrap; }
-    .stat { flex: 1 1 32%; }
-    .stat.wide { flex: 1 1 100%; border-left: none; border-top: 1px solid var(--line-soft); }
-    .keys { display: none; }
-  }
-  /* phones: an entry's job pill drops under its text instead of squeezing it */
-  @media (max-width: 600px) {
-    ol.items li.entry .body { flex-direction: column; align-items: flex-start; gap: 4px; }
-    ol.items li.entry .txt { align-self: stretch; }
-    ol.items li.entry .body .jobpill { max-width: 100%; }
-    .wday ul li { flex-wrap: wrap; }
-    .wday ul li > span:first-of-type { flex-basis: calc(100% - 20px); }
-    .wday ul li .jobpill { margin: 1px 0 2px 14px; max-width: calc(100% - 14px); }
-  }
-</style>
-</head>
-<body>
-<header class="mast">
-  <div class="brand">
-    <span class="glyph" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none"><rect x="9" y="6" width="14" height="21" rx="2.5" stroke="currentColor" stroke-width="2"/><rect x="12" y="3.5" width="8" height="4.5" rx="1.5" fill="currentColor" stroke="none"/><path d="M12 16l2.6 2.6 5.4-5.8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-    <span class="brand-text">
-      <span class="name">Docket</span>
-      <span class="sub">Daily work log</span>
-    </span>
-  </div>
-  <div class="tabs" id="viewTabs">
-    <button data-view="day" class="active" data-tip="One day at a time — shortcut: D">Day</button>
-    <button data-view="week" data-tip="The whole week at a glance — shortcut: W">Week</button>
-    <button data-view="month" data-tip="Calendar with entry counts — shortcut: M">Month</button>
-  </div>
-  <div class="head-right">
-    <div class="saved-pill" id="savedPill" data-tip="Everything saves to this browser automatically — keep an occasional Export as a backup"><span class="dot">●</span> Auto-saved locally</div>
-    <button class="helpbtn" id="helpBtn" data-tip="How Docket works — shortcut: ?" aria-label="How Docket works">?</button>
-  </div>
-</header>
-<div class="app">
-
-  <aside class="side">
-    <section class="grow">
-      <h2>Recent days</h2>
-      <ul class="daylist" id="dayList"></ul>
-    </section>
-
-    <section>
-      <h2>Jobs <span class="qcount" id="jobCount"></span></h2>
-      <div class="wish-add">
-        <input type="text" id="newJobSide" placeholder="New job…" autocomplete="off" maxlength="60" aria-label="New job name">
-        <button id="addJobBtn" data-tip="Add a job" aria-label="Add a job">+</button>
-      </div>
-      <ul class="joblist" id="jobList"></ul>
-      <div class="wish-hint">Click a job to see everything on it — logged and still to do</div>
-    </section>
-
-    <section>
-      <h2>Wishlist <span class="qcount" id="wishCount"></span></h2>
-      <div class="wish-add">
-        <input type="text" id="newWish" placeholder="Needs doing…" autocomplete="off" aria-label="New wishlist item">
-        <button id="addWishBtn" data-tip="Add to the wishlist" aria-label="Add to the wishlist">+</button>
-        <div class="jobwrap" id="wishJobWrap">
-          <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span>
-          <input type="text" id="wishJob" list="jobOptions" placeholder="Job (optional)" autocomplete="off" maxlength="60" aria-label="Job for new wishlist items (optional)">
-          <button type="button" class="jobclear" id="wishJobClear" data-tip="Stop adding to this job" aria-label="Clear job"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></span></button>
-        </div>
-      </div>
-      <ul class="wishlist" id="wishList"></ul>
-      <div class="wish-hint">Drag onto the log or a day · ↳ sends to open day</div>
-    </section>
-
-    <section>
-      <h2>Recurring <span class="qcount" id="recCount"></span></h2>
-      <div class="wish-add">
-        <input type="text" id="newRec" placeholder="Happens often…" autocomplete="off" aria-label="New recurring task">
-        <button id="addRecBtn" data-tip="Add a recurring task" aria-label="Add a recurring task">+</button>
-        <div class="jobwrap" id="recJobWrap">
-          <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span>
-          <input type="text" id="recJob" list="jobOptions" placeholder="Job (optional)" autocomplete="off" maxlength="60" aria-label="Job for new recurring items (optional)">
-          <button type="button" class="jobclear" id="recJobClear" data-tip="Stop adding to this job" aria-label="Clear job"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></span></button>
-        </div>
-      </div>
-      <ul class="wishlist" id="recList"></ul>
-      <div class="wish-hint">Drag or ↳ to log it on a day — it stays in this list</div>
-    </section>
-
-    <section class="tools">
-      <h2>Backup &amp; data</h2>
-      <div class="tools-grid">
-        <button id="exportBtn" data-tip="Back up everything — log, jobs, wishlist and recurring — to a JSON file"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg></span>Export JSON</button>
-        <button id="importBtn" data-tip="Merge a JSON backup back in — duplicates are skipped"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 8 5-5 5 5"/><path d="M12 3v12"/></svg></span>Import JSON</button>
-        <button id="csvExportBtn" data-tip="Export the log, jobs, wishlist and recurring as a CSV that opens straight in Excel"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M12 18v-6"/><path d="m9 15 3 3 3-3"/></svg></span>Export CSV</button>
-        <button id="csvImportBtn" data-tip="Bulk-load from a spreadsheet CSV — date first, task second, job third (optional). Duplicates are skipped"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M12 12v6"/><path d="m9 15 3-3 3 3"/></svg></span>Import CSV</button>
-      </div>
-      <button class="clearall" id="clearAllBtn" data-tip="Wipe the log, jobs, wishlist or recurring tasks — e.g. to start fresh and re-import a backup. You choose what goes, and can Undo"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></span>Clear data…</button>
-      <input type="file" id="importFile" accept=".json,application/json" hidden>
-      <input type="file" id="csvFile" accept=".csv,text/csv,text/plain" hidden>
-    </section>
-  </aside>
-
-  <main class="main">
-    <section class="hero">
-      <p class="eyebrow" id="dayTitle"></p>
-      <div class="datenav">
-        <button class="arrow" id="prevDay" data-tip="Previous day — shortcut: ←" aria-label="Previous"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></span></button>
-        <div class="datewrap">
-          <button type="button" class="bigdate" id="navDate" data-tip="Pick a date from the calendar" aria-label="Pick a date"></button>
-          <input type="date" id="datePick" tabindex="-1" aria-label="Date">
-        </div>
-        <button class="arrow" id="nextDay" data-tip="Next day — shortcut: →" aria-label="Next"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></span></button>
-      </div>
-      <div class="side-actions">
-        <button id="copyDay" data-tip="Date heading + bulleted list — ready to paste into an email or invoice. Shortcut: C"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span><span id="copyDayLabel">Copy Day to Clipboard</span></button>
-        <button id="copyPlain" data-tip="Just the lines, one per line — no date heading"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg></span>Copy Items Only</button>
-        <button id="logJobBtn" style="display:none" data-tip="Set this as the job and start logging on the open day — shortcut: N"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span>Log Work on This Job</button>
-        <button id="todayBtn" data-tip="Back to today — shortcut: T"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M12 14h.01"/></svg></span>Jump to Today</button>
-      </div>
-    </section>
-
-    <div class="logzone" id="logPanel">
-      <div class="stats">
-        <div class="stat" data-tip="Entries logged on the open day"><span class="sn" id="statToday">0</span><span class="sl">This day</span></div>
-        <div class="stat" data-tip="Entries in the open day's week (Mon–Sun)"><span class="sn" id="statWeek">0</span><span class="sl">This week</span></div>
-        <div class="stat" data-tip="Entries in the open day's month"><span class="sn" id="statMonth">0</span><span class="sl">This month</span></div>
-        <div class="stat wide">
-          <div class="actstrip" id="actStrip"></div>
-          <span class="sl">Last 14 days</span>
-        </div>
-      </div>
-
-      <div class="addcard">
-        <div class="jobwrap" id="jobWrap" data-tip="Job — entries you add go against it, and it stays set so you can log several in a row. Shortcut: J">
-          <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span>
-          <input type="text" id="newJob" list="jobOptions" placeholder="Job (optional)" autocomplete="off" maxlength="60" aria-label="Job for new entries (optional)">
-          <button type="button" class="jobclear" id="jobClear" data-tip="Stop logging against this job" aria-label="Clear job"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></span></button>
-        </div>
-        <div class="inwrap">
-          <input type="text" id="newItem" placeholder="What did you do?" autocomplete="off" aria-label="What did you do?">
-          <kbd class="enterhint">Enter ↵</kbd>
-        </div>
-        <button id="addBtn" aria-label="Add entry"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>Add</button>
-      </div>
-
-      <div class="sheet" id="sheet"><ol class="items" id="itemList"></ol></div>
-      <div class="empty" id="emptyMsg">
-        <svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><rect x="9" y="6" width="14" height="21" rx="2.5" stroke="currentColor" stroke-width="1.6"/><rect x="12" y="3.5" width="8" height="4.5" rx="1.5" fill="currentColor" stroke="none"/><path d="M12 16l2.6 2.6 5.4-5.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        <p class="e1">Nothing logged for this day yet</p>
-        <p class="e2">Type above and press Enter — or drag something in from the Wishlist.</p>
-      </div>
-
-      <div class="foot-actions">
-        <span class="spacer"></span>
-        <button class="clearday" id="clearDay" data-tip="Delete every entry on this day — Undo appears in case you slip">Clear this day</button>
-      </div>
-    </div>
-
-    <div class="weekview" id="weekView" style="display:none"></div>
-
-    <div class="jobview" id="jobView" style="display:none"></div>
-    <datalist id="jobOptions"></datalist>
-
-    <div class="monthview" id="monthView" style="display:none">
-      <div class="view-sum"><span id="monthSum"></span><span class="mlegend" aria-hidden="true">less <i></i><i class="l1"></i><i class="l2"></i><i class="l3"></i> more</span></div>
-      <div class="mgrid" id="monthGrid"></div>
-    </div>
-
-    <div class="keys" aria-hidden="true"><kbd>←</kbd><kbd>→</kbd> move &nbsp;·&nbsp; <kbd>T</kbd> today &nbsp;·&nbsp; <kbd>D</kbd><kbd>W</kbd><kbd>M</kbd> views &nbsp;·&nbsp; <kbd>N</kbd> new entry &nbsp;·&nbsp; <kbd>J</kbd> job &nbsp;·&nbsp; <kbd>C</kbd> copy &nbsp;·&nbsp; <kbd>?</kbd> guide</div>
-  </main>
-</div>
-
-<button class="fab" id="fab" data-tip="Add an entry — shortcut: N" aria-label="Add an entry">+</button>
-
-<div class="overlay" id="helpOverlay">
-  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
-    <div class="modal-head">
-      <h2 id="helpTitle">How Docket works</h2>
-      <button class="close" id="helpClose" data-tip="Close — Esc works too" aria-label="Close">✕</button>
-    </div>
-    <div class="modal-body">
-      <p>Docket is your daily record of work done, in a single file. No installs, no server, no account —
-        everything lives in this HTML file and saves automatically on your machine.
-        Not sure what a button does? <b>Hover it</b> — or <kbd>Tab</kbd> to it — and it explains itself.</p>
-
-      <h3><span class="tick">●</span> The daily log</h3>
-      <ul>
-        <li>Type what you did in the box and press <kbd>Enter</kbd> — it's saved instantly.</li>
-        <li>The tiles above the log count the open day, its week and its month; the small bars chart the <b>last 14 days</b> — click a bar to jump to that day.</li>
-        <li>Move between days with the <b>‹ ›</b> arrows, or <b>click the big date</b> to open a calendar.</li>
-        <li>Hover an entry and click the <b>✎ pencil</b> to edit it (Save/Cancel), or <b>✕</b> to delete it.</li>
-        <li>Deleted the wrong thing? An <b>Undo</b> button pops up for a few seconds — same for <b>Clear this day</b>.</li>
-        <li><b>Recent Days</b> in the sidebar lists every day that has entries, grouped by month — click a month name to fold or unfold it, and the <b>▦</b> icon opens that month in the calendar.</li>
-      </ul>
-
-      <h3><span class="tick">●</span> Jobs — group work under one heading</h3>
-      <ul>
-        <li>Doing several things for the same client, site or project? Type its name in the <b>Job</b> box left of the entry box (or pick one from its list) — every entry you add goes against that job.</li>
-        <li>The job <b>stays set</b>, so you can log a run of entries in a row. Click its <b>✕</b> (or empty the box) to stop.</li>
-        <li>Entries show their job as a small pill — <b>click the pill</b>, or the job in the sidebar's <b>Jobs</b> list, to open the <b>Job view</b>: every entry on that job, across every day, with totals.</li>
-        <li>In the Job view, <b>Copy Job</b> gives you the job name plus each day's work — ready for an invoice.</li>
-        <li>Wishlist and recurring items take a job too — the <b>Job</b> box appears under their add box when you click into it, and their <b>✎ pencil</b> changes it. Logging one on a day carries its job onto the entry.</li>
-        <li>The Job view lists the job's <b>wishlist and recurring items</b> above its logged work — click <b>↳</b> to log one on the open day.</li>
-        <li>Change an entry's job with the <b>✎ pencil</b>. Rename or delete a job from the sidebar; deleting a job keeps everything that was on it.</li>
-      </ul>
-
-      <h3><span class="tick">●</span> Copy &amp; paste</h3>
-      <ul>
-        <li><b>Copy Day to Clipboard</b> copies the date plus a bulleted list — ready to paste into an email, timesheet or invoice.</li>
-        <li><b>Copy Items Only</b> copies just the lines, no date heading.</li>
-      </ul>
-
-      <h3><span class="tick">●</span> Day · Week · Month views</h3>
-      <ul>
-        <li>Switch views with the <b>Day / Week / Month</b> tabs. The <b>‹ ›</b> arrows then step by day, week or month.</li>
-        <li><b>Week</b> shows the whole week's entries at a glance; <b>Month</b> is a calendar with counts per day.</li>
-        <li>Click any day in either view to open it. The copy buttons follow the view — in Month view, <b>Copy Month</b> gives you the full month-to-date list, ready to paste.</li>
-      </ul>
-
-      <h3><span class="tick">●</span> Keyboard shortcuts</h3>
-      <p>They work whenever you're not typing in a box:</p>
-      <ul>
-        <li><kbd>←</kbd> <kbd>→</kbd> — previous / next day (steps by week or month in those views)</li>
-        <li><kbd>T</kbd> — jump to today &nbsp;·&nbsp; <kbd>D</kbd> <kbd>W</kbd> <kbd>M</kbd> — switch to Day, Week or Month view</li>
-        <li><kbd>N</kbd> — start typing a new entry &nbsp;·&nbsp; <kbd>J</kbd> — pick the job for new entries</li>
-        <li><kbd>C</kbd> — copy the open day, week, month or job</li>
-        <li><kbd>?</kbd> — open this guide &nbsp;·&nbsp; <kbd>Esc</kbd> — close it</li>
-      </ul>
-
-      <h3><span class="tick">●</span> Wishlist</h3>
-      <ul>
-        <li>Queue things that still need doing in the sidebar's <b>Wishlist</b>.</li>
-        <li>When one gets done, <b>drag it onto the log or onto a day</b> — in Recent Days, or straight onto a Week or Month cell. It becomes an entry there.</li>
-        <li>Or hover it and click <b>↳</b> to log it on the day you have open. Click its text or <b>✎</b> to edit it or set its job, <b>✕</b> to remove.</li>
-      </ul>
-
-      <h3><span class="tick">●</span> Recurring tasks</h3>
-      <ul>
-        <li>Add tasks you do again and again to <b>Recurring</b> in the sidebar.</li>
-        <li>Drag one onto any day (or click <b>↳</b> for the open day) to log it — <b>it stays in the list</b> so you can use it next time.</li>
-        <li>If it's already on that day (same job), Docket skips the duplicate and tells you.</li>
-      </ul>
-
-      <h3><span class="tick">●</span> CSV import / export (Excel)</h3>
-      <p>Bulk-load the month to date from a spreadsheet. One entry per row: date first, task second, and optionally a job third.
-        Put <b>Wishlist</b> or <b>Recurring</b> in the date column to load those lists instead.</p>
-      <pre>Date,Task,Job
-2026-07-01,"Installed blinds, lounge",Smith House
-02/07/2026,Quoted new office fit-out,
-Wishlist,Order paint,Smith House
-Recurring,Timesheet,</pre>
-      <ul>
-        <li>The header row is optional — but to import jobs, include it with <b>Job</b> as the third heading. Dates can be <b>2026-07-01</b> or <b>01/07/2026</b> style (day-first).</li>
-        <li>Comma, semicolon or tab delimited — detected automatically.</li>
-        <li>Re-importing is safe: duplicates and unreadable rows are skipped and reported. The same task on two different jobs isn't a duplicate.</li>
-        <li><b>Export CSV</b> writes the same format, so you can export → edit in Excel → import back.</li>
-      </ul>
-
-      <h3><span class="tick">●</span> Backups &amp; where your data lives</h3>
-      <ul>
-        <li>Data is stored by <b>this browser, on this computer</b>. Stick to one browser (e.g. always Edge).</li>
-        <li><b>Export JSON</b> saves everything — including jobs and the wishlist — to a file; <b>Import JSON</b> merges it back in. Use it to move to another browser or PC, or as a safety net.</li>
-        <li>Clearing the browser's site data erases the log — keep an occasional export.</li>
-        <li><b>Clear data…</b> wipes the log, jobs, wishlist and/or recurring tasks — you tick which. Use it to start fresh,
-          e.g. clear everything then <b>Import JSON</b> to reload a backup cleanly. It offers to export a backup first, and an <b>Undo</b> pops up afterwards.</li>
-        <li>Both <b>JSON</b> and <b>CSV</b> hold everything — the log, jobs, wishlist and recurring tasks, each with its job. JSON is the exact backup; CSV is the one to open in Excel.</li>
-      </ul>
-
-      <div class="note"><b>Tip:</b> right-click the Docket.html file → <i>Send to</i> → <i>Desktop (create shortcut)</i>
-        so it's always one click away. Reopen this guide any time with the <b>?</b> button, top right.</div>
-    </div>
-    <div class="modal-foot">
-      <button id="helpDone">Got it</button>
-    </div>
-  </div>
-</div>
-
-<div class="overlay" id="clearOverlay">
-  <div class="modal modal-sm" role="dialog" aria-modal="true" aria-labelledby="clearTitle" aria-describedby="clearDesc">
-    <div class="modal-head danger">
-      <h2 id="clearTitle">Clear data</h2>
-      <button class="close" id="clearClose" data-tip="Close — Esc works too" aria-label="Close">✕</button>
-    </div>
-    <div class="modal-body">
-      <p id="clearDesc" style="margin-top:12px">Start fresh — for example before re-importing a backup. Tick what to remove:</p>
-      <div class="clearopts">
-        <label class="copt"><input type="checkbox" id="clrLog" checked><span class="ct"><b>Daily log</b><span id="clrLogN"></span></span></label>
-        <label class="copt"><input type="checkbox" id="clrJobs" checked><span class="ct"><b>Jobs</b><span id="clrJobsN"></span></span></label>
-        <label class="copt"><input type="checkbox" id="clrWish" checked><span class="ct"><b>Wishlist</b><span id="clrWishN"></span></span></label>
-        <label class="copt"><input type="checkbox" id="clrRec" checked><span class="ct"><b>Recurring tasks</b><span id="clrRecN"></span></span></label>
-      </div>
-      <p class="clearwarn" id="clearWarn"></p>
-      <div class="backupnote">
-        <span><b>Keep a copy first.</b> A backup holds everything above, so Import JSON puts it all back.</span>
-        <button id="clearBackup" type="button"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg></span><span>Export JSON</span></button>
-      </div>
-    </div>
-    <div class="modal-foot">
-      <button class="ghostbtn" id="clearCancel">Cancel</button>
-      <button class="dangerbtn" id="clearGo">Clear selected</button>
-    </div>
-  </div>
-</div>
-
-<div id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
-
-<script>
 (function () {
   "use strict";
   // Storage keys keep the app's original "track." prefix on purpose:
@@ -2327,7 +404,7 @@ Recurring,Timesheet,</pre>
     ol.classList.toggle("stagger", staggerNext);
     ol.innerHTML = "";
     list.forEach(function (item, idx) {
-      ol.appendChild(item.id === editingId ? buildEditor(item) : buildEntry(item, idx));
+      ol.appendChild(item.id === editingId ? buildEditor(item, currentDate) : buildEntry(item, idx, currentDate));
     });
 
     $("sheet").style.display = list.length === 0 ? "none" : "";
@@ -2414,15 +491,7 @@ Recurring,Timesheet,</pre>
 
         if (list.length > 0) {
           var ul = document.createElement("ul");
-          list.forEach(function (it) {
-            var li = document.createElement("li");
-            var t = document.createElement("span");
-            t.textContent = it.text;
-            li.appendChild(t);
-            var pill = jobPill(it);
-            if (pill) li.appendChild(pill);
-            ul.appendChild(li);
-          });
+          list.forEach(function (it) { ul.appendChild(buildMiniEntry(it, d, true)); });
           main.appendChild(ul);
         } else {
           var none = document.createElement("div");
@@ -2432,6 +501,7 @@ Recurring,Timesheet,</pre>
         }
 
         card.appendChild(main);
+        card.dataset.day = d;
         makeDropTarget(card, function () { return d; });
         wrap.appendChild(card);
       })(shiftDay(ws, i));
@@ -2477,7 +547,17 @@ Recurring,Timesheet,</pre>
         cell.className = "mcell" + (iso === todayISO() ? " today" : "") +
           (cdow === 0 || cdow === 6 ? " wknd" : "") +
           (list.length >= 4 ? " d3" : list.length >= 2 ? " d2" : list.length === 1 ? " d1" : "");
-        cell.dataset.tip = (list.length ? list.length + " entr" + (list.length === 1 ? "y" : "ies") : "No entries") + " — click to open the day";
+        // jobs worked that day, busiest first, for the cell line and tooltip
+        var perJob = {}, jobOrder = [];
+        list.forEach(function (it) {
+          if (!jobById(it.job)) return;
+          if (!perJob[it.job]) { perJob[it.job] = 0; jobOrder.push(it.job); }
+          perJob[it.job]++;
+        });
+        jobOrder.sort(function (a, b) { return perJob[b] - perJob[a]; });
+        var jobTip = jobOrder.map(function (id) { return jobById(id).text + " " + perJob[id]; }).join(", ");
+        cell.dataset.tip = (list.length ? list.length + " entr" + (list.length === 1 ? "y" : "ies") : "No entries") +
+          (jobTip ? " · " + jobTip : "") + " — click to open the day";
 
         var dnum = document.createElement("div");
         dnum.className = "dnum";
@@ -2491,6 +571,23 @@ Recurring,Timesheet,</pre>
           dnum.appendChild(count);
         }
         cell.appendChild(dnum);
+
+        if (jobOrder.length) {
+          var mj = document.createElement("div");
+          mj.className = "mjobs";
+          mj.appendChild(icon("job"));
+          var mjn = document.createElement("span");
+          mjn.className = "jn";
+          mjn.textContent = jobById(jobOrder[0]).text;
+          mj.appendChild(mjn);
+          if (jobOrder.length > 1) {
+            var mjm = document.createElement("span");
+            mjm.className = "jm";
+            mjm.textContent = "+" + (jobOrder.length - 1);
+            mj.appendChild(mjm);
+          }
+          cell.appendChild(mj);
+        }
 
         list.slice(0, 2).forEach(function (it) {
           var snip = document.createElement("div");
@@ -2509,6 +606,7 @@ Recurring,Timesheet,</pre>
           currentDate = iso;
           setView("day");
         });
+        cell.dataset.day = iso;
         makeDropTarget(cell, function () { return iso; });
         grid.appendChild(cell);
       })(isoOf(new Date(d.getFullYear(), d.getMonth(), day)));
@@ -2668,33 +766,29 @@ Recurring,Timesheet,</pre>
       main.appendChild(head);
 
       var ul = document.createElement("ul");
-      list.forEach(function (it) {
-        var li = document.createElement("li");
-        li.textContent = it.text;
-        ul.appendChild(li);
-      });
+      list.forEach(function (it) { ul.appendChild(buildMiniEntry(it, d, false)); });
       main.appendChild(ul);
       card.appendChild(main);
       wrap.appendChild(card);
     });
   }
 
-  function buildEntry(item, idx) {
-    var li = document.createElement("li");
-    li.className = "entry";
+  // Entries drag onto another day (Recent days, a Week card, a Month cell)
+  // to move there, or onto a job in the sidebar to link them.
+  function makeEntryDraggable(li, item) {
+    li.draggable = true;
+    li.addEventListener("dragstart", function (e) {
+      e.dataTransfer.setData("text/plain", "e:" + item.id);
+      e.dataTransfer.effectAllowed = "linkMove"; // move onto a day, link onto a job
+      li.classList.add("dragging");
+    });
+    li.addEventListener("dragend", function () { li.classList.remove("dragging"); });
+  }
 
-    var num = document.createElement("span");
-    num.className = "num";
-    num.textContent = idx + 1;
-
-    var txt = document.createElement("div");
-    txt.className = "txt";
-    txt.textContent = item.text;
-    txt.addEventListener("dblclick", function () { startEdit(item.id); });
-
+  function entryButtons(item) {
     var edit = document.createElement("button");
     edit.className = "icon edit";
-    edit.dataset.tip = "Edit this entry — double-clicking the text works too";
+    edit.dataset.tip = "Edit — text, job or date. Double-clicking the text works too";
     edit.setAttribute("aria-label", "Edit entry");
     edit.appendChild(icon("pencil"));
     edit.addEventListener("click", function () { startEdit(item.id); });
@@ -2705,6 +799,42 @@ Recurring,Timesheet,</pre>
     del.setAttribute("aria-label", "Delete entry");
     del.appendChild(icon("x"));
     del.addEventListener("click", function () { removeItem(item.id); });
+    return [edit, del];
+  }
+
+  // A compact entry for the Week and Job views: same edit, delete and drag
+  // as the Day view's ledger rows.
+  function buildMiniEntry(item, day, showPill) {
+    if (item.id === editingId) return buildEditor(item, day);
+    var li = document.createElement("li");
+    li.className = "mini";
+    var t = document.createElement("span");
+    t.className = "mt";
+    t.textContent = item.text;
+    t.addEventListener("dblclick", function () { startEdit(item.id); });
+    li.appendChild(t);
+    var pill = showPill && jobPill(item);
+    if (pill) li.appendChild(pill);
+    entryButtons(item).forEach(function (b) { li.appendChild(b); });
+    makeEntryDraggable(li, item);
+    return li;
+  }
+
+  function buildEntry(item, idx) {
+    var li = document.createElement("li");
+    li.className = "entry";
+    makeEntryDraggable(li, item);
+
+    var num = document.createElement("span");
+    num.className = "num";
+    num.textContent = idx + 1;
+    num.dataset.tip = "Drag the entry onto another day to move it, or onto a job to link it";
+
+    var txt = document.createElement("div");
+    txt.className = "txt";
+    txt.textContent = item.text;
+    txt.addEventListener("dblclick", function () { startEdit(item.id); });
+    var btns = entryButtons(item);
 
     var body = document.createElement("div");
     body.className = "body";
@@ -2714,12 +844,12 @@ Recurring,Timesheet,</pre>
 
     li.appendChild(num);
     li.appendChild(body);
-    li.appendChild(edit);
-    li.appendChild(del);
+    li.appendChild(btns[0]);
+    li.appendChild(btns[1]);
     return li;
   }
 
-  function buildEditor(item) {
+  function buildEditor(item, day) {
     var li = document.createElement("li");
     li.className = "editing";
 
@@ -2742,6 +872,14 @@ Recurring,Timesheet,</pre>
     jobWrap.dataset.tip = "The job this entry belongs to — pick one, type a new name, or leave empty";
     jobWrap.appendChild(jobInput);
 
+    var dateInput = document.createElement("input");
+    dateInput.type = "date";
+    dateInput.className = "edate";
+    dateInput.value = day;
+    dateInput.required = true;
+    dateInput.setAttribute("aria-label", "Date of this entry");
+    dateInput.dataset.tip = "Change the date to move this entry to another day";
+
     function commit() {
       var v = input.value.trim();
       editingId = null;
@@ -2754,22 +892,26 @@ Recurring,Timesheet,</pre>
         changed = true;
       }
       if (changed) save();
+      // a valid new date moves it (moveEntry renders and offers Undo)
+      var to = parseDateFlexible(dateInput.value);
+      if (to && to !== day && moveEntry(item.id, to)) return;
       render();
     }
     function cancel() {
       editingId = null;
       render();
     }
-    [input, jobInput].forEach(function (el) {
+    [input, jobInput, dateInput].forEach(function (el) {
       el.addEventListener("keydown", function (e) {
-        if (e.key === "Enter") commit();
-        if (e.key === "Escape") cancel();
+        if (e.key === "Enter") { e.preventDefault(); commit(); }
+        if (e.key === "Escape") { e.preventDefault(); cancel(); }
       });
     });
 
     var row = document.createElement("div");
     row.className = "editrow";
     row.appendChild(jobWrap);
+    row.appendChild(dateInput);
     var saveBtn = document.createElement("button");
     saveBtn.className = "save";
     saveBtn.textContent = "Save";
@@ -2898,6 +1040,7 @@ Recurring,Timesheet,</pre>
           editingId = null;
           render();
         });
+        btn.dataset.day = d;
         makeDropTarget(btn, function () { return d; });
         li.appendChild(btn);
         ul.appendChild(li);
@@ -3011,6 +1154,8 @@ Recurring,Timesheet,</pre>
       li.appendChild(row);
       li.appendChild(ren);
       li.appendChild(kill);
+      li.dataset.job = j.id;
+      makeJobDropTarget(li, function () { return j.id; });
       ul.appendChild(li);
     });
   }
@@ -3130,8 +1275,86 @@ Recurring,Timesheet,</pre>
     return "added";
   }
 
+  // ---------- entries anywhere ----------
+  // Entry ids are unique across the whole log, so an id alone finds one —
+  // which lets the Day, Week and Job views share edit, delete and move.
+  function findEntry(id) {
+    var days = Object.keys(data);
+    for (var i = 0; i < days.length; i++) {
+      var list = data[days[i]] || [];
+      for (var k = 0; k < list.length; k++) {
+        if (list[k].id === id) return { day: days[i], index: k, item: list[k] };
+      }
+    }
+    return null;
+  }
+
+  function moveEntry(id, toDay) {
+    var f = findEntry(id);
+    if (!f || !toDay || f.day === toDay) return false;
+    data[f.day].splice(f.index, 1);
+    if (!data[toDay]) data[toDay] = [];
+    data[toDay].push(f.item);
+    if (editingId === id) editingId = null;
+    save();
+    render();
+    toast("Moved to " + shortDow(toDay) + " " + toDay, function () {
+      removeEntryById(toDay, id);
+      if (!data[f.day]) data[f.day] = [];
+      data[f.day].splice(Math.min(f.index, data[f.day].length), 0, f.item);
+      save();
+      render();
+    });
+    return true;
+  }
+
+  // Dropping anything — an entry, a wishlist or a recurring item — on a job
+  // links it to that job.
+  function makeJobDropTarget(el, getJob) {
+    el.addEventListener("dragover", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      e.dataTransfer.dropEffect = "link";
+      el.classList.add("droptarget");
+    });
+    el.addEventListener("dragleave", function (e) {
+      if (!el.contains(e.relatedTarget)) el.classList.remove("droptarget");
+    });
+    el.addEventListener("drop", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      el.classList.remove("droptarget");
+      linkToJob(e.dataTransfer.getData("text/plain"), getJob());
+    });
+  }
+
+  function linkToJob(payload, jobId) {
+    var job = jobById(jobId);
+    var kind = payload.charAt(0), id = payload.slice(2), item = null;
+    if (!job || payload.charAt(1) !== ":") return;
+    if (kind === "e") {
+      var f = findEntry(id);
+      item = f && f.item;
+    } else if (kind === "w" || kind === "r") {
+      item = queueList(kind).find(function (it) { return it.id === id; });
+    }
+    if (!item) return;
+    if (item.job === jobId) { toast("Already on “" + job.text + "”"); return; }
+    var before = item.job;
+    var persist = function () { if (kind === "e") save(); else saveQueue(kind); };
+    item.job = jobId;
+    persist();
+    render();
+    toast("Linked to “" + job.text + "”", function () {
+      if (before) item.job = before; else delete item.job;
+      persist();
+      render();
+    });
+  }
+
   // ---------- wishlist & recurring ----------
-  // Drag payloads are prefixed: "w:<id>" wishlist (moves), "r:<id>" recurring (copies).
+  // Drag payloads are prefixed: "w:<id>" wishlist (moves), "r:<id>" recurring
+  // (copies), "e:<id>" an entry (moves to the day dropped on).
   function makeDropTarget(el, getDay) {
     el.addEventListener("dragover", function (e) {
       e.preventDefault();
@@ -3149,6 +1372,8 @@ Recurring,Timesheet,</pre>
       var payload = e.dataTransfer.getData("text/plain");
       if (payload.indexOf("w:") === 0 || payload.indexOf("r:") === 0) {
         sendQueueItem(payload.charAt(0), payload.slice(2), getDay());
+      } else if (payload.indexOf("e:") === 0) {
+        moveEntry(payload.slice(2), getDay());
       }
     });
   }
@@ -3367,7 +1592,7 @@ Recurring,Timesheet,</pre>
 
       li.addEventListener("dragstart", function (e) {
         e.dataTransfer.setData("text/plain", kind + ":" + item.id);
-        e.dataTransfer.effectAllowed = "move";
+        e.dataTransfer.effectAllowed = "linkMove"; // move onto a day, link onto a job
         li.classList.add("dragging");
       });
       li.addEventListener("dragend", function () {
@@ -3445,11 +1670,10 @@ Recurring,Timesheet,</pre>
   }
 
   function removeItem(id) {
-    var day = currentDate;
-    var list = items();
-    var i = list.findIndex(function (it) { return it.id === id; });
-    if (i === -1) return;
-    var gone = list.splice(i, 1)[0];
+    var f = findEntry(id);
+    if (!f) return;
+    var day = f.day, i = f.index;
+    var gone = data[day].splice(i, 1)[0];
     if (editingId === id) editingId = null;
     save();
     render();
@@ -3750,6 +1974,7 @@ Recurring,Timesheet,</pre>
 
   // ---------- wiring ----------
   makeDropTarget($("logPanel"), function () { return currentDate; });
+  makeJobDropTarget($("jobView"), function () { return currentJob; });
   registerJobBox("main", $("newJob"), $("jobWrap"), $("jobClear"), {
     empty: "Job — entries you add go against it, and it stays set so you can log several in a row. Shortcut: J",
     set: "New entries go against"
@@ -4104,6 +2329,49 @@ Recurring,Timesheet,</pre>
   document.addEventListener("scroll", hideTip, true);
   document.addEventListener("dragstart", hideTip, true);
 
+  // ---------- installable app ----------
+  // Served over http(s), Docket is a PWA: a manifest makes it installable and
+  // a service worker lets it open offline. Opened as a file (file://) neither
+  // can work, so both are wired up only when served — the standalone file
+  // stays free of console errors.
+  var APP_VERSION = "__APP_VERSION__";
+  $("appVersion").textContent = "Docket " + APP_VERSION;
+  var served = location.protocol === "https:" || location.protocol === "http:";
+  if (served) {
+    var mf = document.createElement("link");
+    mf.rel = "manifest";
+    mf.href = "manifest.webmanifest";
+    document.head.appendChild(mf);
+    var touch = document.querySelector('link[rel="apple-touch-icon"]');
+    if (touch) touch.href = "icons/apple-touch-icon.png";
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", function () {
+        navigator.serviceWorker.register("sw.js").catch(function () {
+          // offline support is a bonus; the app works fine without it
+        });
+      });
+    }
+  }
+  var installPrompt = null;
+  window.addEventListener("beforeinstallprompt", function (e) {
+    e.preventDefault(); // show our own button instead of the browser's mini-bar
+    installPrompt = e;
+    $("installBtn").hidden = false;
+  });
+  $("installBtn").addEventListener("click", function () {
+    if (!installPrompt) return;
+    installPrompt.prompt();
+    installPrompt.userChoice.then(function () {
+      installPrompt = null;
+      $("installBtn").hidden = true;
+    });
+  });
+  window.addEventListener("appinstalled", function () {
+    installPrompt = null;
+    $("installBtn").hidden = true;
+    toast("Docket installed — open it from your Start menu, dock or desktop");
+  });
+
   render();
   if (!localStorage.getItem(HELP_KEY)) {
     openHelp(); // first run: show the guide
@@ -4111,6 +2379,3 @@ Recurring,Timesheet,</pre>
     $("newItem").focus();
   }
 })();
-</script>
-</body>
-</html>

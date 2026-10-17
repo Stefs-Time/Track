@@ -1,0 +1,16 @@
+# dependencies
+node_modules/
+
+# build output — produced by `npm run build`, attached to GitHub Releases
+dist/
+
+# test output
+test-results/
+playwright-report/
+blob-report/
+
+# local config and noise
+.env
+*.log
+.DS_Store
+Thumbs.db
