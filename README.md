@@ -1,65 +1,107 @@
-# Docket — Daily Work Log
+# Docket — daily work log
 
-A daily log of work done with a black-and-silver ledger look, built for consulting: record what you did each day, then copy it straight into an email, timesheet or invoice. Runs locally on Windows — no installs, no server, no account. It's a single file.
+Log what you did each day, group it by **job** (a client, site or project), and copy it straight into an email, timesheet or invoice. Docket is black-and-silver, keyboard-friendly, and private: everything is stored on your own device, and nothing is sent anywhere.
 
-## How to use
+It comes two ways, from the same code:
 
-1. Download `Docket.html` (or clone this repo).
-2. Double-click `Docket.html` — it opens in your browser (Edge, Chrome, etc.).
-3. Pick a date (defaults to today), type what you did, press **Enter** to add it.
+- **An installable app (PWA).** Open it from the web, click **Install app**, and it gets its own window and Start menu / dock icon, and works offline.
+- **A single HTML file.** Download `Docket.html` and double-click it. There's no install, no server and no internet needed.
 
-The full guide is built into the app itself — it pops up on first use, and the **?** button (top right) reopens it any time. The HTML file is all you need; this README just mirrors it.
-
-Tip: right-click `Docket.html` → *Send to* → *Desktop (create shortcut)* so it's always one click away.
+![Docket's Day view: a day's entries, each tagged with its job, beside the Jobs, Wishlist and Recurring lists](docs/screenshots/day.jpg)
 
 ## Features
 
-- **Jobs** — group work under one heading (a client, site or project). Type a name in the **Job** box beside the entry box and every entry you add goes against it; it stays set so you can log a run of entries in a row. Each entry shows its job as a pill — click it (or the job in the sidebar's **Jobs** list) to open the **Job view**: every entry on that job across every day, with totals and a **Copy Job** button that's ready for an invoice. Change an entry's job with the pencil; rename or delete jobs from the sidebar (deleting a job keeps everything that was on it).
-- **Jobs on the Wishlist and Recurring too** — click into either list's add box and a **Job** box appears beneath it (sticky, like the main one). The ✎ pencil on a list item edits its text and job. Logging an item on a day (↳ or drag) carries its job onto the entry, and the Job view lists the job's wishlist and recurring items above its logged work, each with a ↳ to log it on the open day.
-- **Per-day lists** — use the date picker or ‹ › buttons to move between days; the sidebar groups every logged day by month, with old months folded away.
-- **Day, Week and Month views** — a weekly overview and a monthly calendar with entry counts; click any day to open it, and the copy buttons follow the view (Copy Month = the whole month-to-date, ready to paste).
-- **Activity at a glance** — stat tiles count the open day, its week and its month; a clickable 14-day activity chart sits beside them, and the month calendar shades busier days like a heatmap.
-- **Copy & paste** — "Copy Day to Clipboard" copies the date plus a bulleted list, ready to paste into an email, timesheet or invoice; entries on a job carry it in brackets. "Copy Items Only" copies just the lines.
-- **Wishlist** — queue things that still need doing, then drag them onto a day (or click ↳) when they're done. Undo is there if you send one to the wrong day.
-- **Recurring tasks** — keep often-repeated tasks in the sidebar and drag (or ↳) them onto any day; they stay in the list for next time, and duplicates on the same day are skipped.
-- **Edit in place** — hover an entry and click the pencil to edit (Save/Cancel), or ✕ to delete.
-- **Undo** — deleting an entry, a wishlist/recurring item, or clearing a whole day pops up an **Undo** button for a few seconds, so nothing is lost to a slipped click.
-- **Keyboard shortcuts** — `←` `→` move between days (weeks/months in those views), `T` jumps to today, `D`/`W`/`M` switch views, `N` starts a new entry, `J` picks the job, `C` copies the open view, `?` opens the guide.
-- **Hover hints** — every button and control explains itself when you hover over it, or when you Tab to it with the keyboard.
-- **Auto-save** — everything is stored in the browser's local storage on your machine, instantly, as you type.
-- **CSV import/export** — bulk-load the month to date from a spreadsheet, or export everything for Excel.
-- **Backup** — Export JSON saves all your data (log, jobs, wishlist and recurring tasks, each with its job) to a file; Import JSON merges a backup back in (no duplicates). Export CSV holds the same things in spreadsheet form — see below.
-- **Clear data** — the **Clear data…** button under Backup & data wipes the log, jobs, wishlist and/or recurring tasks; you tick which. It shows what each will remove, offers a one-click JSON backup first, and pops up an **Undo** afterwards. To reload cleanly, clear everything, then Import JSON (or Import CSV).
+- **Daily log.** Type what you did and press Enter. Day, Week and Month views, stat tiles and a 14-day activity chart.
+- **Jobs.** Set a job once and log several entries against it. Each entry shows its job, and the **Job view** gathers everything on a job across every day, with totals. **Copy Job** gives you an invoice-ready list.
+- **Wishlist and Recurring.** Queue things to do, or keep often-repeated tasks. Both can carry a job, and logging one (↳ or drag) carries the job onto the entry.
+- **Move and edit anywhere.** Edit or delete entries from the Day, Week and Job views. Move an entry by changing its date or dragging it onto another day. Link anything to a job by dropping it on that job.
+- **Month calendar.** Shaded like a heatmap by how busy each day was, with each day's jobs named, busiest first.
+- **Copy to clipboard.** Copy the open day, week, month or job as a dated bulleted list, or just the lines.
+- **Undo** for deletes, moves, links and **Clear data**.
+- **Import and export.** JSON is the exact backup. CSV opens in Excel. Both carry everything, including jobs. See [docs/DATA-FORMAT.md](docs/DATA-FORMAT.md).
+- **Keyboard shortcuts.** `←` `→` move, `T` today, `D` `W` `M` views, `N` new entry, `J` job, `C` copy, `?` guide.
+- **Built-in guide.** It opens on first use, and the **?** button brings it back. Every control explains itself on hover or keyboard focus.
 
-## CSV format
+| Job view | Month view | Phone |
+|---|---|---|
+| ![Job view](docs/screenshots/job.jpg) | ![Month view](docs/screenshots/month.jpg) | ![Phone layout](docs/screenshots/phone.jpg) |
 
-One entry per row: date in the first column, task in the second, and optionally the job in the third.
+## Your data
 
-```csv
-Date,Task,Job
-2026-07-01,"Installed blinds, lounge",Smith House
-2026-07-01,Collected payment,Smith House
-02/07/2026,Quoted new office fit-out,
-Wishlist,Order paint,Smith House
-Recurring,Timesheet,
-,,Garden shed
+- Docket saves to the browser's local storage as you type. There's no account and no cloud copy.
+- Data belongs to **one browser on one device**. The installed app and the standalone file each keep their own. To move between them, or to a new computer, use **Export JSON** in one and **Import JSON** in the other.
+- Clearing the browser's site data erases the log, so keep an occasional **Export JSON** as a backup.
+- **Clear data…** (under Backup & data) wipes chosen parts so you can start fresh or re-import a backup cleanly. It offers to export first, and Undo is there afterwards.
+- Data from earlier versions, including from when the app was called Track, loads unchanged.
+
+## Development
+
+Requires **Node.js 20+** (22 recommended; see `.nvmrc`).
+
+```bash
+npm install
+npm run dev      # rebuilds on change and serves http://localhost:3000
+npm test         # builds, then runs the Playwright end-to-end suite
+npm run check    # syntax-checks every script
 ```
 
-The import is forgiving:
+The first time on a new machine, install the test browser with `npx playwright install chromium`.
 
-- A header row is optional and skipped automatically — but to import jobs, include it with `Job` (or `Project` / `Client`) as the third heading. Without that header, any extra columns are added to the task text, as before. Jobs that don't exist yet are created.
-- Dates can be `2026-07-01`, `01/07/2026`, `1/7/2026`, `01-07-2026` or `01.07.2026` (day-first assumed).
-- Comma, semicolon, or tab delimited — detected automatically, so Excel's regional "Save as CSV" quirks are fine.
-- Duplicate entries (same date + same text) and unreadable rows are skipped, and the import tells you how many.
+### How it's put together
 
-- `Wishlist` or `Recurring` in the Date column puts the row on that list instead of the log.
-- A row with only a Job (no date, no task) creates that job. Export uses this for jobs nothing points at yet, so they survive a round trip.
-- Duplicates: in a file with a Job column, the same task on two different jobs is two items, and a job in the file fills in the job on a matching item that has none. In a file without one, the same task on the same day is a duplicate, as before.
+```
+src/
+  index.html             page markup
+  styles.css             all styles
+  app.js                 all behaviour (plain JS, no framework, no runtime deps)
+  sw.js                  service worker (offline support)
+  manifest.webmanifest   PWA manifest
+  icons/                 app icons (icon.svg is the source)
+scripts/
+  build.js               inlines CSS + JS into one file → dist/
+  dev.js                 build-watch + server, cross-platform
+  screenshots.js         regenerates docs/screenshots/
+server.js                Express server for hosting the app
+tests/                   Playwright end-to-end suites
+docs/                    data formats and screenshots
+```
 
-**Export CSV** produces this exact format, so you can export, edit in Excel, and re-import.
+The code is split into separate files to make it easy to work on. `npm run build` inlines it back into one self-contained page, which is what keeps the double-click download working. The build writes `dist/index.html` (served by the server) and `dist/Docket.html` (the standalone download). `dist/` is generated output and isn't committed.
 
-## Notes
+## Deploying to Railway
 
-- Data lives in the browser you open the file with. If you switch browsers (e.g. Chrome → Edge), Export from the old one and Import in the new one.
-- Clearing your browser's site data will erase the log — keep an occasional Export as a backup.
-- The app was previously called Track; its saved data carries over unchanged after the rename.
+Docket needs no database. All data stays in each user's browser, so the server only hands out static files. That keeps hosting cheap and means there's no user data to secure. The trade-off is no automatic sync between devices; JSON export/import covers moving data.
+
+1. Create a Railway project from this GitHub repo.
+2. Railway reads `railway.json`, which sets:
+   - **Build command:** `npm run build`
+   - **Start command:** `npm start`
+   - **Health check:** `/healthz`
+3. Generate a domain under **Settings → Networking**. Railway serves it over HTTPS, which installing the app requires.
+
+**Environment variables**
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `PORT` | `3000` | Port to listen on. Railway sets this for you. |
+| `HOST` | `0.0.0.0` | Interface to bind. |
+
+See `.env.example`. There are no secrets to configure.
+
+**Endpoints**
+
+| Path | |
+|---|---|
+| `/` | The app |
+| `/download` | The standalone `Docket.html`, as a download |
+| `/healthz` | `{"status":"ok","version":"…"}` for health checks |
+
+The server sends a strict Content-Security-Policy that allows only the page's own script, by its hash. It also sends anti-framing, `nosniff` and referrer headers, and HSTS over HTTPS. The page and service worker are served `no-cache`, so a new deploy reaches users on their next launch.
+
+## Releasing
+
+1. Bump `version` in `package.json` and add a section to `CHANGELOG.md`.
+2. Commit, then tag and push: `git tag v2.0.0 && git push origin v2.0.0`.
+3. The **Release** workflow runs the tests and publishes a GitHub Release with `Docket.html` attached, ready to download.
+
+CI runs the full test suite on every push and pull request. Each run also uploads the built `Docket.html` as an artifact.
