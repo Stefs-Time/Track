@@ -2,6 +2,24 @@
 
 All notable changes to Docket. Versions follow [Semantic Versioning](https://semver.org/).
 
+## [2.1.0] — 2026-10-18
+
+A complete visual redesign. Every control is where it was; everything looks new.
+
+### Changed
+- **New look ("Studio")**: a light, warm canvas with one tangerine accent replaces the
+  black-and-silver ledger. Bold, left-aligned headings; lists move to a left panel;
+  entering work happens in one composer bar.
+- **Week view** is a timeline; **Month view** is a grid of rounded, heat-shaded tiles.
+- New app icon and favicon.
+
+### Added
+- **A colour per job**, used on its pills, down the edge of its entries, on calendar
+  bars and to tint the Job view. Existing jobs get colours automatically; click a job's
+  dot in the sidebar to change it. Colours are kept in JSON backups.
+- **Month cells show how each day split between jobs**, as a coloured bar.
+- **Dark mode** that follows the system, and a theme button to pin light or dark.
+
 ## [2.0.0] — 2026-10-17
 
 The jobs release, and the first release as an installable application.
@@ -53,4 +71,5 @@ The single-file daily log: Day, Week and Month views, Wishlist and Recurring lis
 copy to clipboard, CSV and JSON import/export, Undo, keyboard shortcuts and the
 black-and-silver ledger design.
 
+[2.1.0]: https://github.com/Stefs-Time/Track/releases/tag/v2.1.0
 [2.0.0]: https://github.com/Stefs-Time/Track/releases/tag/v2.0.0

@@ -75,7 +75,7 @@ test('Jobs: log against a job, see all its work, rename, delete, copy, export', 
   check(await page.locator('#jobView .wday').count() === 2, 'job view shows 2 days');
   check((await page.locator('#jobView .stat .sn').first().textContent()) === '4', 'job view counts 4 entries');
   check(await page.isHidden('#todayBtn') && await page.isVisible('#logJobBtn'), 'Log Work on This Job replaces Jump to Today');
-  check(await page.locator('#prevDay').evaluate(e => getComputedStyle(e).visibility) === 'hidden', 'date arrows hidden in job view');
+  check(!(await page.isVisible('#prevDay')) && !(await page.isVisible('#nextDay')), 'date arrows hidden in job view');
   check(await page.locator('#jobList li.current').count() === 1, 'sidebar highlights current job');
   await page.keyboard.press('ArrowLeft');
   check(await page.textContent('#dayTitle') === 'Job', 'arrow keys do nothing in job view');

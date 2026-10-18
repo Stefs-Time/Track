@@ -97,16 +97,46 @@
     return null;
   }
   // Name → id, creating the job the first time a name is used ("" → null).
-  function ensureJob(name) {
+  function ensureJob(name, color) {
     var clean = cleanJobName(name);
     if (clean === "") return null;
     var found = jobByName(clean);
     if (found) return found.id;
-    var job = { id: newId(), text: clean };
+    var job = { id: newId(), text: clean, color: validColor(color) ? color : nextJobColor() };
     jobs.push(job);
     saveJobs();
     return job.id;
   }
+
+  // Every job has a colour, shown on its pills, entries, calendar bars and
+  // Job view. Picked from a fixed palette that reads well on light and dark;
+  // new jobs take the least-used colour so neighbours rarely match.
+  var JOB_COLORS = ["#3e7bfa", "#12a37f", "#9b5cf6", "#e09a00", "#e8458b", "#0ea5b7", "#e5484d", "#6e9e1c"];
+  function validColor(c) { return typeof c === "number" && c >= 0 && c < JOB_COLORS.length && c % 1 === 0; }
+  function nextJobColor() {
+    var used = JOB_COLORS.map(function () { return 0; });
+    jobs.forEach(function (j) { if (validColor(j.color)) used[j.color]++; });
+    var best = 0;
+    for (var i = 1; i < used.length; i++) if (used[i] < used[best]) best = i;
+    return best;
+  }
+  function jobColor(idOrJob) {
+    var j = typeof idOrJob === "string" ? jobById(idOrJob) : idOrJob;
+    return j && validColor(j.color) ? JOB_COLORS[j.color] : "";
+  }
+  // Paint an element with a job's colour (read by CSS as --job).
+  function tintJob(el, jobId) {
+    var c = jobColor(jobId);
+    if (c) el.style.setProperty("--job", c);
+  }
+  // Jobs made before colours existed get one, once.
+  (function colourExistingJobs() {
+    var changed = false;
+    jobs.forEach(function (j) {
+      if (!validColor(j.color)) { j.color = nextJobColor(); changed = true; }
+    });
+    if (changed) saveJobs();
+  })();
   function jobName(entry) {
     var j = entry && jobById(entry.job);
     return j ? j.text : "";
@@ -252,6 +282,7 @@
     var b = document.createElement("button");
     b.type = "button";
     b.className = "jobpill";
+    tintJob(b, j.id);
     b.appendChild(icon("job"));
     var n = document.createElement("span");
     n.className = "jn";
@@ -330,6 +361,9 @@
     $("nextDay").dataset.tip = "Next " + unit + " — shortcut: →";
     $("todayBtn").disabled = currentDate === todayISO();
     var inJob = view === "job";
+    document.body.setAttribute("data-view", view);
+    var jc = inJob ? jobColor(currentJob) : "";
+    if (jc) document.body.style.setProperty("--jobc", jc); else document.body.style.removeProperty("--jobc");
     $("prevDay").classList.toggle("gone", inJob);
     $("nextDay").classList.toggle("gone", inJob);
     $("prevDay").disabled = $("nextDay").disabled = inJob;
@@ -575,6 +609,7 @@
         if (jobOrder.length) {
           var mj = document.createElement("div");
           mj.className = "mjobs";
+          tintJob(mj, jobOrder[0]);
           mj.appendChild(icon("job"));
           var mjn = document.createElement("span");
           mjn.className = "jn";
@@ -587,6 +622,23 @@
             mj.appendChild(mjm);
           }
           cell.appendChild(mj);
+          // how the day split between jobs (job-less entries in grey)
+          var bar = document.createElement("div");
+          bar.className = "mbar";
+          bar.setAttribute("aria-hidden", "true");
+          var loose = list.length - jobOrder.reduce(function (n, id) { return n + perJob[id]; }, 0);
+          jobOrder.forEach(function (id) {
+            var seg = document.createElement("span");
+            seg.style.flex = String(perJob[id]);
+            tintJob(seg, id);
+            bar.appendChild(seg);
+          });
+          if (loose > 0) {
+            var rest = document.createElement("span");
+            rest.style.flex = String(loose);
+            bar.appendChild(rest);
+          }
+          cell.appendChild(bar);
         }
 
         list.slice(0, 2).forEach(function (it) {
@@ -808,6 +860,7 @@
     if (item.id === editingId) return buildEditor(item, day);
     var li = document.createElement("li");
     li.className = "mini";
+    tintJob(li, item.job);
     var t = document.createElement("span");
     t.className = "mt";
     t.textContent = item.text;
@@ -823,6 +876,7 @@
   function buildEntry(item, idx) {
     var li = document.createElement("li");
     li.className = "entry";
+    tintJob(li, item.job);
     makeEntryDraggable(li, item);
 
     var num = document.createElement("span");
@@ -1111,6 +1165,19 @@
         setTimeout(function () { input.focus(); input.select(); }, 0);
         return;
       }
+
+      var dot = document.createElement("button");
+      dot.className = "jobdot";
+      tintJob(dot, j.id);
+      li.style.setProperty("--job", jobColor(j));
+      dot.dataset.tip = "Change this job's colour";
+      dot.setAttribute("aria-label", "Change colour of job " + j.text);
+      dot.addEventListener("click", function () {
+        j.color = ((validColor(j.color) ? j.color : 0) + 1) % JOB_COLORS.length;
+        saveJobs();
+        render();
+      });
+      li.appendChild(dot);
 
       var row = document.createElement("button");
       row.className = "jobrow";
@@ -1934,7 +2001,7 @@
           incoming._jobs.forEach(function (j) {
             if (!j || typeof j.text !== "string" || typeof j.id !== "string") return;
             var had = !!jobByName(j.text);
-            var local = ensureJob(j.text);
+            var local = ensureJob(j.text, j.color);
             if (local) { jobMap[j.id] = local; if (!had) added++; }
           });
         }
@@ -2328,6 +2395,41 @@
   document.addEventListener("mousedown", hideTip, true);
   document.addEventListener("scroll", hideTip, true);
   document.addEventListener("dragstart", hideTip, true);
+
+  // ---------- theme ----------
+  // Auto follows the system; Light and Dark pin one. The <head> script
+  // applies a pinned choice before first paint; this keeps it in step.
+  var THEME_KEY = "track.theme.v1";
+  var THEME_ICONS = {
+    auto: '<circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18Z" fill="currentColor"/>',
+    light: '<circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+    dark: '<path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11Z"/>'
+  };
+  var THEME_NEXT = { auto: "light", light: "dark", dark: "auto" };
+  var THEME_LABEL = { auto: "Theme: matches your system", light: "Theme: light", dark: "Theme: dark" };
+  function currentTheme() {
+    var t = null;
+    try { t = localStorage.getItem(THEME_KEY); } catch (e) {}
+    return t === "light" || t === "dark" ? t : "auto";
+  }
+  function applyTheme(t) {
+    if (t === "auto") document.documentElement.removeAttribute("data-theme");
+    else document.documentElement.setAttribute("data-theme", t);
+    var b = $("themeBtn");
+    b.querySelector("svg").innerHTML = THEME_ICONS[t];
+    b.dataset.tip = THEME_LABEL[t] + " — click for " + THEME_NEXT[t];
+    b.setAttribute("aria-label", THEME_LABEL[t] + ". Switch to " + THEME_NEXT[t]);
+  }
+  $("themeBtn").addEventListener("click", function () {
+    var next = THEME_NEXT[currentTheme()];
+    try {
+      if (next === "auto") localStorage.removeItem(THEME_KEY); else localStorage.setItem(THEME_KEY, next);
+    } catch (e) {}
+    applyTheme(next);
+    hideTip();
+    showTip(this); // keep the hint in step with the new state
+  });
+  applyTheme(currentTheme());
 
   // ---------- installable app ----------
   // Served over http(s), Docket is a PWA: a manifest makes it installable and

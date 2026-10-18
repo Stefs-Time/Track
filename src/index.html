@@ -3,14 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="color-scheme" content="dark">
-<meta name="theme-color" content="#0a0b0e">
-<meta name="description" content="Docket — a black-and-silver daily work log. Record what you did each day, group it by job, and copy it straight into an email, timesheet or invoice. Works offline; your data stays on your device.">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f6f4ef" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#131210" media="(prefers-color-scheme: dark)">
+<meta name="description" content="Docket — a daily work log. Record what you did each day, group it by job, and copy it straight into an email, timesheet or invoice. Works offline; your data stays on your device.">
 <meta name="application-name" content="Docket">
 <meta name="apple-mobile-web-app-title" content="Docket">
 <title>Docket — Daily Work Log</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230a0b0e'/%3E%3Crect x='9' y='6' width='14' height='21' rx='2.5' fill='none' stroke='%23c9d0d9' stroke-width='2'/%3E%3Crect x='12' y='3.5' width='8' height='4.5' rx='1.5' fill='%23c9d0d9'/%3E%3Cpath d='M12 16l2.6 2.6 5.4-5.8' fill='none' stroke='%23c9d0d9' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
-<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230a0b0e'/%3E%3Crect x='9' y='6' width='14' height='21' rx='2.5' fill='none' stroke='%23c9d0d9' stroke-width='2'/%3E%3Crect x='12' y='3.5' width='8' height='4.5' rx='1.5' fill='%23c9d0d9'/%3E%3Cpath d='M12 16l2.6 2.6 5.4-5.8' fill='none' stroke='%23c9d0d9' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23ff6a3d'/%3E%3Crect x='9' y='6.5' width='14' height='20' rx='3' fill='none' stroke='%231d1b18' stroke-width='2.2'/%3E%3Crect x='12' y='4' width='8' height='4.5' rx='1.6' fill='%231d1b18'/%3E%3Cpath d='M12.2 16.4l2.7 2.7 5-5.4' fill='none' stroke='%231d1b18' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23ff6a3d'/%3E%3Crect x='9' y='6.5' width='14' height='20' rx='3' fill='none' stroke='%231d1b18' stroke-width='2.2'/%3E%3Crect x='12' y='4' width='8' height='4.5' rx='1.6' fill='%231d1b18'/%3E%3Cpath d='M12.2 16.4l2.7 2.7 5-5.4' fill='none' stroke='%231d1b18' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<script>
+// Apply a pinned light/dark choice before first paint (no white flash).
+(function () { try { var t = localStorage.getItem("track.theme.v1"); if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t); } catch (e) {} })();
+</script>
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -30,6 +35,7 @@
   <div class="head-right">
     <button class="installbtn" id="installBtn" hidden data-tip="Install Docket as an app — its own window, Start menu / dock icon, and it works offline"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg></span>Install app</button>
     <div class="saved-pill" id="savedPill" data-tip="Everything saves to this browser automatically — keep an occasional Export as a backup"><span class="dot">●</span> Auto-saved locally</div>
+    <button class="themebtn" id="themeBtn" type="button" data-tip="Theme" aria-label="Theme"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></span></button>
     <button class="helpbtn" id="helpBtn" data-tip="How Docket works — shortcut: ?" aria-label="How Docket works">?</button>
   </div>
 </header>
@@ -198,7 +204,8 @@
         <li>Wishlist and recurring items take a job too — the <b>Job</b> box appears under their add box when you click into it, and their <b>✎ pencil</b> changes it. Logging one on a day carries its job onto the entry.</li>
         <li>The Job view lists the job's <b>wishlist and recurring items</b> above its logged work — click <b>↳</b> to log one on the open day.</li>
         <li><b>Drag</b> an entry, wishlist or recurring item onto a job in the sidebar (or onto an open Job view) to link it to that job.</li>
-        <li>The <b>Month</b> calendar shows which job each day went to, busiest first.</li>
+        <li>Every job has its own <b>colour</b> — on its pills, down the edge of its entries, and on the calendar. Click the coloured dot beside a job in the sidebar to change it.</li>
+        <li>The <b>Month</b> calendar names each day's jobs, busiest first, with a bar showing how the day split between them.</li>
         <li>Change an entry's job with the <b>✎ pencil</b>. Rename or delete a job from the sidebar; deleting a job keeps everything that was on it.</li>
       </ul>
 
@@ -269,6 +276,11 @@ Recurring,Timesheet,</pre>
         <li>Opened from the web, Docket can be <b>installed</b>: click <b>Install app</b> (top right), or the install icon in Edge's or Chrome's address bar. It gets its own window and Start menu / dock icon, and <b>works offline</b>.</li>
         <li>Prefer a file? The single-file version runs by double-clicking — no install, no internet.</li>
         <li><b>Moving between the two?</b> Each keeps its own data. <b>Export JSON</b> in the one you're leaving, then <b>Import JSON</b> in the other.</li>
+      </ul>
+
+      <h3><span class="tick">●</span> Light or dark</h3>
+      <ul>
+        <li>Docket follows your system's light or dark setting. The <b>◐</b> button (top right) pins light or dark instead — click it again to go back to following the system.</li>
       </ul>
 
       <div class="note"><b>Tip:</b> reopen this guide any time with the <b>?</b> button, top right.</div>

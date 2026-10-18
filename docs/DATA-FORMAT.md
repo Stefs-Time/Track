@@ -17,7 +17,7 @@ installed app and the standalone file.
     { "id": "1759650000001-cd34e", "text": "Admin and emails" }
   ],
   "_jobs": [
-    { "id": "1759640000000-xy98z", "text": "Smith House" }
+    { "id": "1759640000000-xy98z", "text": "Smith House", "color": 0 }
   ],
   "_wishlist": [
     { "id": "1759650000002-ef56g", "text": "Order paint", "job": "1759640000000-xy98z" }
@@ -32,6 +32,8 @@ installed app and the standalone file.
 - Each `YYYY-MM-DD` key holds that day's entries, in order.
 - `job` is optional on entries, wishlist and recurring items. It points at a
   job's `id` in `_jobs`.
+- `color` on a job is an index (0–7) into Docket's job palette. It's optional;
+  jobs without one are given one when loaded.
 - `_docket.version` is the format version. Version 1 backups (from before
   jobs) have no `_jobs` and no `job` fields, and still import.
 
@@ -89,11 +91,12 @@ rename to Docket keeps loading.
 | Key | Holds |
 |---|---|
 | `track.tasks.v1` | The log: `{ "YYYY-MM-DD": [entry, …] }` |
-| `track.jobs.v1` | Jobs: `[{ id, text }]` |
+| `track.jobs.v1` | Jobs: `[{ id, text, color }]` |
 | `track.wishlist.v1` | Wishlist: `[{ id, text, job? }]` |
 | `track.recurring.v1` | Recurring tasks: `[{ id, text, job? }]` |
 | `track.view.v1` | Last view (`day`, `week`, `month`) |
 | `track.helpseen.v1` | Whether the first-run guide has been shown |
+| `track.theme.v1` | A pinned theme (`light` / `dark`); absent means follow the system |
 
 `localStorage` belongs to one browser profile and one site (or, for the
 standalone file, to `file://`). That's why the installed app and the
