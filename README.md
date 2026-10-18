@@ -1,6 +1,6 @@
 # Docket — daily work log
 
-Log what you did each day, group it by **job** (a client, site or project), and copy it straight into an email, timesheet or invoice. Docket is black-and-silver, keyboard-friendly, and private: everything is stored on your own device, and nothing is sent anywhere.
+Log what you did each day, group it by **job** (a client, site or project), and copy it straight into an email, timesheet or invoice. Docket is bright, colour-coded by job, keyboard-friendly, and private: everything is stored on your own device, and nothing is sent anywhere.
 
 It comes two ways, from the same code:
 
@@ -15,16 +15,18 @@ It comes two ways, from the same code:
 - **Jobs.** Set a job once and log several entries against it. Each entry shows its job, and the **Job view** gathers everything on a job across every day, with totals. **Copy Job** gives you an invoice-ready list.
 - **Wishlist and Recurring.** Queue things to do, or keep often-repeated tasks. Both can carry a job, and logging one (↳ or drag) carries the job onto the entry.
 - **Move and edit anywhere.** Edit or delete entries from the Day, Week and Job views. Move an entry by changing its date or dragging it onto another day. Link anything to a job by dropping it on that job.
-- **Month calendar.** Shaded like a heatmap by how busy each day was, with each day's jobs named, busiest first.
+- **A colour per job.** Each job's colour runs through its pills, entries, calendar bars and Job view, so you can tell work apart at a glance. Click a job's dot to change it.
+- **Month calendar.** Shaded like a heatmap by how busy each day was, with each day's jobs named, busiest first, and a bar showing how the day split.
+- **Light and dark.** Follows your system, or pin either with the theme button.
 - **Copy to clipboard.** Copy the open day, week, month or job as a dated bulleted list, or just the lines.
 - **Undo** for deletes, moves, links and **Clear data**.
 - **Import and export.** JSON is the exact backup. CSV opens in Excel. Both carry everything, including jobs. See [docs/DATA-FORMAT.md](docs/DATA-FORMAT.md).
 - **Keyboard shortcuts.** `←` `→` move, `T` today, `D` `W` `M` views, `N` new entry, `J` job, `C` copy, `?` guide.
 - **Built-in guide.** It opens on first use, and the **?** button brings it back. Every control explains itself on hover or keyboard focus.
 
-| Job view | Month view | Phone |
+| Job view | Month view | Dark, on a phone |
 |---|---|---|
-| ![Job view](docs/screenshots/job.jpg) | ![Month view](docs/screenshots/month.jpg) | ![Phone layout](docs/screenshots/phone.jpg) |
+| ![Job view](docs/screenshots/job.jpg) | ![Month view](docs/screenshots/month.jpg) | ![Phone layout in dark mode](docs/screenshots/phone-dark.jpg) |
 
 ## Your data
 
