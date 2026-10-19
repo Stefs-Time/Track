@@ -887,6 +887,37 @@ ol.items li.entry .num {
   user-select: none;
 }
 ol.items li.entry:hover .num { background: var(--surface); color: var(--ink); }
+ol.items li.entry .num { border: none; padding: 0; font-family: var(--font); }
+ol.items li.entry .num:focus-visible { background: var(--accent); color: var(--accent-ink); outline-offset: 1px; }
+/* where a dragged entry will land */
+#itemList li.entry.drop-before::after, #itemList li.entry.drop-after::after {
+  content: "";
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  height: 3px;
+  border-radius: 3px;
+  background: var(--accent);
+  opacity: 1;
+}
+#itemList li.entry.drop-before::after { top: -2px; bottom: auto; }
+#itemList li.entry.drop-after::after { top: auto; bottom: -2px; }
+/* touch-only up / down buttons, in the number's place */
+ol.items li.entry .mover { display: none; flex-shrink: 0; flex-direction: column; gap: 2px; }
+ol.items li.entry .mover button {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 22px;
+  padding: 0;
+  border: none;
+  border-radius: 7px;
+  background: var(--sunk);
+  color: var(--ink-2);
+  font-size: 9px;
+}
+ol.items li.entry .mover button:active { background: var(--accent); color: var(--accent-ink); }
+ol.items li.entry .mover button:disabled { opacity: .3; }
 ol.items li.entry .body { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; }
 ol.items li.entry .txt { flex: 1; min-width: 0; font-size: 14.5px; white-space: pre-wrap; word-break: break-word; }
 ol.items li.entry .body .jobpill { max-width: 45%; }
@@ -1389,6 +1420,8 @@ body[data-view="job"] .datenav .bigdate::before {
    ========================================================================== */
 @media (pointer: coarse) {
   ol.items li.entry .icon { opacity: 1; }
+  ol.items li.entry .num { display: none; }
+  ol.items li.entry .mover { display: flex; }
   .wday ul li .icon, ul.wishlist .wbtn, ul.joblist .wbtn { display: grid; }
   ul.joblist li.row .count { display: none; }
 }

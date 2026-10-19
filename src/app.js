@@ -827,14 +827,78 @@
 
   // Entries drag onto another day (Recent days, a Week card, a Month cell)
   // to move there, or onto a job in the sidebar to link them.
+  var draggingEntry = null; // id of the entry being dragged, for reordering
   function makeEntryDraggable(li, item) {
     li.draggable = true;
     li.addEventListener("dragstart", function (e) {
       e.dataTransfer.setData("text/plain", "e:" + item.id);
       e.dataTransfer.effectAllowed = "linkMove"; // move onto a day, link onto a job
+      draggingEntry = item.id;
       li.classList.add("dragging");
     });
-    li.addEventListener("dragend", function () { li.classList.remove("dragging"); });
+    li.addEventListener("dragend", function () {
+      draggingEntry = null;
+      li.classList.remove("dragging");
+    });
+  }
+
+  // ---------- reordering a day ----------
+  // Put an entry at a new position in its day. The order is what the copy
+  // buttons, exports and every view show, so it's saved like any change.
+  function reorderEntry(day, id, toIndex) {
+    var list = data[day] || [];
+    var from = list.findIndex(function (it) { return it.id === id; });
+    if (from === -1) return false;
+    toIndex = Math.max(0, Math.min(list.length - 1, toIndex));
+    if (toIndex === from) return false;
+    list.splice(toIndex, 0, list.splice(from, 1)[0]);
+    save();
+    render();
+    return true;
+  }
+
+  // Dropping a dragged entry on another entry of the same day reorders:
+  // the top half of a row means "above it", the bottom half "below it".
+  function makeReorderTarget(li, day, item) {
+    function sameDay() {
+      return draggingEntry && draggingEntry !== item.id &&
+        (data[day] || []).some(function (it) { return it.id === draggingEntry; });
+    }
+    function below(e) {
+      var r = li.getBoundingClientRect();
+      return e.clientY > r.top + r.height / 2;
+    }
+    function clear() { li.classList.remove("drop-before", "drop-after"); }
+    li.addEventListener("dragover", function (e) {
+      if (!sameDay()) return; // let other drags bubble to the log
+      e.preventDefault();
+      e.stopPropagation();
+      e.dataTransfer.dropEffect = "move";
+      var after = below(e);
+      li.classList.toggle("drop-after", after);
+      li.classList.toggle("drop-before", !after);
+    });
+    li.addEventListener("dragleave", function (e) {
+      if (!li.contains(e.relatedTarget)) clear();
+    });
+    li.addEventListener("drop", function (e) {
+      if (!sameDay()) return;
+      e.preventDefault();
+      e.stopPropagation();
+      clear();
+      var list = data[day];
+      var from = list.findIndex(function (it) { return it.id === draggingEntry; });
+      var to = list.findIndex(function (it) { return it.id === item.id; }) + (below(e) ? 1 : 0);
+      if (from < to) to--; // removing it first shifts everything after up one
+      reorderEntry(day, draggingEntry, to);
+    });
+  }
+
+  // After a keyboard or button move, keep focus with the entry that moved.
+  function refocusEntry(id, selector) {
+    var row = $("itemList").querySelector('li.entry[data-id="' + id + '"]');
+    var target = row && (row.querySelector(selector) || row.querySelector(".num"));
+    if (target) target.focus();
   }
 
   function entryButtons(item) {
@@ -873,16 +937,44 @@
     return li;
   }
 
-  function buildEntry(item, idx) {
+  function buildEntry(item, idx, day) {
     var li = document.createElement("li");
     li.className = "entry";
+    li.dataset.id = item.id;
     tintJob(li, item.job);
     makeEntryDraggable(li, item);
+    makeReorderTarget(li, day, item);
+    var count = (data[day] || []).length;
 
-    var num = document.createElement("span");
+    // the number doubles as the reorder handle: drag it, or focus it and
+    // press up / down
+    var num = document.createElement("button");
+    num.type = "button";
     num.className = "num";
     num.textContent = idx + 1;
-    num.dataset.tip = "Drag the entry onto another day to move it, or onto a job to link it";
+    num.dataset.tip = "Drag up or down to reorder — or onto another day or a job. Keyboard: ↑ ↓";
+    num.setAttribute("aria-label", "Entry " + (idx + 1) + " of " + count + ". Press up or down to reorder");
+    num.addEventListener("keydown", function (e) {
+      if (e.key !== "ArrowUp" && e.key !== "ArrowDown") return;
+      e.preventDefault();
+      if (reorderEntry(day, item.id, idx + (e.key === "ArrowUp" ? -1 : 1))) refocusEntry(item.id, ".num");
+    });
+
+    // touch screens can't drag-and-drop, so they get up / down buttons
+    var mover = document.createElement("span");
+    mover.className = "mover";
+    [["up", "▲", -1, "Move up"], ["down", "▼", 1, "Move down"]].forEach(function (m) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = m[0];
+      b.textContent = m[1];
+      b.setAttribute("aria-label", m[3]);
+      b.disabled = m[2] < 0 ? idx === 0 : idx === count - 1;
+      b.addEventListener("click", function () {
+        if (reorderEntry(day, item.id, idx + m[2])) refocusEntry(item.id, ".mover ." + m[0]);
+      });
+      mover.appendChild(b);
+    });
 
     var txt = document.createElement("div");
     txt.className = "txt";
@@ -897,6 +989,7 @@
     if (pill) body.appendChild(pill);
 
     li.appendChild(num);
+    li.appendChild(mover);
     li.appendChild(body);
     li.appendChild(btns[0]);
     li.appendChild(btns[1]);
