@@ -2,6 +2,32 @@
 
 All notable changes to Docket. Versions follow [Semantic Versioning](https://semver.org/).
 
+## [2.3.0] — 2026-10-19
+
+Easier to use, everywhere.
+
+### Added
+- **Search** — press `/` or Ctrl+K (or the Search button) to find any entry, job,
+  wishlist or recurring item. Every word must match the text, job or date
+  ("smith oct" works); jobs list first, then the log newest first. ↑ ↓ and Enter jump
+  straight to the result, which lights up.
+- **Ctrl+Z** undoes the last delete, move, link or clear for a minute after it
+  happens, not just while the Undo button is showing.
+- **Reorder in the Week and Job views** too: drag within a card, or focus the coloured
+  dot and press ↑ ↓; ▲ ▼ buttons on touch screens. In the Job view, moves are among that
+  job's entries and leave other jobs' entries where they are.
+- **Quick add in the Week view** — the + on a day's card adds an entry to that day
+  without leaving the week, using the job set in the Job box.
+
+### Changed
+- **Dark mode is a neutral grey** instead of a warm brown-black.
+- **Esc** leaves the entry box (and the Job box), so the single-key shortcuts work
+  straight after typing. `/` now opens search; `N` still starts a new entry.
+- The floating + steps aside while the entry box is on screen, and on phones while
+  you're typing, instead of covering the list.
+- Week-view rows on phones lay out as a grid: reorder buttons, text with its job
+  beneath, then edit and delete.
+
 ## [2.2.0] — 2026-10-19
 
 ### Added
@@ -78,6 +104,7 @@ The single-file daily log: Day, Week and Month views, Wishlist and Recurring lis
 copy to clipboard, CSV and JSON import/export, Undo, keyboard shortcuts and the
 black-and-silver ledger design.
 
+[2.3.0]: https://github.com/Stefs-Time/Track/releases/tag/v2.3.0
 [2.2.0]: https://github.com/Stefs-Time/Track/releases/tag/v2.2.0
 [2.1.0]: https://github.com/Stefs-Time/Track/releases/tag/v2.1.0
 [2.0.0]: https://github.com/Stefs-Time/Track/releases/tag/v2.0.0

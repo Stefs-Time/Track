@@ -55,4 +55,12 @@ async function importFile(page, selector, file) {
   await page.waitForFunction(() => /Imported|Nothing|empty|failed/.test(document.getElementById("toast").textContent));
 }
 
-module.exports = { check, iso, seed, state, importFile };
+/**
+ * Wait for running CSS animations (view entrances, row stagger) to finish,
+ * so positions measured for a drag don't shift underneath the pointer.
+ */
+async function settle(page) {
+  await page.evaluate(() => Promise.all(document.getAnimations().map((a) => a.finished.catch(() => {}))));
+}
+
+module.exports = { check, iso, seed, state, importFile, settle };

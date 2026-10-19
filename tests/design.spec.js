@@ -80,12 +80,12 @@ test.describe("theme", () => {
     await page.click("#themeBtn"); // auto → light
     check(await page.evaluate(() => document.documentElement.dataset.theme) === "light", "first click pins light");
     await page.click("#themeBtn"); // light → dark
-    check(await bg() === rgb("#131210"), "second click switches to dark");
+    check(await bg() === rgb("#121316"), "second click switches to dark");
     check((await page.getAttribute("#themeBtn", "aria-label")).startsWith("Theme: dark"), "the button says which theme is on");
 
     await page.reload();
     check(await page.evaluate(() => document.documentElement.dataset.theme) === "dark", "dark survives a reload");
-    check(await bg() === rgb("#131210"), "…and is painted dark");
+    check(await bg() === rgb("#121316"), "…and is painted dark");
 
     await page.click("#themeBtn"); // dark → auto
     check(await page.evaluate(() => document.documentElement.hasAttribute("data-theme")) === false, "third click goes back to following the system");
