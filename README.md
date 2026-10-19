@@ -14,6 +14,7 @@ It comes two ways, from the same code:
 - **Daily log.** Type what you did and press Enter. Day, Week and Month views, stat tiles and a 14-day activity chart.
 - **Jobs.** Set a job once and log several entries against it. Each entry shows its job, and the **Job view** gathers everything on a job across every day, with totals. **Copy Job** gives you an invoice-ready list.
 - **Wishlist and Recurring.** Queue things to do, or keep often-repeated tasks. Both can carry a job, and logging one (↳ or drag) carries the job onto the entry.
+- **Reorder a day.** Drag entries up or down, or use ↑ ↓ on the keyboard; touch screens get ▲ ▼ buttons. Copies and exports follow your order.
 - **Move and edit anywhere.** Edit or delete entries from the Day, Week and Job views. Move an entry by changing its date or dragging it onto another day. Link anything to a job by dropping it on that job.
 - **A colour per job.** Each job's colour runs through its pills, entries, calendar bars and Job view, so you can tell work apart at a glance. Click a job's dot to change it.
 - **Month calendar.** Shaded like a heatmap by how busy each day was, with each day's jobs named, busiest first, and a bar showing how the day split.

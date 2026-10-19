@@ -2,6 +2,13 @@
 
 All notable changes to Docket. Versions follow [Semantic Versioning](https://semver.org/).
 
+## [2.2.0] — 2026-10-19
+
+### Added
+- **Reorder a day's entries.** Drag an entry up or down the list (a line shows where
+  it will land), or Tab to its number and press ↑ / ↓. Touch screens get ▲ ▼ buttons
+  beside each entry instead. The order is what the copy buttons and exports use.
+
 ## [2.1.0] — 2026-10-18
 
 A complete visual redesign. Every control is where it was; everything looks new.
@@ -71,5 +78,6 @@ The single-file daily log: Day, Week and Month views, Wishlist and Recurring lis
 copy to clipboard, CSV and JSON import/export, Undo, keyboard shortcuts and the
 black-and-silver ledger design.
 
+[2.2.0]: https://github.com/Stefs-Time/Track/releases/tag/v2.2.0
 [2.1.0]: https://github.com/Stefs-Time/Track/releases/tag/v2.1.0
 [2.0.0]: https://github.com/Stefs-Time/Track/releases/tag/v2.0.0
