@@ -338,6 +338,7 @@
 
   function setView(v) {
     view = v;
+    weekAdding = null;
     if (v !== "job") { try { localStorage.setItem(VIEW_KEY, v); } catch (e) {} }
     editingId = null;
     render();
@@ -521,11 +522,24 @@
           count.textContent = list.length;
           head.appendChild(count);
         }
+        var plus = document.createElement("button");
+        plus.type = "button";
+        plus.className = "wadd";
+        plus.textContent = "+";
+        plus.dataset.tip = "Add an entry to " + LONGDOW[dd.getDay()] + " without leaving the week";
+        plus.setAttribute("aria-label", "Add an entry to " + prettyDate(d));
+        plus.addEventListener("click", function () {
+          weekAdding = weekAdding === d ? null : d;
+          weekAddFocus = true;
+          render();
+        });
+        head.appendChild(plus);
         main.appendChild(head);
 
         if (list.length > 0) {
           var ul = document.createElement("ul");
-          list.forEach(function (it) { ul.appendChild(buildMiniEntry(it, d, true)); });
+          var weekIds = list.map(function (it) { return it.id; });
+          list.forEach(function (it) { ul.appendChild(buildMiniEntry(it, d, true, weekIds)); });
           main.appendChild(ul);
         } else {
           var none = document.createElement("div");
@@ -534,12 +548,55 @@
           main.appendChild(none);
         }
 
+        if (weekAdding === d) main.appendChild(buildWeekAdd(d, dd));
         card.appendChild(main);
         card.dataset.day = d;
         makeDropTarget(card, function () { return d; });
         wrap.appendChild(card);
       })(shiftDay(ws, i));
     }
+  }
+
+  // Quick add inside a Week card: log on that day without switching views.
+  // It uses the job set in the Day view's Job box, and says so.
+  var weekAdding = null;   // the day whose card has its add box open
+  var weekAddFocus = false;
+  function buildWeekAdd(d, dd) {
+    var row = document.createElement("div");
+    row.className = "waddrow";
+    var input = document.createElement("input");
+    input.type = "text";
+    input.autocomplete = "off";
+    var job = jobByName($("newJob").value);
+    input.placeholder = "Add to " + LONGDOW[dd.getDay()] + (job ? " · " + job.text : "") + "…";
+    input.setAttribute("aria-label", "New entry for " + prettyDate(d));
+    var go = document.createElement("button");
+    go.type = "button";
+    go.textContent = "Add";
+    function add() {
+      var v = input.value.trim();
+      if (v === "") { input.focus(); return; }
+      var entry = { id: newId(), text: v };
+      var jid = ensureJob($("newJob").value);
+      if (jid) entry.job = jid;
+      if (!data[d]) data[d] = [];
+      data[d].push(entry);
+      save();
+      weekAddFocus = true; // stay open for the next one
+      render();
+    }
+    input.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") { e.preventDefault(); add(); }
+      if (e.key === "Escape") { e.preventDefault(); weekAdding = null; render(); }
+    });
+    go.addEventListener("click", add);
+    row.appendChild(input);
+    row.appendChild(go);
+    if (weekAddFocus) {
+      weekAddFocus = false;
+      setTimeout(function () { input.focus(); }, 0);
+    }
+    return row;
   }
 
   function renderMonth() {
@@ -818,7 +875,8 @@
       main.appendChild(head);
 
       var ul = document.createElement("ul");
-      list.forEach(function (it) { ul.appendChild(buildMiniEntry(it, d, false)); });
+      var jobIds = list.map(function (it) { return it.id; });
+      list.forEach(function (it) { ul.appendChild(buildMiniEntry(it, d, false, jobIds)); });
       main.appendChild(ul);
       card.appendChild(main);
       wrap.appendChild(card);
@@ -843,22 +901,36 @@
   }
 
   // ---------- reordering a day ----------
-  // Put an entry at a new position in its day. The order is what the copy
-  // buttons, exports and every view show, so it's saved like any change.
-  function reorderEntry(day, id, toIndex) {
+  // Entries are moved relative to each other ("put this one above / below
+  // that one"), so the same code works for the Day view's full list, a Week
+  // card, and the Job view — which shows only part of each day. The order is
+  // what copy, export and every view use, so it's saved like any change.
+  function placeEntry(day, id, targetId, after) {
     var list = data[day] || [];
     var from = list.findIndex(function (it) { return it.id === id; });
-    if (from === -1) return false;
-    toIndex = Math.max(0, Math.min(list.length - 1, toIndex));
-    if (toIndex === from) return false;
-    list.splice(toIndex, 0, list.splice(from, 1)[0]);
+    if (from === -1 || id === targetId) return false;
+    var moving = list.splice(from, 1)[0];
+    var at = list.findIndex(function (it) { return it.id === targetId; });
+    if (at === -1) { list.splice(from, 0, moving); return false; }
+    var to = at + (after ? 1 : 0);
+    list.splice(to, 0, moving);
+    if (to === from) return false; // dropped where it already was
     save();
     render();
     return true;
   }
 
+  // One step up or down among the entries a view shows (`ids`, in order).
+  function stepEntry(day, id, ids, dir) {
+    var i = ids.indexOf(id);
+    var j = i + dir;
+    if (i === -1 || j < 0 || j >= ids.length) return false;
+    return placeEntry(day, id, ids[j], dir > 0);
+  }
+
   // Dropping a dragged entry on another entry of the same day reorders:
   // the top half of a row means "above it", the bottom half "below it".
+  // Drags from elsewhere (other days, the lists) bubble on to the day itself.
   function makeReorderTarget(li, day, item) {
     function sameDay() {
       return draggingEntry && draggingEntry !== item.id &&
@@ -870,7 +942,7 @@
     }
     function clear() { li.classList.remove("drop-before", "drop-after"); }
     li.addEventListener("dragover", function (e) {
-      if (!sameDay()) return; // let other drags bubble to the log
+      if (!sameDay()) return;
       e.preventDefault();
       e.stopPropagation();
       e.dataTransfer.dropEffect = "move";
@@ -886,19 +958,49 @@
       e.preventDefault();
       e.stopPropagation();
       clear();
-      var list = data[day];
-      var from = list.findIndex(function (it) { return it.id === draggingEntry; });
-      var to = list.findIndex(function (it) { return it.id === item.id; }) + (below(e) ? 1 : 0);
-      if (from < to) to--; // removing it first shifts everything after up one
-      reorderEntry(day, draggingEntry, to);
+      placeEntry(day, draggingEntry, item.id, below(e));
     });
   }
 
   // After a keyboard or button move, keep focus with the entry that moved.
+  // Views that aren't showing keep their old rows in the page, so pick the
+  // visible copy of the entry.
   function refocusEntry(id, selector) {
-    var row = $("itemList").querySelector('li.entry[data-id="' + id + '"]');
-    var target = row && (row.querySelector(selector) || row.querySelector(".num"));
-    if (target) target.focus();
+    var rows = document.querySelectorAll('li[data-id="' + id + '"]');
+    for (var i = 0; i < rows.length; i++) {
+      if (rows[i].offsetParent === null) continue;
+      var target = rows[i].querySelector(selector) || rows[i].querySelector(".num, .mgrip");
+      if (target && target.offsetParent !== null) { target.focus(); return; }
+    }
+  }
+
+  // Keyboard: a focused handle moves its entry with up / down.
+  function reorderKeys(handle, day, item, ids, selector) {
+    handle.addEventListener("keydown", function (e) {
+      if (e.key !== "ArrowUp" && e.key !== "ArrowDown") return;
+      e.preventDefault();
+      if (stepEntry(day, item.id, ids, e.key === "ArrowUp" ? -1 : 1)) refocusEntry(item.id, selector);
+    });
+  }
+
+  // Touch screens can't drag and drop, so they get up / down buttons.
+  function buildMover(day, item, ids) {
+    var idx = ids.indexOf(item.id);
+    var mover = document.createElement("span");
+    mover.className = "mover";
+    [["up", "▲", -1, "Move up"], ["down", "▼", 1, "Move down"]].forEach(function (m) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = m[0];
+      b.textContent = m[1];
+      b.setAttribute("aria-label", m[3]);
+      b.disabled = m[2] < 0 ? idx === 0 : idx === ids.length - 1;
+      b.addEventListener("click", function () {
+        if (stepEntry(day, item.id, ids, m[2])) refocusEntry(item.id, ".mover ." + m[0]);
+      });
+      mover.appendChild(b);
+    });
+    return mover;
   }
 
   function entryButtons(item) {
@@ -920,11 +1022,26 @@
 
   // A compact entry for the Week and Job views: same edit, delete and drag
   // as the Day view's ledger rows.
-  function buildMiniEntry(item, day, showPill) {
+  function buildMiniEntry(item, day, showPill, ids) {
     if (item.id === editingId) return buildEditor(item, day);
     var li = document.createElement("li");
     li.className = "mini";
+    li.dataset.id = item.id;
     tintJob(li, item.job);
+    var many = ids.length > 1;
+    // the job-coloured dot is the reorder handle: drag, or focus + up / down
+    var grip = document.createElement("button");
+    grip.type = "button";
+    grip.className = "mgrip";
+    grip.dataset.tip = many ? "Drag up or down to reorder — or onto another day or a job. Keyboard: ↑ ↓"
+                            : "Drag onto another day to move it, or onto a job to link it";
+    grip.setAttribute("aria-label", many
+      ? "Entry " + (ids.indexOf(item.id) + 1) + " of " + ids.length + ". Press up or down to reorder"
+      : "Entry");
+    if (many) reorderKeys(grip, day, item, ids, ".mgrip");
+    li.appendChild(grip);
+    if (many) li.appendChild(buildMover(day, item, ids));
+    makeReorderTarget(li, day, item);
     var t = document.createElement("span");
     t.className = "mt";
     t.textContent = item.text;
@@ -944,7 +1061,8 @@
     tintJob(li, item.job);
     makeEntryDraggable(li, item);
     makeReorderTarget(li, day, item);
-    var count = (data[day] || []).length;
+    var ids = (data[day] || []).map(function (it) { return it.id; });
+    var count = ids.length;
 
     // the number doubles as the reorder handle: drag it, or focus it and
     // press up / down
@@ -954,27 +1072,8 @@
     num.textContent = idx + 1;
     num.dataset.tip = "Drag up or down to reorder — or onto another day or a job. Keyboard: ↑ ↓";
     num.setAttribute("aria-label", "Entry " + (idx + 1) + " of " + count + ". Press up or down to reorder");
-    num.addEventListener("keydown", function (e) {
-      if (e.key !== "ArrowUp" && e.key !== "ArrowDown") return;
-      e.preventDefault();
-      if (reorderEntry(day, item.id, idx + (e.key === "ArrowUp" ? -1 : 1))) refocusEntry(item.id, ".num");
-    });
-
-    // touch screens can't drag-and-drop, so they get up / down buttons
-    var mover = document.createElement("span");
-    mover.className = "mover";
-    [["up", "▲", -1, "Move up"], ["down", "▼", 1, "Move down"]].forEach(function (m) {
-      var b = document.createElement("button");
-      b.type = "button";
-      b.className = m[0];
-      b.textContent = m[1];
-      b.setAttribute("aria-label", m[3]);
-      b.disabled = m[2] < 0 ? idx === 0 : idx === count - 1;
-      b.addEventListener("click", function () {
-        if (reorderEntry(day, item.id, idx + m[2])) refocusEntry(item.id, ".mover ." + m[0]);
-      });
-      mover.appendChild(b);
-    });
+    reorderKeys(num, day, item, ids, ".num");
+    var mover = buildMover(day, item, ids);
 
     var txt = document.createElement("div");
     txt.className = "txt";
@@ -1731,6 +1830,7 @@
       }
       var li = document.createElement("li");
       li.draggable = true;
+      li.dataset.id = item.id;
 
       var grip = document.createElement("span");
       grip.className = "grip";
@@ -1908,19 +2008,32 @@
 
   var toastTimer;
   // Pass an undo function to get an Undo button; those toasts linger longer.
+  // The last undoable action stays undoable for a minute after its toast
+  // fades: the Undo button and Ctrl+Z both run it, once.
+  var lastUndo = null;
+  var UNDO_WINDOW = 60000;
+  function runUndo() {
+    if (!lastUndo || Date.now() > lastUndo.until) { lastUndo = null; return false; }
+    var fn = lastUndo.fn;
+    lastUndo = null;
+    clearTimeout(toastTimer);
+    var t = $("toast");
+    t.classList.remove("show");
+    fn();
+    if (!t.classList.contains("show")) toast("Undone");
+    return true;
+  }
   function toast(msg, undo, ms) {
     var t = $("toast");
     t.textContent = "";
     t.appendChild(document.createTextNode(msg));
     if (undo) {
+      lastUndo = { fn: undo, until: Date.now() + UNDO_WINDOW };
       var b = document.createElement("button");
       b.className = "undo";
       b.textContent = "Undo";
-      b.addEventListener("click", function () {
-        clearTimeout(toastTimer);
-        t.classList.remove("show");
-        undo();
-      });
+      b.dataset.tip = "Undo — Ctrl+Z works for a minute afterwards";
+      b.addEventListener("click", runUndo);
       t.appendChild(b);
     }
     t.classList.add("show");
@@ -2169,7 +2282,8 @@
       // with words already typed, Enter adds them; otherwise move on to typing
       if ($("newItem").value.trim() !== "") addItem(); else $("newItem").focus();
     }
-    if (e.key === "Escape") { setJobBox(""); }
+    // Esc clears a set job; pressed again (or on an empty box) it leaves the box
+    if (e.key === "Escape") { if (this.value) setJobBox(""); else this.blur(); }
   });
   $("addJobBtn").addEventListener("click", addJobFromSide);
   $("newJobSide").addEventListener("keydown", function (e) {
@@ -2182,6 +2296,7 @@
   });
   $("newItem").addEventListener("keydown", function (e) {
     if (e.key === "Enter") addItem();
+    if (e.key === "Escape") this.blur(); // hands the keyboard back to the shortcuts
   });
   $("datePick").addEventListener("change", function () {
     if (this.value) { currentDate = this.value; editingId = null; render(); }
@@ -2217,6 +2332,13 @@
     $("newItem").scrollIntoView({ block: "center", behavior: "smooth" });
   }
   $("fab").addEventListener("click", focusNewItem);
+  // the floating + only matters when the entry box is out of sight; while
+  // the box is showing it would just cover the list
+  if ("IntersectionObserver" in window) {
+    new IntersectionObserver(function (seen) {
+      $("fab").classList.toggle("away", view === "day" && seen[0].isIntersecting);
+    }).observe($("newItem"));
+  }
   function copyView(withHeading) {
     var noun = view === "week" ? "week" : view === "month" ? "month" : view === "job" ? "job" : "day";
     var empty = "Nothing to copy — this " + noun + " has no entries";
@@ -2372,6 +2494,176 @@
     clearData(p);
   });
 
+  // ---------- search ----------
+  // One box that finds anything: jobs, every logged entry, and the wishlist
+  // and recurring lists. Every word typed must match somewhere in the
+  // item's text, its job or its date ("smith oct" works). Jobs list first,
+  // then the log newest first, then the lists.
+  var SEARCH_LIMIT = 60;
+  var searchOpener = null;
+  var searchHits = [];
+  var searchActive = 0;
+
+  function searchCorpus() {
+    var out = [];
+    jobs.forEach(function (j) {
+      out.push({ kind: "job", id: j.id, text: j.text, job: j.id, hay: j.text });
+    });
+    Object.keys(data).sort().reverse().forEach(function (d) {
+      var label = prettyDate(d);
+      (data[d] || []).forEach(function (it) {
+        out.push({ kind: "entry", id: it.id, day: d, text: it.text, job: it.job, hay: it.text + " " + jobName(it) + " " + label + " " + d });
+      });
+    });
+    [["w", wishlist, "Wishlist"], ["r", recurring, "Recurring"]].forEach(function (q) {
+      q[1].forEach(function (it) {
+        out.push({ kind: q[0], id: it.id, text: it.text, job: it.job, hay: it.text + " " + jobName(it) + " " + q[2] });
+      });
+    });
+    return out;
+  }
+
+  function searchWords(q) {
+    return q.toLowerCase().split(/\s+/).filter(function (w) { return w !== ""; });
+  }
+
+  // Text with every matched word wrapped in <mark>, built from text nodes so
+  // nothing typed into an entry can ever be read as HTML.
+  function highlighted(text, words) {
+    var frag = document.createDocumentFragment();
+    if (!words.length) { frag.appendChild(document.createTextNode(text)); return frag; }
+    var lower = text.toLowerCase();
+    var marks = [];
+    words.forEach(function (w) {
+      var from = 0, at;
+      while ((at = lower.indexOf(w, from)) !== -1) { marks.push([at, at + w.length]); from = at + w.length; }
+    });
+    marks.sort(function (a, b) { return a[0] - b[0]; });
+    var pos = 0;
+    marks.forEach(function (m) {
+      if (m[0] < pos) return; // overlapping match already covered
+      if (m[0] > pos) frag.appendChild(document.createTextNode(text.slice(pos, m[0])));
+      var mk = document.createElement("mark");
+      mk.textContent = text.slice(m[0], m[1]);
+      frag.appendChild(mk);
+      pos = m[1];
+    });
+    if (pos < text.length) frag.appendChild(document.createTextNode(text.slice(pos)));
+    return frag;
+  }
+
+  function runSearch() {
+    var q = $("searchInput").value;
+    var words = searchWords(q);
+    var corpus = searchCorpus();
+    var total;
+    if (words.length === 0) {
+      // nothing typed yet: the most recent entries, as a starting point
+      searchHits = corpus.filter(function (h) { return h.kind === "entry"; }).slice(0, 8);
+      total = searchHits.length;
+      $("searchSum").textContent = searchHits.length ? "Recent entries — type to search everything" : "Nothing logged yet — type to search jobs and lists";
+    } else {
+      var all = corpus.filter(function (h) {
+        var hay = h.hay.toLowerCase();
+        return words.every(function (w) { return hay.indexOf(w) !== -1; });
+      });
+      total = all.length;
+      searchHits = all.slice(0, SEARCH_LIMIT);
+      $("searchSum").textContent = total === 0 ? "No matches for “" + q.trim() + "”"
+        : total + (total === 1 ? " match" : " matches") + (total > SEARCH_LIMIT ? " — showing the first " + SEARCH_LIMIT : "");
+    }
+    searchActive = 0;
+    var ul = $("searchResults");
+    ul.innerHTML = "";
+    searchHits.forEach(function (h, i) {
+      var li = document.createElement("li");
+      li.id = "sr-" + i;
+      li.setAttribute("role", "option");
+      li.className = "sr";
+      tintJob(li, h.job);
+      var where = document.createElement("span");
+      where.className = "where";
+      if (h.kind === "entry") {
+        var dd = dateObj(h.day);
+        where.textContent = DOW[dd.getDay()] + " " + dd.getDate() + " " + MON[dd.getMonth()] + " " + dd.getFullYear();
+      } else {
+        where.textContent = h.kind === "job" ? "Job" : h.kind === "w" ? "Wishlist" : "Recurring";
+        where.classList.add("kind");
+      }
+      var what = document.createElement("span");
+      what.className = "what";
+      what.appendChild(highlighted(h.text, words));
+      li.appendChild(where);
+      li.appendChild(what);
+      if (h.kind !== "job") {
+        var pill = jobPill({ job: h.job });
+        if (pill) { pill.tabIndex = -1; li.appendChild(pill); }
+      }
+      li.addEventListener("mousemove", function () { if (searchActive !== i) setSearchActive(i); });
+      li.addEventListener("click", function () { openHit(h); });
+      ul.appendChild(li);
+    });
+    setSearchActive(0);
+  }
+
+  function setSearchActive(i) {
+    var items = $("searchResults").children;
+    if (!items.length) { $("searchInput").removeAttribute("aria-activedescendant"); return; }
+    searchActive = Math.max(0, Math.min(items.length - 1, i));
+    for (var k = 0; k < items.length; k++) items[k].classList.toggle("active", k === searchActive);
+    $("searchInput").setAttribute("aria-activedescendant", "sr-" + searchActive);
+    items[searchActive].scrollIntoView({ block: "nearest" });
+  }
+
+  // Briefly light up the thing a search jumped to.
+  function flash(el) {
+    if (!el) return;
+    el.scrollIntoView({ block: "center", behavior: "smooth" });
+    el.classList.remove("flash");
+    void el.offsetWidth; // restart the animation if it's already running
+    el.classList.add("flash");
+  }
+
+  function openHit(h) {
+    closeSearch(true);
+    if (h.kind === "job") { openJob(h.id); return; }
+    if (h.kind === "entry") {
+      currentDate = h.day;
+      editingId = null;
+      setView("day");
+      flash($("itemList").querySelector('li[data-id="' + h.id + '"]'));
+      return;
+    }
+    flash($(h.kind === "w" ? "wishList" : "recList").querySelector('li[data-id="' + h.id + '"]'));
+  }
+
+  function openSearch() {
+    searchOpener = document.activeElement;
+    hideTip();
+    $("searchOverlay").classList.add("open");
+    $("searchInput").value = "";
+    runSearch();
+    $("searchInput").focus();
+  }
+  function closeSearch(jumping) {
+    $("searchOverlay").classList.remove("open");
+    var back = searchOpener;
+    searchOpener = null;
+    if (!jumping && back && document.contains(back) && back.offsetParent !== null) back.focus();
+  }
+  $("searchBtn").addEventListener("click", openSearch);
+  $("searchInput").addEventListener("input", runSearch);
+  $("searchInput").addEventListener("keydown", function (e) {
+    if (e.key === "ArrowDown") { e.preventDefault(); setSearchActive(searchActive + 1); }
+    else if (e.key === "ArrowUp") { e.preventDefault(); setSearchActive(searchActive - 1); }
+    else if (e.key === "Enter") { e.preventDefault(); if (searchHits[searchActive]) openHit(searchHits[searchActive]); }
+    else if (e.key === "Escape") { e.preventDefault(); closeSearch(); }
+  });
+  $("searchOverlay").addEventListener("keydown", trapFocus);
+  $("searchOverlay").addEventListener("click", function (e) {
+    if (e.target === this) closeSearch();
+  });
+
   // ---------- help ----------
   var HELP_KEY = "track.helpseen.v1";
   var helpOpener = null;
@@ -2422,9 +2714,21 @@
       if (e.key === "Escape") closeClear();
       return; // no shortcuts behind an open dialog
     }
-    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    if ($("searchOverlay").classList.contains("open")) return; // search handles its own keys
     var a = document.activeElement;
-    if (a && (a.tagName === "INPUT" || a.tagName === "TEXTAREA" || a.isContentEditable)) return;
+    var typing = a && (a.tagName === "INPUT" || a.tagName === "TEXTAREA" || a.isContentEditable);
+    if ((e.ctrlKey || e.metaKey) && !e.altKey && (e.key === "k" || e.key === "K")) {
+      e.preventDefault();
+      if (!helpOpen) openSearch();
+      return;
+    }
+    // in a text box, Ctrl+Z is the box's own undo; elsewhere it's Docket's
+    if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && (e.key === "z" || e.key === "Z") && !typing && !helpOpen) {
+      if (runUndo()) e.preventDefault();
+      return;
+    }
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    if (typing) return;
     if (helpOpen) return;
     switch (e.key) {
       case "ArrowLeft": e.preventDefault(); shiftForView(-1); break;
@@ -2433,7 +2737,8 @@
       case "d": case "D": setView("day"); break;
       case "w": case "W": setView("week"); break;
       case "m": case "M": setView("month"); break;
-      case "n": case "N": case "/": e.preventDefault();
+      case "/": e.preventDefault(); openSearch(); break;
+      case "n": case "N": e.preventDefault();
         if (view === "job") $("logJobBtn").click(); else focusNewItem();
         break;
       case "j": case "J": e.preventDefault();

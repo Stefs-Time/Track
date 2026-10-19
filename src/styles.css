@@ -44,15 +44,15 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
-    --bg: #131210;
-    --panel: #181715;
-    --surface: #1e1c1a;
-    --sunk: #262420;
-    --ink: #f2efe9;
-    --ink-2: #bfb8ac;
-    --ink-3: #90897e;
-    --line: #2d2a26;
-    --line-2: #3b3732;
+    --bg: #121316;
+    --panel: #17181c;
+    --surface: #1d1f23;
+    --sunk: #26282d;
+    --ink: #f1f2f4;
+    --ink-2: #b7bac1;
+    --ink-3: #8a8e97;
+    --line: #2c2e33;
+    --line-2: #3a3d43;
     --accent: #ff7a50;
     --accent-ink: #1d1b18;
     --accent-text: #ff9a78;
@@ -64,8 +64,8 @@
     --danger: #ff7272;
     --danger-soft: rgba(255, 114, 114, 0.12);
     --success: #4cd38a;
-    --invert-bg: #f2efe9;
-    --invert-ink: #1d1b18;
+    --invert-bg: #f1f2f4;
+    --invert-ink: #16171a;
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
     --shadow-md: 0 1px 2px rgba(0, 0, 0, 0.4), 0 12px 30px -12px rgba(0, 0, 0, 0.6);
     --shadow-lg: 0 2px 6px rgba(0, 0, 0, 0.45), 0 30px 60px -20px rgba(0, 0, 0, 0.75);
@@ -73,15 +73,15 @@
 }
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --bg: #131210;
-  --panel: #181715;
-  --surface: #1e1c1a;
-  --sunk: #262420;
-  --ink: #f2efe9;
-  --ink-2: #bfb8ac;
-  --ink-3: #90897e;
-  --line: #2d2a26;
-  --line-2: #3b3732;
+  --bg: #121316;
+  --panel: #17181c;
+  --surface: #1d1f23;
+  --sunk: #26282d;
+  --ink: #f1f2f4;
+  --ink-2: #b7bac1;
+  --ink-3: #8a8e97;
+  --line: #2c2e33;
+  --line-2: #3a3d43;
   --accent: #ff7a50;
   --accent-ink: #1d1b18;
   --accent-text: #ff9a78;
@@ -93,8 +93,8 @@
   --danger: #ff7272;
   --danger-soft: rgba(255, 114, 114, 0.12);
   --success: #4cd38a;
-  --invert-bg: #f2efe9;
-  --invert-ink: #1d1b18;
+  --invert-bg: #f1f2f4;
+  --invert-ink: #16171a;
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
   --shadow-md: 0 1px 2px rgba(0, 0, 0, 0.4), 0 12px 30px -12px rgba(0, 0, 0, 0.6);
   --shadow-lg: 0 2px 6px rgba(0, 0, 0, 0.45), 0 30px 60px -20px rgba(0, 0, 0, 0.75);
@@ -240,6 +240,33 @@ input::placeholder { color: var(--ink-3); }
 }
 .helpbtn:hover, .themebtn:hover { color: var(--ink); border-color: var(--line-2); box-shadow: var(--shadow-sm); }
 .themebtn .ic svg { width: 17px; height: 17px; }
+/* search: a wide button on desktop, an icon on phones */
+.searchbtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  min-width: 170px;
+  padding: 0 8px 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink-3);
+  font-size: 13px;
+  font-weight: 500;
+}
+.searchbtn .ic svg { width: 15px; height: 15px; }
+.searchbtn .sl { margin-right: auto; }
+.searchbtn kbd {
+  padding: 0 7px;
+  border-radius: 6px;
+  border: 1px solid var(--line-2);
+  background: var(--sunk);
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 18px;
+}
+.searchbtn:hover { color: var(--ink); border-color: var(--line-2); box-shadow: var(--shadow-sm); }
 .installbtn {
   display: flex;
   align-items: center;
@@ -903,8 +930,8 @@ ol.items li.entry .num:focus-visible { background: var(--accent); color: var(--a
 #itemList li.entry.drop-before::after { top: -2px; bottom: auto; }
 #itemList li.entry.drop-after::after { top: auto; bottom: -2px; }
 /* touch-only up / down buttons, in the number's place */
-ol.items li.entry .mover { display: none; flex-shrink: 0; flex-direction: column; gap: 2px; }
-ol.items li.entry .mover button {
+.mover { display: none; flex-shrink: 0; flex-direction: column; gap: 2px; }
+.mover button {
   display: grid;
   place-items: center;
   width: 30px;
@@ -916,8 +943,9 @@ ol.items li.entry .mover button {
   color: var(--ink-2);
   font-size: 9px;
 }
-ol.items li.entry .mover button:active { background: var(--accent); color: var(--accent-ink); }
-ol.items li.entry .mover button:disabled { opacity: .3; }
+.mover button:active { background: var(--accent); color: var(--accent-ink); }
+.mover button:disabled { opacity: .3; }
+.wday ul li .mover button { width: 28px; height: 20px; }
 ol.items li.entry .body { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; }
 ol.items li.entry .txt { flex: 1; min-width: 0; font-size: 14.5px; white-space: pre-wrap; word-break: break-word; }
 ol.items li.entry .body .jobpill { max-width: 45%; }
@@ -1128,6 +1156,27 @@ li.editing .editrow input.edate { padding: 0 10px; min-width: 0; }
 }
 .wday ul li:first-child { border-top: none; }
 .wday ul li::before { content: ""; flex-shrink: 0; width: 8px; height: 8px; border-radius: 50%; background: var(--job, var(--line-2)); }
+.wday ul li.mini::before { display: none; }
+/* the job-coloured dot doubles as the reorder handle */
+.mgrip {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 20px;
+  height: 26px;
+  margin-left: -6px;
+  padding: 0;
+  border: none;
+  border-radius: 7px;
+  background: none;
+  cursor: grab;
+}
+.mgrip::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--job, var(--line-2)); transition: transform .15s var(--ease); }
+.wday ul li.mini:hover .mgrip::before { transform: scale(1.35); }
+.mgrip:hover { background: var(--sunk); }
+.mgrip:focus-visible { background: var(--accent-soft); }
+.wday ul li.mini.drop-before { box-shadow: inset 0 3px 0 var(--accent); }
+.wday ul li.mini.drop-after { box-shadow: inset 0 -3px 0 var(--accent); }
 .wday ul li > span:first-of-type, .wday ul li.mini .mt { flex: 1 1 auto; min-width: 0; word-break: break-word; }
 .wday ul li .jobpill { font-size: 11.5px; height: 22px; }
 .wday ul li .icon { display: none; width: 28px; height: 28px; }
@@ -1247,9 +1296,16 @@ body[data-view="job"] .datenav .bigdate::before {
   box-shadow: 0 14px 30px -10px var(--accent-ring), var(--shadow-md);
 }
 .fab:hover { transform: translateY(-3px) rotate(90deg); }
+/* while the entry box is on screen the + is redundant, so it steps aside */
+.fab.away { opacity: 0; transform: scale(.6); pointer-events: none; transition: opacity .2s, transform .25s var(--ease); }
+/* on small screens, typing anywhere (with the keyboard up) needs the room */
+@media (max-width: 860px) {
+  body:has(input:focus) .fab { opacity: 0; transform: scale(.6); pointer-events: none; }
+}
 .fab:active { transform: scale(.94); }
 
-.keys { margin-top: 34px; color: var(--ink-3); font-size: 12px; user-select: none; }
+.keys { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 34px; color: var(--ink-3); font-size: 12px; user-select: none; }
+.keys span { white-space: nowrap; }
 .keys kbd, .modal-body kbd {
   display: inline-block;
   min-width: 20px;
@@ -1361,6 +1417,85 @@ body[data-view="job"] .datenav .bigdate::before {
 .backupnote button:hover { border-color: var(--line-2); box-shadow: var(--shadow-sm); }
 .backupnote button.done { border-color: var(--success); color: var(--success); }
 
+/* search panel — opens near the top, like a command palette */
+.overlay.search { align-items: flex-start; padding-top: 11vh; }
+.modal.searchbox { max-width: 640px; max-height: 72vh; }
+.searchfield { display: flex; align-items: center; gap: 12px; padding: 16px 20px; border-bottom: 1px solid var(--line); }
+.searchfield .ic { color: var(--accent-text); }
+.searchfield .ic svg { width: 20px; height: 20px; }
+.searchfield input { flex: 1; min-width: 0; border: none; background: none; font-size: 17px; padding: 4px 0; }
+.searchfield input:focus { outline: none; }
+.searchfield kbd, .searchfoot kbd {
+  padding: 0 6px;
+  border-radius: 6px;
+  border: 1px solid var(--line-2);
+  border-bottom-width: 2px;
+  background: var(--sunk);
+  color: var(--ink-3);
+  font-family: var(--mono);
+  font-size: 11px;
+}
+.searchsum { margin: 0; padding: 10px 20px 4px; color: var(--ink-3); font-size: 12.5px; }
+.results { list-style: none; margin: 0; padding: 4px 8px 8px; overflow-y: auto; scrollbar-width: thin; }
+.results .sr {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 46px;
+  padding: 8px 12px 8px 16px;
+  border-radius: 12px;
+  cursor: pointer;
+}
+.results .sr::before { content: ""; position: absolute; left: 4px; top: 12px; bottom: 12px; width: 3px; border-radius: 3px; background: var(--job, transparent); }
+.results .sr.active { background: var(--sunk); }
+.results .sr .where { flex-shrink: 0; width: 132px; white-space: nowrap; color: var(--ink-3); font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.results .sr .where.kind { color: var(--accent-text); text-transform: uppercase; letter-spacing: .06em; font-size: 11px; }
+.results .sr .what { flex: 1; min-width: 0; font-size: 14px; word-break: break-word; }
+.results .sr mark { background: var(--accent-soft); color: inherit; border-radius: 4px; padding: 0 2px; box-shadow: inset 0 -2px 0 var(--accent); }
+.results .sr .jobpill { pointer-events: none; max-width: 34%; }
+.searchfoot { display: flex; gap: 16px; padding: 10px 20px 14px; border-top: 1px solid var(--line); color: var(--ink-3); font-size: 12px; }
+
+/* where a search jumped to lights up for a moment */
+.flash { animation: flash 1.8s var(--ease); }
+@keyframes flash {
+  0%, 30% { background: var(--accent-soft); box-shadow: 0 0 0 2px var(--accent); }
+  100% { background: transparent; box-shadow: 0 0 0 2px transparent; }
+}
+
+/* Week cards: + adds to that day in place */
+.wday-head .wadd {
+  display: grid;
+  place-items: center;
+  align-self: center;
+  width: 26px;
+  height: 26px;
+  margin-left: 6px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink-2);
+  font-size: 17px;
+  line-height: 1;
+}
+.wday-head .count + .wadd { margin-left: 6px; }
+.wday-head .wsub + .wadd { margin-left: auto; }
+.wday-head .wadd:hover { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.waddrow { display: flex; gap: 6px; margin-top: 8px; }
+.waddrow input {
+  flex: 1;
+  min-width: 0;
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--sunk);
+  font-size: 13.5px;
+}
+.waddrow input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); background: var(--surface); }
+.waddrow button { height: 36px; padding: 0 16px; border: none; border-radius: 10px; background: var(--accent); color: var(--accent-ink); font-weight: 700; font-size: 13px; }
+
 /* ==========================================================================
    Toast and hover hints — inverted, so they never get lost
    ========================================================================== */
@@ -1420,8 +1555,8 @@ body[data-view="job"] .datenav .bigdate::before {
    ========================================================================== */
 @media (pointer: coarse) {
   ol.items li.entry .icon { opacity: 1; }
-  ol.items li.entry .num { display: none; }
-  ol.items li.entry .mover { display: flex; }
+  ol.items li.entry .num, .wday ul li .mgrip { display: none; }
+  .mover { display: flex; }
   .wday ul li .icon, ul.wishlist .wbtn, ul.joblist .wbtn { display: grid; }
   ul.joblist li.row .count { display: none; }
 }
@@ -1440,6 +1575,13 @@ body[data-view="job"] .datenav .bigdate::before {
   .tabs button { flex: 1; }
   .brand .sub { display: none; }
   .saved-pill { display: none; }
+  .searchbtn { min-width: 0; width: 34px; padding: 0; justify-content: center; }
+  .searchbtn .sl, .searchbtn kbd { display: none; }
+  .results .sr { flex-wrap: wrap; gap: 2px 10px; }
+  .results .sr .where { width: auto; }
+  .results .sr .what { flex-basis: 100%; }
+  .results .sr .jobpill { max-width: 100%; }
+  .overlay.search { padding: 12px; }
   .app { display: flex; flex-direction: column; }
   .main { order: 1; max-width: none; padding: 22px 16px 40px; }
   .side { order: 2; position: static; height: auto; overflow: visible; border-right: none; border-top: 1px solid var(--line); padding: 24px 16px 100px; }
@@ -1473,9 +1615,20 @@ body[data-view="job"] .datenav .bigdate::before {
   .wchip { width: 44px; height: 50px; border-radius: 13px; }
   .weekview > .wday::after, .jobview > .wday::after { left: 21px; top: 52px; }
   .wday-main { padding: 10px 12px 8px; }
-  .wday ul li { flex-wrap: wrap; }
-  .wday ul li.mini .mt { flex-basis: calc(100% - 100px); }
-  .wday ul li .jobpill { margin-left: 18px; max-width: calc(100% - 18px); }
+  /* phone rows: reorder control | text over its job | edit, delete */
+  .wday ul li.mini {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
+    column-gap: 8px;
+    row-gap: 4px;
+    align-items: center;
+    padding: 6px 0;
+  }
+  .wday ul li.mini > .mover, .wday ul li.mini > .mgrip { grid-column: 1; grid-row: 1 / span 2; }
+  .wday ul li.mini > .mt { grid-column: 2; grid-row: 1; }
+  .wday ul li.mini > .jobpill { grid-column: 2; grid-row: 2; justify-self: start; max-width: 100%; }
+  .wday ul li.mini > .icon.edit { grid-column: 3; grid-row: 1 / span 2; }
+  .wday ul li.mini > .icon.del { grid-column: 4; grid-row: 1 / span 2; }
   .editrow { grid-template-columns: 1fr 1fr; }
   .mgrid { gap: 3px; }
   .mcell { border-radius: 9px; }
