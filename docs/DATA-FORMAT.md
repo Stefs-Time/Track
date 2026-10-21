@@ -97,6 +97,17 @@ rename to Docket keeps loading.
 | `track.view.v1` | Last view (`day`, `week`, `month`) |
 | `track.helpseen.v1` | Whether the first-run guide has been shown |
 | `track.theme.v1` | A pinned theme (`light` / `dark`); absent means follow the system |
+| `<key>.before-repair` | The original text of a store that had to be repaired on load (see below) |
+
+## Validation and repair
+
+Every record is checked when Docket loads:
+
+- An entry or list item needs non-empty `text`. A bare string becomes the text, and a number is converted. A missing or duplicate `id` is replaced.
+- A day key must be `YYYY-MM-DD` and hold a list.
+- A job needs a name. A missing colour, or one outside 0–7, is given a free colour.
+
+Anything else is dropped. If any record changed, the store's original text is first saved under `<key>.before-repair` (one slot per store, replaced by the next repair). Then the cleaned data is saved and a message says so. Text that isn't valid JSON at all is kept the same way, and the store starts empty.
 
 `localStorage` belongs to one browser profile and one site (or, for the
 standalone file, to `file://`). That's why the installed app and the

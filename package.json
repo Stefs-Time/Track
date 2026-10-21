@@ -1,6 +1,6 @@
 {
   "name": "docket",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "private": true,
   "description": "Docket — a daily work log with jobs. Installable offline web app (PWA) that also runs as a single, double-click HTML file.",
   "keywords": [
@@ -24,14 +24,19 @@
     "start": "node server.js",
     "dev": "node scripts/dev.js",
     "test": "npm run build && playwright test",
-    "check": "node --check src/app.js && node --check src/sw.js && node --check server.js && node --check scripts/build.js && node --check scripts/dev.js && node --check scripts/icons.js && node --check scripts/screenshots.js",
+    "check": "npm run lint && node --check src/app.js && node --check src/sw.js",
     "screenshots": "node scripts/screenshots.js",
-    "icons": "node scripts/icons.js"
+    "icons": "node scripts/icons.js",
+    "lint": "eslint ."
   },
   "dependencies": {
     "express": "^5.3.0"
   },
   "devDependencies": {
-    "@playwright/test": "1.56.1"
+    "@axe-core/playwright": "4.14.0",
+    "@eslint/js": "9.39.5",
+    "@playwright/test": "1.56.1",
+    "eslint": "9.39.5",
+    "globals": "15.15.0"
   }
 }
