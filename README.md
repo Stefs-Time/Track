@@ -38,6 +38,14 @@ It comes two ways, from the same code:
 - Clearing the browser's site data erases the log, so keep an occasional **Export JSON** as a backup.
 - **Clear data…** (under Backup & data) wipes chosen parts so you can start fresh or re-import a backup cleanly. It offers to export first, and Undo is there afterwards.
 - Data from earlier versions, including from when the app was called Track, loads unchanged.
+- **Two tabs open?** They stay in step: a change in one shows up in the other, so neither overwrites the other's work.
+- **Storage blocked** (some private windows, site data turned off)? Docket still works, marks itself **Not saved**, and tells you to export before closing.
+- **Damaged data**, from a hand-edited file for example, is repaired on load rather than breaking the app. The original is kept under a `.before-repair` key. See [docs/DATA-FORMAT.md](docs/DATA-FORMAT.md).
+- **Undo is safe:** it only works while nothing has changed since, so it can never throw away newer work.
+
+## Accessibility
+
+Docket is built to WCAG 2.1 AA. An automated axe-core check covers every view and dialog in both themes on every test run. Everything works from the keyboard: shortcuts, Tab to any control, and ↑ ↓ to reorder. Every action that needs a drag or a hover has a non-drag, non-hover route, and touch screens get always-visible buttons in place of hover ones.
 
 ## Development
 
@@ -46,8 +54,8 @@ Requires **Node.js 20+** (22 recommended; see `.nvmrc`).
 ```bash
 npm install
 npm run dev      # rebuilds on change and serves http://localhost:3000
-npm test         # builds, then runs the Playwright end-to-end suite
-npm run check    # syntax-checks every script
+npm test         # builds, then runs the Playwright end-to-end suite (incl. accessibility)
+npm run check    # ESLint + syntax checks
 ```
 
 The first time on a new machine, install the test browser with `npx playwright install chromium`.
@@ -66,12 +74,16 @@ scripts/
   build.js               inlines CSS + JS into one file → dist/
   dev.js                 build-watch + server, cross-platform
   screenshots.js         regenerates docs/screenshots/
+  icons.js               renders the PNG icons from icons/icon.svg
 server.js                Express server for hosting the app
-tests/                   Playwright end-to-end suites
-docs/                    data formats and screenshots
+tests/                   Playwright end-to-end and accessibility suites
+docs/                    architecture, data formats and screenshots
+eslint.config.js         lint rules
 ```
 
 The code is split into separate files to make it easy to work on. `npm run build` inlines it back into one self-contained page, which is what keeps the double-click download working. The build writes `dist/index.html` (served by the server) and `dist/Docket.html` (the standalone download). `dist/` is generated output and isn't committed.
+
+**Before changing the code, read [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).** It covers the render cycle, the storage guards, drag-and-drop, undo, and the rules every change follows.
 
 ## Deploying to Railway
 
@@ -106,7 +118,7 @@ The server sends a strict Content-Security-Policy that allows only the page's ow
 ## Releasing
 
 1. Bump `version` in `package.json` and add a section to `CHANGELOG.md`.
-2. Commit, then tag and push: `git tag v2.0.0 && git push origin v2.0.0`.
+2. Commit, then tag and push the same version: `git tag vX.Y.Z && git push origin vX.Y.Z`.
 3. The **Release** workflow runs the tests and publishes a GitHub Release with `Docket.html` attached, ready to download.
 
-CI runs the full test suite on every push and pull request. Each run also uploads the built `Docket.html` as an artifact.
+CI runs lint and the full test suite on every push and pull request. Each run also uploads the built `Docket.html` as an artifact.

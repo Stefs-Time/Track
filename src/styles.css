@@ -14,7 +14,7 @@
   --sunk: #f4f1ea;
   --ink: #1d1b18;
   --ink-2: #57524a;
-  --ink-3: #77716a;
+  --ink-3: #655f58;               /* ≥ 5:1 on every light surface (WCAG AA) */
   --line: #e6e0d5;
   --line-2: #d8d0c1;
   --accent: #ff6a3d;
@@ -27,6 +27,7 @@
   --heat-3: rgba(255, 106, 61, 0.38);
   --danger: #cf3131;
   --danger-soft: rgba(207, 49, 49, 0.09);
+  --danger-ink: #ffffff;
   --success: #188a4a;
   --invert-bg: #1d1b18;           /* toasts and tooltips */
   --invert-ink: #f6f4ef;
@@ -50,7 +51,7 @@
     --sunk: #26282d;
     --ink: #f1f2f4;
     --ink-2: #b7bac1;
-    --ink-3: #8a8e97;
+    --ink-3: #9a9ea7;
     --line: #2c2e33;
     --line-2: #3a3d43;
     --accent: #ff7a50;
@@ -63,6 +64,7 @@
     --heat-3: rgba(255, 122, 80, 0.40);
     --danger: #ff7272;
     --danger-soft: rgba(255, 114, 114, 0.12);
+    --danger-ink: #16171a;
     --success: #4cd38a;
     --invert-bg: #f1f2f4;
     --invert-ink: #16171a;
@@ -79,7 +81,7 @@
   --sunk: #26282d;
   --ink: #f1f2f4;
   --ink-2: #b7bac1;
-  --ink-3: #8a8e97;
+  --ink-3: #9a9ea7;
   --line: #2c2e33;
   --line-2: #3a3d43;
   --accent: #ff7a50;
@@ -92,6 +94,7 @@
   --heat-3: rgba(255, 122, 80, 0.40);
   --danger: #ff7272;
   --danger-soft: rgba(255, 114, 114, 0.12);
+    --danger-ink: #16171a;
   --success: #4cd38a;
   --invert-bg: #f1f2f4;
   --invert-ink: #16171a;
@@ -739,7 +742,7 @@ body[data-view="job"] .eyebrow { color: color-mix(in oklab, var(--jobc, var(--ac
   font-variant-numeric: tabular-nums;
 }
 .stat .sl { font-size: 12px; font-weight: 600; color: var(--ink-3); white-space: nowrap; }
-.stat:first-child .sl { color: color-mix(in srgb, var(--accent-ink) 72%, transparent); }
+.stat:first-child .sl { color: var(--accent-ink); opacity: .85; }
 .stat.wide { gap: 8px; }
 .stat.wide .actstrip { width: 100%; height: 34px; }
 
@@ -1113,7 +1116,7 @@ li.editing .editrow input.edate { padding: 0 10px; min-width: 0; }
 .wchip .wd { font-size: 10.5px; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
 .wchip .wn { font-family: var(--display); font-size: 21px; font-weight: 800; line-height: 1.05; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
 .wday.today .wchip { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); box-shadow: 0 8px 18px -8px var(--accent-ring); }
-.wday.today .wchip .wd { color: color-mix(in srgb, var(--accent-ink) 70%, transparent); }
+.wday.today .wchip .wd { color: var(--accent-ink); }
 .wday-main {
   flex: 1;
   min-width: 0;
@@ -1191,8 +1194,13 @@ li.editing .editrow input.edate { padding: 0 10px; min-width: 0; }
    Job view
    ========================================================================== */
 .jobview .stats { grid-template-columns: repeat(3, minmax(0, 1fr)); margin-bottom: 8px; }
-.jobview .stat:first-child { background: var(--jobc, var(--accent)); border-color: var(--jobc, var(--accent)); color: #fff; }
-.jobview .stat:first-child .sl { color: rgba(255, 255, 255, 0.82); }
+.jobview .stat:first-child {
+  background: color-mix(in srgb, var(--jobc, var(--accent)) 16%, var(--surface));
+  border-color: var(--jobc, var(--accent));
+  color: var(--ink);
+  box-shadow: inset 4px 0 0 var(--jobc, var(--accent));
+}
+.jobview .stat:first-child .sl { color: var(--ink-2); opacity: 1; }
 body[data-view="job"] .datenav .bigdate::before {
   content: "";
   display: inline-block;
@@ -1270,7 +1278,7 @@ body[data-view="job"] .datenav .bigdate::before {
 .mcell .mjobs .ic { display: none; }
 .mcell .mjobs::before { content: ""; flex-shrink: 0; width: 7px; height: 7px; border-radius: 50%; background: var(--job, var(--accent)); }
 .mcell .mjobs .jn { overflow: hidden; text-overflow: ellipsis; }
-.mcell .mjobs .jm { color: var(--ink-3); flex-shrink: 0; }
+.mcell .mjobs .jm { color: var(--ink-2); flex-shrink: 0; }
 .mcell .snip { font-size: 11.5px; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 /* how the day split between jobs, as a bar along the bottom */
 .mcell .mbar { position: absolute; left: 9px; right: 9px; bottom: 6px; display: flex; gap: 2px; height: 4px; }
@@ -1372,7 +1380,7 @@ body[data-view="job"] .datenav .bigdate::before {
 .modal-foot button:hover { filter: brightness(1.05); }
 .modal-foot button.ghostbtn { background: var(--sunk); color: var(--ink); }
 .modal-foot button.ghostbtn:hover { background: var(--line); filter: none; }
-.modal-foot button.dangerbtn { background: var(--danger); color: #fff; }
+.modal-foot button.dangerbtn { background: var(--danger); color: var(--danger-ink); }
 .modal-foot button:disabled { opacity: .4; pointer-events: none; }
 .modal-foot .appver { margin-right: auto; color: var(--ink-3); font-size: 12px; font-variant-numeric: tabular-nums; }
 #clearOverlay .modal-foot button { white-space: nowrap; }
@@ -1521,7 +1529,9 @@ body[data-view="job"] .datenav .bigdate::before {
   transition: opacity .2s ease, transform .3s var(--ease);
 }
 #toast:empty { padding: 0; }
-#toast.show { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0) scale(1); }
+/* the message never blocks what's under it — only its Undo button takes clicks */
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+#toast.show .undo { pointer-events: auto; }
 #toast .undo {
   height: 30px;
   padding: 0 14px;

@@ -7,31 +7,103 @@
   var REC_KEY = "track.recurring.v1";
   var VIEW_KEY = "track.view.v1";
   var JOB_KEY = "track.jobs.v1";
-  var data = load();          // { "YYYY-MM-DD": [{id, text, job?}, ...] } — job is a job id
-  var wishlist = loadList(WISH_KEY);  // [{id, text}, ...]
-  var recurring = loadList(REC_KEY);  // [{id, text}, ...]
-  var jobs = loadList(JOB_KEY);       // [{id, text}, ...] — text is the job's name
+  var THEME_KEY = "track.theme.v1";
+  var HELP_KEY = "track.helpseen.v1";
+
+  // ---------- storage ----------
+  // localStorage can be full, or blocked outright (some private windows,
+  // site data disabled), and then *any* access throws. Every read and write
+  // goes through these guards so Docket always starts; when storage is
+  // unavailable it runs for the session and says plainly that nothing is
+  // being saved.
+  var storageBlocked = false;
+  function readStore(key) {
+    try { return localStorage.getItem(key); }
+    catch (e) { storageBlocked = true; return null; }
+  }
+  // Preferences (view, theme, guide seen) are conveniences: if they can't be
+  // stored the app simply forgets them, so failures are ignored on purpose.
+  function setPref(key, value) {
+    try {
+      if (value === null) localStorage.removeItem(key); else localStorage.setItem(key, value);
+    } catch (e) { /* a preference that can't be saved is just forgotten */ }
+  }
+
+  // ---------- loading, with repair ----------
+  // Saved data is validated item by item, so one damaged or hand-edited
+  // record is fixed or dropped instead of breaking the whole log. If anything
+  // had to change, the original text is kept under "<key>.before-repair"
+  // before the cleaned data is saved over it.
+  var repairs = {};          // key -> original raw text, for anything repaired
+  var seenIds = {};          // ids must be unique within a store, or edits hit the wrong item
+  function uniqueId(id) {
+    if (typeof id !== "string" || id === "" || seenIds[id]) id = newId();
+    seenIds[id] = true;
+    return id;
+  }
+  function readJSON(key, fallback) {
+    var raw = readStore(key);
+    if (!raw) return { value: fallback, raw: null };
+    try { return { value: JSON.parse(raw), raw: raw }; }
+    catch (e) { repairs[key] = raw; return { value: fallback, raw: raw }; }
+  }
+  // An entry, wishlist or recurring item: {id, text, job?}. A bare string
+  // (from old or hand-made files) becomes the text.
+  function cleanItem(it) {
+    if (typeof it === "string") it = { text: it };
+    if (!it || typeof it !== "object") return null;
+    var text = typeof it.text === "string" ? it.text : typeof it.text === "number" ? String(it.text) : "";
+    if (text.trim() === "") return null;
+    var out = { id: uniqueId(it.id), text: text };
+    if (typeof it.job === "string" && it.job !== "") out.job = it.job;
+    return out;
+  }
+  function cleanJob(j) {
+    if (!j || typeof j !== "object" || typeof j.text !== "string" || j.text.trim() === "") return null;
+    var out = { id: uniqueId(j.id), text: j.text.trim() };
+    if (typeof j.color === "number" && j.color % 1 === 0) out.color = j.color; // range-checked once colours load
+    return out;
+  }
+  function load() {
+    seenIds = {};
+    var got = readJSON(STORE_KEY, {});
+    var parsed = got.value, out = {};
+    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+      Object.keys(parsed).forEach(function (d) {
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(d) || !Array.isArray(parsed[d])) return;
+        var list = parsed[d].map(cleanItem).filter(Boolean);
+        if (list.length) out[d] = list;
+      });
+    }
+    if (got.raw && JSON.stringify(out) !== got.raw && JSON.stringify(out) !== JSON.stringify(parsed)) repairs[STORE_KEY] = got.raw;
+    return out;
+  }
+  function loadList(key, clean) {
+    seenIds = {};
+    var got = readJSON(key, []);
+    var out = Array.isArray(got.value) ? got.value.map(clean || cleanItem).filter(Boolean) : [];
+    if (got.raw && JSON.stringify(out) !== JSON.stringify(got.value)) repairs[key] = got.raw;
+    return out;
+  }
+
+  var data = load();                          // { "YYYY-MM-DD": [{id, text, job?}, …] } — job is a job id
+  var wishlist = loadList(WISH_KEY);          // [{id, text, job?}, …]
+  var recurring = loadList(REC_KEY);          // [{id, text, job?}, …]
+  var jobs = loadList(JOB_KEY, cleanJob);     // [{id, text, color}, …] — text is the job's name
   var currentDate = todayISO();
   var currentJob = null;      // job id shown by the Job view
   var editingId = null;
   var view = (function () {
-    var v = localStorage.getItem(VIEW_KEY);
+    var v = readStore(VIEW_KEY);
     return (v === "week" || v === "month") ? v : "day";
   })();
 
-  // ---------- storage ----------
-  function load() {
-    try {
-      var raw = localStorage.getItem(STORE_KEY);
-      var parsed = raw ? JSON.parse(raw) : {};
-      return (parsed && typeof parsed === "object" && !Array.isArray(parsed)) ? parsed : {};
-    } catch (e) { return {}; }
-  }
-  // Every write goes through here: localStorage can be full, or blocked
-  // outright (private windows, file:// with site data disabled). Failing
-  // silently would leave the screen showing work that was never stored.
+  // Every data write goes through here. dataVersion counts writes, so an
+  // Undo can tell when the log has changed since the action it would undo.
   var storageBroken = false;
+  var dataVersion = 0;
   function writeStore(key, value) {
+    dataVersion++;
     try {
       localStorage.setItem(key, value);
       if (storageBroken) {
@@ -58,15 +130,6 @@
   }
   function newId() {
     return Date.now() + "-" + Math.random().toString(36).slice(2, 7);
-  }
-  function loadList(key) {
-    try {
-      var raw = localStorage.getItem(key);
-      var parsed = raw ? JSON.parse(raw) : [];
-      return Array.isArray(parsed) ? parsed.filter(function (it) {
-        return it && typeof it.text === "string" && it.text !== "";
-      }) : [];
-    } catch (e) { return []; }
   }
   function saveWishlist() {
     writeStore(WISH_KEY, JSON.stringify(wishlist));
@@ -242,11 +305,11 @@
   // Day-first is assumed for d/m/y unless the first number can only be a month.
   function parseDateFlexible(s) {
     s = String(s || "").trim();
-    var m = s.match(/^(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})$/);
+    var m = s.match(/^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})$/);
     var y, mo, d;
     if (m) { y = +m[1]; mo = +m[2]; d = +m[3]; }
     else {
-      m = s.match(/^(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{4})$/);
+      m = s.match(/^(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})$/);
       if (!m) return null;
       d = +m[1]; mo = +m[2]; y = +m[3];
       if (mo > 12 && d <= 12) { var t = d; d = mo; mo = t; } // clearly month-first
@@ -339,7 +402,7 @@
   function setView(v) {
     view = v;
     weekAdding = null;
-    if (v !== "job") { try { localStorage.setItem(VIEW_KEY, v); } catch (e) {} }
+    if (v !== "job") setPref(VIEW_KEY, v);
     editingId = null;
     render();
   }
@@ -392,6 +455,8 @@
       $("copyDayLabel").textContent = "Copy Day to Clipboard";
     }
 
+    // the accessible name leads with the visible heading, then what clicking does
+    $("navDate").setAttribute("aria-label", $("navDate").textContent + (inJob ? "" : " — choose a date"));
     $("logPanel").style.display = view === "day" ? "" : "none";
     $("weekView").style.display = view === "week" ? "" : "none";
     $("monthView").style.display = view === "month" ? "" : "none";
@@ -567,8 +632,9 @@
     var input = document.createElement("input");
     input.type = "text";
     input.autocomplete = "off";
-    var job = jobByName($("newJob").value);
-    input.placeholder = "Add to " + LONGDOW[dd.getDay()] + (job ? " · " + job.text : "") + "…";
+    var jobText = cleanJobName($("newJob").value);
+    var known = jobByName(jobText);
+    input.placeholder = "Add to " + LONGDOW[dd.getDay()] + (jobText ? " · " + (known ? known.text : jobText) : "") + "…";
     input.setAttribute("aria-label", "New entry for " + prettyDate(d));
     var go = document.createElement("button");
     go.type = "button";
@@ -1390,7 +1456,6 @@
         ? st.n + " entr" + (st.n === 1 ? "y" : "ies") + " over " + st.days.length + " day" + (st.days.length === 1 ? "" : "s")
         : "Nothing logged yet") +
         (open ? " · " + open + " on the wishlist/recurring" : "") + " — click to see it all";
-      row.setAttribute("aria-label", "Open job " + j.text + (st ? ", " + st.n + " entries" : ""));
       row.addEventListener("click", function () { openJob(j.id); });
 
       var ren = document.createElement("button");
@@ -2014,6 +2079,12 @@
   var UNDO_WINDOW = 60000;
   function runUndo() {
     if (!lastUndo || Date.now() > lastUndo.until) { lastUndo = null; return false; }
+    if (lastUndo.version !== dataVersion) {
+      // something was saved since — undoing now would throw that work away
+      lastUndo = null;
+      toast("Nothing to undo — your log has changed since then");
+      return true;
+    }
     var fn = lastUndo.fn;
     lastUndo = null;
     clearTimeout(toastTimer);
@@ -2028,7 +2099,7 @@
     t.textContent = "";
     t.appendChild(document.createTextNode(msg));
     if (undo) {
-      lastUndo = { fn: undo, until: Date.now() + UNDO_WINDOW };
+      lastUndo = { fn: undo, until: Date.now() + UNDO_WINDOW, version: dataVersion };
       var b = document.createElement("button");
       b.className = "undo";
       b.textContent = "Undo";
@@ -2303,7 +2374,8 @@
   });
   $("navDate").addEventListener("click", function () {
     var input = $("datePick");
-    if (input.showPicker) { try { input.showPicker(); return; } catch (e) {} }
+    // showPicker throws if the browser won't open it here; fall back to a click
+    if (input.showPicker) { try { input.showPicker(); return; } catch (e) { /* fall through */ } }
     input.click();
   });
   function shiftForView(dir) {
@@ -2596,8 +2668,15 @@
       li.appendChild(where);
       li.appendChild(what);
       if (h.kind !== "job") {
+        // a plain tag here: the whole row is the control, so no button inside it
         var pill = jobPill({ job: h.job });
-        if (pill) { pill.tabIndex = -1; li.appendChild(pill); }
+        if (pill) {
+          var tag = document.createElement("span");
+          tag.className = pill.className;
+          tag.style.cssText = pill.style.cssText;
+          while (pill.firstChild) tag.appendChild(pill.firstChild);
+          li.appendChild(tag);
+        }
       }
       li.addEventListener("mousemove", function () { if (searchActive !== i) setSearchActive(i); });
       li.addEventListener("click", function () { openHit(h); });
@@ -2610,7 +2689,10 @@
     var items = $("searchResults").children;
     if (!items.length) { $("searchInput").removeAttribute("aria-activedescendant"); return; }
     searchActive = Math.max(0, Math.min(items.length - 1, i));
-    for (var k = 0; k < items.length; k++) items[k].classList.toggle("active", k === searchActive);
+    for (var k = 0; k < items.length; k++) {
+      items[k].classList.toggle("active", k === searchActive);
+      items[k].setAttribute("aria-selected", k === searchActive ? "true" : "false");
+    }
     $("searchInput").setAttribute("aria-activedescendant", "sr-" + searchActive);
     items[searchActive].scrollIntoView({ block: "nearest" });
   }
@@ -2624,17 +2706,30 @@
     el.classList.add("flash");
   }
 
+  // Jumping to a result also moves keyboard focus there, so the next key
+  // press acts on what you found (and never on the now-hidden search box).
   function openHit(h) {
     closeSearch(true);
-    if (h.kind === "job") { openJob(h.id); return; }
+    if (h.kind === "job") {
+      openJob(h.id);
+      $("navDate").focus({ preventScroll: true });
+      return;
+    }
     if (h.kind === "entry") {
       currentDate = h.day;
       editingId = null;
       setView("day");
-      flash($("itemList").querySelector('li[data-id="' + h.id + '"]'));
+      var row = $("itemList").querySelector('li[data-id="' + h.id + '"]');
+      flash(row);
+      var handle = row && row.querySelector(".num");
+      if (handle && handle.offsetParent !== null) handle.focus({ preventScroll: true });
+      else if (row) { var b = row.querySelector(".mover button:not(:disabled), .icon.edit"); if (b) b.focus({ preventScroll: true }); }
       return;
     }
-    flash($(h.kind === "w" ? "wishList" : "recList").querySelector('li[data-id="' + h.id + '"]'));
+    var li = $(h.kind === "w" ? "wishList" : "recList").querySelector('li[data-id="' + h.id + '"]');
+    flash(li);
+    var edit = li && li.querySelector(".wbtn.edit");
+    if (edit) edit.focus({ preventScroll: true });
   }
 
   function openSearch() {
@@ -2646,6 +2741,7 @@
     $("searchInput").focus();
   }
   function closeSearch(jumping) {
+    $("searchInput").blur(); // focus must never linger on the hidden box
     $("searchOverlay").classList.remove("open");
     var back = searchOpener;
     searchOpener = null;
@@ -2665,7 +2761,6 @@
   });
 
   // ---------- help ----------
-  var HELP_KEY = "track.helpseen.v1";
   var helpOpener = null;
   function openHelp() {
     helpOpener = document.activeElement;
@@ -2674,7 +2769,7 @@
   }
   function closeHelp() {
     $("helpOverlay").classList.remove("open");
-    try { localStorage.setItem(HELP_KEY, "1"); } catch (e) {}
+    setPref(HELP_KEY, "1");
     // Send focus back where it came from; falling back to the entry box,
     // which only exists in Day view.
     var back = helpOpener && document.contains(helpOpener) && helpOpener.offsetParent !== null
@@ -2785,7 +2880,8 @@
   document.addEventListener("focusin", function (e) {
     var el = e.target;
     if (!el || !el.closest) return;
-    try { if (!el.matches(":focus-visible")) return; } catch (err) {}
+    // older browsers don't know :focus-visible — show the hint anyway
+    try { if (!el.matches(":focus-visible")) return; } catch (err) { /* unsupported selector */ }
     showTip(el.closest("[data-tip]"));
   });
   document.addEventListener("focusout", hideTip);
@@ -2797,7 +2893,6 @@
   // ---------- theme ----------
   // Auto follows the system; Light and Dark pin one. The <head> script
   // applies a pinned choice before first paint; this keeps it in step.
-  var THEME_KEY = "track.theme.v1";
   var THEME_ICONS = {
     auto: '<circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18Z" fill="currentColor"/>',
     light: '<circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
@@ -2806,8 +2901,7 @@
   var THEME_NEXT = { auto: "light", light: "dark", dark: "auto" };
   var THEME_LABEL = { auto: "Theme: matches your system", light: "Theme: light", dark: "Theme: dark" };
   function currentTheme() {
-    var t = null;
-    try { t = localStorage.getItem(THEME_KEY); } catch (e) {}
+    var t = readStore(THEME_KEY);
     return t === "light" || t === "dark" ? t : "auto";
   }
   function applyTheme(t) {
@@ -2820,9 +2914,7 @@
   }
   $("themeBtn").addEventListener("click", function () {
     var next = THEME_NEXT[currentTheme()];
-    try {
-      if (next === "auto") localStorage.removeItem(THEME_KEY); else localStorage.setItem(THEME_KEY, next);
-    } catch (e) {}
+    setPref(THEME_KEY, next === "auto" ? null : next);
     applyTheme(next);
     hideTip();
     showTip(this); // keep the hint in step with the new state
@@ -2872,8 +2964,42 @@
     toast("Docket installed — open it from your Start menu, dock or desktop");
   });
 
+  // ---------- other tabs ----------
+  // With Docket open in two tabs, each would otherwise save its own stale
+  // copy over the other's work. The browser tells every other tab when one
+  // saves, so reload from storage and redraw.
+  var DATA_KEYS = [STORE_KEY, WISH_KEY, REC_KEY, JOB_KEY];
+  window.addEventListener("storage", function (e) {
+    if (e.key === THEME_KEY) { applyTheme(currentTheme()); return; }
+    if (e.key !== null && DATA_KEYS.indexOf(e.key) === -1) return;
+    data = load();
+    wishlist = loadList(WISH_KEY);
+    recurring = loadList(REC_KEY);
+    jobs = loadList(JOB_KEY, cleanJob);
+    lastUndo = null; // undo closures point at the old copies
+    if (editingId && !findEntry(editingId)) editingId = null;
+    if (queueEdit && !queueList(queueEdit.kind).some(function (it) { return it.id === queueEdit.id; })) queueEdit = null;
+    render();
+  });
+
   render();
-  if (!localStorage.getItem(HELP_KEY)) {
+
+  if (storageBlocked) {
+    failSaved();
+    toast("This browser is blocking storage — Docket works, but nothing will be saved. Export a backup before closing.", null, 9000);
+  } else {
+    var repaired = Object.keys(repairs);
+    if (repaired.length) {
+      repaired.forEach(function (key) { setPref(key + ".before-repair", repairs[key]); });
+      save();
+      saveJobs();
+      saveWishlist();
+      saveRecurring();
+      toast("Some saved items were unreadable and were repaired — the original is kept as a backup", null, 9000);
+    }
+  }
+
+  if (!storageBlocked && !readStore(HELP_KEY)) {
     openHelp(); // first run: show the guide
   } else {
     $("newItem").focus();

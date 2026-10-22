@@ -19,7 +19,8 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
-      - run: npm run check
+      - name: Lint and syntax check
+        run: npm run check
       - run: npx playwright install --with-deps chromium
       - run: npm test
         env:

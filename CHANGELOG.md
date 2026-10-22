@@ -2,6 +2,41 @@
 
 All notable changes to Docket. Versions follow [Semantic Versioning](https://semver.org/).
 
+## [2.3.1] — 2026-10-21
+
+A stability, accessibility and documentation release: no new features.
+
+### Fixed
+- **Docket wouldn't start at all when the browser blocks storage** (some private
+  windows, site data turned off). It now starts, works for the session, shows
+  **Not saved**, and explains why.
+- **One damaged saved record stopped the whole log from showing.** Records are now
+  validated on load: readable ones are repaired (missing ids, duplicate ids, bare
+  strings) and the rest dropped. The original is kept under `<key>.before-repair`
+  first, including text that isn't valid JSON.
+- **Two open tabs overwrote each other's work.** Tabs now stay in step: a change in
+  one shows up in the other straight away, and the theme follows too.
+- **Ctrl+Z could throw away newer work.** Undoing a clear after logging new
+  entries restored the old snapshot over them. Undo now only runs while nothing has
+  been saved since, and otherwise says so.
+- After jumping to a search result, the next key press could be swallowed by the
+  hidden search box. Focus now moves to what you jumped to.
+- Messages at the bottom of the screen could cover buttons (such as the guide's
+  "Got it"). Only a message's Undo button takes clicks now.
+- The Week quick-add's hint didn't name a job that was typed but not yet created.
+
+### Accessibility
+- Every view and dialog now passes WCAG 2.1 AA in both themes (axe-core, checked on
+  every test run). 58 issues were fixed: muted text and labels raised to at least
+  4.5:1 contrast, the Job view's colour tile made readable for every job colour,
+  accessible names matched to visible text, search results announce which one is
+  selected, and the guide's text can be scrolled from the keyboard.
+
+### Changed
+- ESLint (recommended rules) runs in `npm run check` and CI.
+- New `docs/ARCHITECTURE.md`; README and data-format docs cover reliability and
+  repair.
+
 ## [2.3.0] — 2026-10-19
 
 Easier to use, everywhere.
@@ -104,6 +139,7 @@ The single-file daily log: Day, Week and Month views, Wishlist and Recurring lis
 copy to clipboard, CSV and JSON import/export, Undo, keyboard shortcuts and the
 black-and-silver ledger design.
 
+[2.3.1]: https://github.com/Stefs-Time/Track/releases/tag/v2.3.1
 [2.3.0]: https://github.com/Stefs-Time/Track/releases/tag/v2.3.0
 [2.2.0]: https://github.com/Stefs-Time/Track/releases/tag/v2.2.0
 [2.1.0]: https://github.com/Stefs-Time/Track/releases/tag/v2.1.0

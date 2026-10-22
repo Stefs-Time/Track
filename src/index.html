@@ -180,7 +180,7 @@
       <h2 id="helpTitle">How Docket works</h2>
       <button class="close" id="helpClose" data-tip="Close — Esc works too" aria-label="Close">✕</button>
     </div>
-    <div class="modal-body">
+    <div class="modal-body" tabindex="0" aria-label="Guide">
       <p>Docket is your daily record of work done. No account, nothing sent anywhere —
         everything saves automatically, as you type, on this device.
         Not sure what a button does? <b>Hover it</b> — or <kbd>Tab</kbd> to it — and it explains itself.</p>
@@ -271,6 +271,8 @@ Recurring,Timesheet,</pre>
         <li>Data is stored by <b>this browser, on this computer</b>. Stick to one browser (e.g. always Edge).</li>
         <li><b>Export JSON</b> saves everything — including jobs and the wishlist — to a file; <b>Import JSON</b> merges it back in. Use it to move to another browser or PC, or as a safety net.</li>
         <li>Clearing the browser's site data erases the log — keep an occasional export.</li>
+        <li>Open in two tabs? They stay in step — a change in one appears in the other.</li>
+        <li>If the browser blocks storage, Docket still works but shows <b>Not saved</b> — export before you close it.</li>
         <li><b>Clear data…</b> wipes the log, jobs, wishlist and/or recurring tasks — you tick which. Use it to start fresh,
           e.g. clear everything then <b>Import JSON</b> to reload a backup cleanly. It offers to export a backup first, and an <b>Undo</b> pops up afterwards.</li>
         <li>Both <b>JSON</b> and <b>CSV</b> hold everything — the log, jobs, wishlist and recurring tasks, each with its job. JSON is the exact backup; CSV is the one to open in Excel.</li>
