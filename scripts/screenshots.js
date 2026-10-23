@@ -69,7 +69,7 @@ async function shoot(browser, name, viewport, steps, colorScheme = "light") {
   }
   fs.mkdirSync(OUT, { recursive: true });
   const browser = await chromium.launch();
-  const desk = { width: 1360, height: 860 };
+  const desk = { width: 1600, height: 900 };
   await shoot(browser, "day.jpg", desk, async (p) => {
     await p.fill("#newJob", "Smith House");
     await p.locator("#newJob").blur();
