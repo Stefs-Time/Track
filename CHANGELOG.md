@@ -2,6 +2,15 @@
 
 All notable changes to Docket. Versions follow [Semantic Versioning](https://semver.org/).
 
+## [2.4.0] — 2026-10-23
+
+### Changed
+- **Three-column layout on PC.** The Wishlist has its own panel on the right, full
+  height. Recent days, Jobs, Recurring and Backup stay on the left, and the log in the
+  middle now fills the space between them instead of stopping at a fixed width.
+  On small laptops (under 1200px wide) the Wishlist folds in under the log. On phones
+  it comes straight after the log, before the other lists.
+
 ## [2.3.1] — 2026-10-21
 
 A stability, accessibility and documentation release: no new features.
@@ -139,6 +148,7 @@ The single-file daily log: Day, Week and Month views, Wishlist and Recurring lis
 copy to clipboard, CSV and JSON import/export, Undo, keyboard shortcuts and the
 black-and-silver ledger design.
 
+[2.4.0]: https://github.com/Stefs-Time/Track/releases/tag/v2.4.0
 [2.3.1]: https://github.com/Stefs-Time/Track/releases/tag/v2.3.1
 [2.3.0]: https://github.com/Stefs-Time/Track/releases/tag/v2.3.0
 [2.2.0]: https://github.com/Stefs-Time/Track/releases/tag/v2.2.0

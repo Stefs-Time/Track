@@ -42,7 +42,7 @@
 </header>
 <div class="app">
 
-  <aside class="side">
+  <aside class="side side-left" aria-label="Days, jobs and recurring tasks">
     <section class="grow">
       <h2>Recent days</h2>
       <ul class="daylist" id="dayList"></ul>
@@ -56,21 +56,6 @@
       </div>
       <ul class="joblist" id="jobList"></ul>
       <div class="wish-hint">Click a job to see everything on it — logged and still to do</div>
-    </section>
-
-    <section>
-      <h2>Wishlist <span class="qcount" id="wishCount"></span></h2>
-      <div class="wish-add">
-        <input type="text" id="newWish" placeholder="Needs doing…" autocomplete="off" aria-label="New wishlist item">
-        <button id="addWishBtn" data-tip="Add to the wishlist" aria-label="Add to the wishlist">+</button>
-        <div class="jobwrap" id="wishJobWrap">
-          <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span>
-          <input type="text" id="wishJob" list="jobOptions" placeholder="Job (optional)" autocomplete="off" maxlength="60" aria-label="Job for new wishlist items (optional)">
-          <button type="button" class="jobclear" id="wishJobClear" data-tip="Stop adding to this job" aria-label="Clear job"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></span></button>
-        </div>
-      </div>
-      <ul class="wishlist" id="wishList"></ul>
-      <div class="wish-hint">Drag onto the log or a day · ↳ sends to open day</div>
     </section>
 
     <section>
@@ -170,6 +155,23 @@
 
     <div class="keys" aria-hidden="true"><span><kbd>/</kbd> search</span><span><kbd>←</kbd><kbd>→</kbd> move</span><span><kbd>T</kbd> today</span><span><kbd>D</kbd><kbd>W</kbd><kbd>M</kbd> views</span><span><kbd>N</kbd> new entry</span><span><kbd>J</kbd> job</span><span><kbd>C</kbd> copy</span><span><kbd>Ctrl</kbd><kbd>Z</kbd> undo</span><span><kbd>Esc</kbd> leave a box</span><span><kbd>?</kbd> guide</span></div>
   </main>
+
+  <aside class="side side-right" aria-label="Wishlist">
+    <section class="wishpanel">
+      <h2>Wishlist <span class="qcount" id="wishCount"></span></h2>
+      <div class="wish-add">
+        <input type="text" id="newWish" placeholder="Needs doing…" autocomplete="off" aria-label="New wishlist item">
+        <button id="addWishBtn" data-tip="Add to the wishlist" aria-label="Add to the wishlist">+</button>
+        <div class="jobwrap" id="wishJobWrap">
+          <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span>
+          <input type="text" id="wishJob" list="jobOptions" placeholder="Job (optional)" autocomplete="off" maxlength="60" aria-label="Job for new wishlist items (optional)">
+          <button type="button" class="jobclear" id="wishJobClear" data-tip="Stop adding to this job" aria-label="Clear job"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></span></button>
+        </div>
+      </div>
+      <ul class="wishlist" id="wishList"></ul>
+      <div class="wish-hint">Drag onto the log or a day · ↳ sends to open day</div>
+    </section>
+  </aside>
 </div>
 
 <button class="fab" id="fab" data-tip="Add an entry — shortcut: N" aria-label="Add an entry">+</button>
@@ -239,7 +241,7 @@
 
       <h3><span class="tick">●</span> Wishlist</h3>
       <ul>
-        <li>Queue things that still need doing in the sidebar's <b>Wishlist</b>.</li>
+        <li>Queue things that still need doing in the <b>Wishlist</b> — the panel on the right (on smaller screens, under the log).</li>
         <li>When one gets done, <b>drag it onto the log or onto a day</b> — in Recent Days, or straight onto a Week or Month cell. It becomes an entry there.</li>
         <li>Or hover it and click <b>↳</b> to log it on the day you have open. Click its text or <b>✎</b> to edit it or set its job, <b>✕</b> to remove.</li>
       </ul>

@@ -16,6 +16,12 @@ the same code run three ways:
 | In a browser tab | the same server | the site's origin |
 | Double-clicked file | nothing — `file://dist/Docket.html` | `file://` |
 
+The page is a three-column grid on PC: `.side-left` (Recent days, Jobs,
+Recurring, Backup), `.main` (the views, filling the space) and `.side-right`
+(the Wishlist). Under 1200px wide the Wishlist moves under `.main`, and under
+860px everything stacks in one column: log, Wishlist, then the other lists.
+The breakpoints live at the end of `styles.css`.
+
 The source is split for editing and joined at build time:
 
 ```
@@ -152,6 +158,7 @@ real server in Chromium:
 | `entries`, `reorder`, `ease` | moving, editing anywhere, reordering, search, undo, quick-add |
 | `clear-data` | Clear data, Undo, and clear → re-import round trips |
 | `design` | job colours, the theme switch |
+| `layout` | three columns on PC, the small-laptop and phone fallbacks |
 | `robustness` | blocked storage, damaged data, two tabs, stale undo |
 | `a11y` | axe-core, WCAG 2.1 A/AA, every view and dialog, both themes |
 | `app` | server headers and CSP, installability, offline use, the standalone file |

@@ -290,16 +290,19 @@ input::placeholder { color: var(--ink-3); }
 /* ==========================================================================
    Layout: lists on the left, the work on the right
    ========================================================================== */
+/* PC: lists left, the work in the middle (filling the space), the
+   Wishlist right. Narrower screens fold the Wishlist under the work. */
 .app {
   display: grid;
-  grid-template-columns: 304px minmax(0, 1fr);
+  grid-template-columns: 300px minmax(0, 1fr) 320px;
   min-height: calc(100vh - 64px);
 }
 .main {
+  grid-column: 2;
+  grid-row: 1;
   min-width: 0;
   width: 100%;
-  max-width: 940px;
-  padding: 34px 48px 110px;
+  padding: 34px clamp(32px, 3vw, 64px) 110px;
 }
 
 /* ---------- side panel ---------- */
@@ -319,6 +322,10 @@ input::placeholder { color: var(--ink-3); }
   scrollbar-width: thin;
   scrollbar-color: var(--line-2) transparent;
 }
+.side.side-right { grid-column: 3; border-right: none; border-left: 1px solid var(--line); }
+/* the Wishlist has the whole right panel, so its list takes the full height */
+.side-right .wishpanel { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+.side-right ul.wishlist { flex: 0 1 auto; min-height: 0; max-height: none; } /* as tall as its items, scrolling once it fills the panel */
 .side h2 {
   display: flex;
   align-items: center;
@@ -1574,9 +1581,24 @@ body[data-view="job"] .datenav .bigdate::before {
 /* ==========================================================================
    Narrower screens
    ========================================================================== */
-@media (max-width: 1100px) {
+@media (min-width: 1200px) {
+  .fab { right: calc(320px + 28px); } /* clear of the Wishlist panel */
+}
+@media (max-width: 1199px) {
   .app { grid-template-columns: 272px minmax(0, 1fr); }
-  .main { padding: 28px 30px 100px; }
+  .side.side-left { grid-row: 1 / span 2; }
+  .main { padding: 28px 30px 48px; }
+  .side.side-right {
+    grid-column: 2;
+    grid-row: 2;
+    position: static;
+    height: auto;
+    overflow: visible;
+    border-left: none;
+    border-top: 1px solid var(--line);
+    padding: 24px 30px 110px;
+  }
+  .side-right ul.wishlist { max-height: 360px; }
   .datenav .bigdate { font-size: 30px; }
 }
 @media (max-width: 860px) {
@@ -1594,7 +1616,9 @@ body[data-view="job"] .datenav .bigdate::before {
   .overlay.search { padding: 12px; }
   .app { display: flex; flex-direction: column; }
   .main { order: 1; max-width: none; padding: 22px 16px 40px; }
-  .side { order: 2; position: static; height: auto; overflow: visible; border-right: none; border-top: 1px solid var(--line); padding: 24px 16px 100px; }
+  .side { position: static; height: auto; overflow: visible; border-right: none; border-top: 1px solid var(--line); padding: 24px 16px 100px; }
+  .side.side-right { order: 2; padding: 24px 16px; }
+  .side.side-left { order: 3; }
   .daylist { max-height: 300px; }
   .datenav .bigdate { font-size: 27px; }
   .stats { grid-template-columns: repeat(3, minmax(0, 1fr)); }

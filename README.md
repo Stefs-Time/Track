@@ -13,6 +13,7 @@ It comes two ways, from the same code:
 
 - **Daily log.** Type what you did and press Enter. Day, Week and Month views, stat tiles and a 14-day activity chart.
 - **Jobs.** Set a job once and log several entries against it. Each entry shows its job, and the **Job view** gathers everything on a job across every day, with totals. **Copy Job** gives you an invoice-ready list.
+- **Uses the whole screen.** On a PC, your lists sit on the left, the log fills the middle, and the Wishlist has its own panel on the right. Smaller screens fold neatly into fewer columns.
 - **Wishlist and Recurring.** Queue things to do, or keep often-repeated tasks. Both can carry a job, and logging one (↳ or drag) carries the job onto the entry.
 - **Search everything.** `/` or Ctrl+K finds any entry, job, wishlist or recurring item — by words, job or date — and jumps straight to it.
 - **Reorder anywhere.** Drag entries up or down in the Day, Week or Job view, or use ↑ ↓ on the keyboard; touch screens get ▲ ▼ buttons. Copies and exports follow your order.
