@@ -13,6 +13,8 @@
  *   dist/sw.js                 service worker, stamped with a build id so a
  *                              new release replaces the old offline cache
  *   dist/icons/*               app icons
+ *   dist/*.br, dist/*.gz       precompressed copies of the text files, which
+ *                              server.js sends to browsers that accept them
  *
  * Usage: node scripts/build.js [--watch]
  */
@@ -21,6 +23,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
+const zlib = require("node:zlib");
 
 const ROOT = path.resolve(__dirname, "..");
 const SRC = path.join(ROOT, "src");
@@ -49,6 +52,26 @@ function copyDir(from, to) {
   }
 }
 
+/** Files worth compressing: text, served on every launch. */
+const COMPRESSIBLE = ["index.html", "Docket.html", "sw.js", "manifest.webmanifest", "icons/icon.svg"];
+
+/**
+ * Write a .br and a .gz beside each compressible file, once, at build time,
+ * so the server never compresses on the fly. Returns the page's .br size.
+ */
+function precompress() {
+  for (const name of COMPRESSIBLE) {
+    const file = path.join(DIST, name);
+    if (!fs.existsSync(file)) continue;
+    const body = fs.readFileSync(file);
+    fs.writeFileSync(file + ".br", zlib.brotliCompressSync(body, {
+      params: { [zlib.constants.BROTLI_PARAM_QUALITY]: 11, [zlib.constants.BROTLI_PARAM_SIZE_HINT]: body.length }
+    }));
+    fs.writeFileSync(file + ".gz", zlib.gzipSync(body, { level: 9 }));
+  }
+  return fs.statSync(path.join(DIST, "index.html.br")).size;
+}
+
 function build() {
   const started = Date.now();
   const css = read("styles.css");
@@ -74,8 +97,9 @@ function build() {
     fs.writeFileSync(path.join(DIST, "sw.js"), read("sw.js").split("__BUILD_ID__").join(buildId));
   }
 
-  const kb = (Buffer.byteLength(html) / 1024).toFixed(0);
-  console.log(`build: dist/ written (Docket ${pkg.version}, ${kb} KB page) in ${Date.now() - started} ms`);
+  const brSize = precompress();
+  const kb = (n) => (n / 1024).toFixed(0);
+  console.log(`build: dist/ written (Docket ${pkg.version}, ${kb(Buffer.byteLength(html))} KB page, ${kb(brSize)} KB compressed) in ${Date.now() - started} ms`);
 }
 
 build();

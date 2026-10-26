@@ -2,6 +2,41 @@
 
 All notable changes to Docket. Versions follow [Semantic Versioning](https://semver.org/).
 
+## [2.5.0] — 2026-10-26
+
+A full audit: security, correctness, speed and keeping your data safe. Nothing
+that worked before has changed how it works.
+
+### Security
+- **CSV exports could carry spreadsheet formulas.** An entry or job starting with
+  `=`, `+`, `-` or `@` would run as a formula when the CSV was opened in Excel.
+  These are now written with a leading apostrophe, which import strips again, so
+  round trips are exact.
+- Updated `body-parser` (a dependency of the server) past a published advisory. CI
+  now fails if a high-severity advisory affects anything that ships.
+
+### Fixed
+- **Left open past midnight, "today" stayed yesterday**, and new entries landed on
+  the wrong day. Docket now follows the date if you were looking at today.
+- **Imports had no Undo.** Every CSV and JSON import can now be undone from its
+  message (or Ctrl+Z), like Clear data.
+
+### Improved
+- **Much faster with a big log.** With 10,000 entries, adding an entry dropped from
+  about 250 ms to 85 ms, opening a job from 500 ms to 140 ms, opening search from
+  390 ms to 50 ms, and loading from 400 ms to 210 ms.
+- **Smaller download.** The server sends the page precompressed (brotli or gzip):
+  about 44 KB instead of 212 KB.
+- **Backup reminder.** The Backup section says when you last exported, and gently
+  reminds you when it's been two weeks and the log has changed, or when there's a
+  sizeable log and no backup yet.
+- **Persistent storage.** Docket asks the browser not to clear its data to free up
+  space.
+- **A safety net for bugs.** An unexpected error now shows a calm message instead of
+  failing silently.
+- Text boxes take up to 1,000 characters, so a stray paste of a whole document
+  can't swamp the log.
+
 ## [2.4.0] — 2026-10-23
 
 ### Changed

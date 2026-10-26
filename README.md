@@ -23,8 +23,9 @@ It comes two ways, from the same code:
 - **Month calendar.** Shaded like a heatmap by how busy each day was, with each day's jobs named, busiest first, and a bar showing how the day split.
 - **Light and dark.** Follows your system, or pin either with the theme button.
 - **Copy to clipboard.** Copy the open day, week, month or job as a dated bulleted list, or just the lines.
-- **Undo** for deletes, moves, links and **Clear data** — the button, or Ctrl+Z for a minute afterwards.
+- **Undo** for deletes, moves, links, imports and **Clear data** — the button, or Ctrl+Z for a minute afterwards.
 - **Import and export.** JSON is the exact backup. CSV opens in Excel. Both carry everything, including jobs. See [docs/DATA-FORMAT.md](docs/DATA-FORMAT.md).
+- **Backup reminder.** Shows when you last exported, and nudges you when it's been a while and the log has changed.
 - **Keyboard shortcuts.** `/` search, `←` `→` move, `T` today, `D` `W` `M` views, `N` new entry, `J` job, `C` copy, `Ctrl+Z` undo, `Esc` leave a box, `?` guide.
 - **Built-in guide.** It opens on first use, and the **?** button brings it back. Every control explains itself on hover or keyboard focus.
 
@@ -36,7 +37,10 @@ It comes two ways, from the same code:
 
 - Docket saves to the browser's local storage as you type. There's no account and no cloud copy.
 - Data belongs to **one browser on one device**. The installed app and the standalone file each keep their own. To move between them, or to a new computer, use **Export JSON** in one and **Import JSON** in the other.
-- Clearing the browser's site data erases the log, so keep an occasional **Export JSON** as a backup.
+- Clearing the browser's site data erases the log, so keep an occasional **Export JSON** as a backup. The **Backup & data** section shows when you last exported and reminds you when it's been two weeks and the log has changed.
+- Docket asks the browser to keep its storage **persistent**, so it isn't cleared to free space.
+- **CSV exports are safe to open in Excel:** text that would run as a formula (starting `=`, `+`, `-` or `@`) is written with a leading apostrophe, which import removes again.
+- **Left open overnight?** Today moves on to the new date by itself.
 - **Clear data…** (under Backup & data) wipes chosen parts so you can start fresh or re-import a backup cleanly. It offers to export first, and Undo is there afterwards.
 - Data from earlier versions, including from when the app was called Track, loads unchanged.
 - **Two tabs open?** They stay in step: a change in one shows up in the other, so neither overwrites the other's work.
@@ -114,7 +118,7 @@ See `.env.example`. There are no secrets to configure.
 | `/download` | The standalone `Docket.html`, as a download |
 | `/healthz` | `{"status":"ok","version":"…"}` for health checks |
 
-The server sends a strict Content-Security-Policy that allows only the page's own script, by its hash. It also sends anti-framing, `nosniff` and referrer headers, and HSTS over HTTPS. The page and service worker are served `no-cache`, so a new deploy reaches users on their next launch.
+The build precompresses the page (brotli and gzip), so it downloads at about a fifth of its size. The server sends a strict Content-Security-Policy that allows only the page's own script, by its hash. It also sends anti-framing, `nosniff` and referrer headers, and HSTS over HTTPS. The page and service worker are served `no-cache`, so a new deploy reaches users on their next launch.
 
 ## Releasing
 

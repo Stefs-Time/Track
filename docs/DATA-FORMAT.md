@@ -80,6 +80,12 @@ Recurring,Timesheet,
 - **Quoting**: standard CSV — wrap fields containing commas, quotes or line
   breaks in double quotes, and double any quotes inside.
 - Exports start with a UTF-8 byte-order mark so Excel reads accents correctly.
+- **Formula guard**: a task or job that starts with `=`, `+`, `-`, `@`, tab or
+  carriage return is exported with a leading apostrophe (`'=SUM(A1)`), so a
+  spreadsheet shows it as text instead of running it as a formula. Import
+  removes that apostrophe again (only when the next character is one of
+  those), so export → import gives back the exact text.
+- Every import, CSV or JSON, can be undone from its message.
 - Duplicates follow the same rules as the JSON import above. Rows with an
   unreadable date or no task are skipped and counted in the import message.
 
@@ -97,6 +103,8 @@ rename to Docket keeps loading.
 | `track.view.v1` | Last view (`day`, `week`, `month`) |
 | `track.helpseen.v1` | Whether the first-run guide has been shown |
 | `track.theme.v1` | A pinned theme (`light` / `dark`); absent means follow the system |
+| `track.lastbackup.v1` | The last export: `{ "at": "YYYY-MM-DD", "entries": n }`, for the backup reminder |
+| `track.persist.v1` | Whether persistent storage was requested: `asked`, `granted` or `declined` |
 | `<key>.before-repair` | The original text of a store that had to be repaired on load (see below) |
 
 ## Validation and repair

@@ -52,11 +52,14 @@ The file is ordered so that each section only depends on the ones above it
 | entries anywhere | `findEntry`, `moveEntry`, `linkToJob`, drop targets |
 | wishlist & recurring | the two sidebar lists, their editor and sending items to a day |
 | actions | adding and removing entries, copy to clipboard, toasts and undo |
-| CSV / JSON backup | import and export |
+| backups, snapshots | the last-backup line, whole-state snapshots for undoing a clear or import |
+| CSV / JSON backup | import and export, the CSV formula guard |
 | wiring | event listeners for the static page controls |
 | clear data, search, help | the three dialogs |
 | keyboard shortcuts, hover hints | global key handling and the tooltip |
 | theme, installable app | light/dark, manifest and service-worker registration |
+| unexpected errors | the global error net: one calm message, at most every 10s |
+| a new day | follows the date past midnight while Docket is left open |
 | other tabs | keeps two open tabs in step via the `storage` event |
 
 ## State and the render cycle
@@ -69,6 +72,13 @@ There is no virtual DOM. **`render()` redraws everything** from that state:
 the header, the active view, and the side panel. The data is small (a log is
 thousands of short strings at most), so a full redraw is instant, and it
 removes a whole class of "the sidebar didn't update" bugs.
+
+A few things a redraw would otherwise recompute are cached, which keeps a
+10,000-entry log under 100 ms per change (`safety.spec.js` holds a budget):
+formatted date labels (`formatOnce`), icon SVGs (`icon()` clones a parsed
+template), and the search index (`searchCorpus`, rebuilt only when
+`dataVersion` moves on). If you add a cache, key it on `dataVersion` or on
+values that can't change, never on time.
 
 Every change follows the same four steps:
 
@@ -124,6 +134,26 @@ source didn't allow. Touch screens can't drag-and-drop, so every reorder
 also has ▲ ▼ buttons, and every move has a non-drag route (the editor's date
 field, ↳ buttons).
 
+## Keeping data safe
+
+- **Persistent storage:** after the first successful save, `askToKeepData`
+  asks the browser (`navigator.storage.persist`) not to evict Docket's
+  storage under pressure. It asks once and records the answer.
+- **Backup reminder:** each export records the date and entry count
+  (`noteBackup`). The Backup section shows "Last backup …", and turns into a
+  reminder after 14 days if the log has changed, or straight away with 20+
+  entries and no backup at all.
+- **Undoable imports and clears:** `snapshotState` copies all four stores
+  before the change; Undo hands it to `restoreState`.
+- **CSV formula guard:** `csvSafe` / `csvUnsafe` add and remove the leading
+  apostrophe described in DATA-FORMAT.md.
+- **Error net:** uncaught errors and rejections show one message (at most
+  every 10 seconds). Saved data is never touched by it.
+- **Midnight:** `followToday` runs on focus, on becoming visible and every
+  minute. If you were looking at today, you move to the new today.
+- **Length limits:** entry and list boxes take up to 1,000 characters,
+  job names 60.
+
 ## Two tabs, blocked storage, damaged data
 
 - **Two tabs:** when one tab saves, the browser fires `storage` in the
@@ -144,6 +174,11 @@ field, ↳ buttons).
   hash**, recomputed when the file changes, so no `unsafe-inline` script;
 - `no-cache` on the page, manifest and service worker, so updates land on
   the next launch; long caching for icons;
+- precompressed delivery: the build writes `.br` and `.gz` copies of the
+  page, service worker, manifest and SVG icon, and `servePrecompressed`
+  sends one when the browser accepts it (brotli first), with the same headers
+  via `applyHeaders` and `Vary: Accept-Encoding`. The page goes out at about
+  a fifth of its size, and nothing is compressed per request;
 - `/healthz` for the platform and `/download` for the standalone file;
 - JSON 404s and a graceful shutdown on `SIGTERM`.
 
@@ -160,8 +195,9 @@ real server in Chromium:
 | `design` | job colours, the theme switch |
 | `layout` | three columns on PC, the small-laptop and phone fallbacks |
 | `robustness` | blocked storage, damaged data, two tabs, stale undo |
+| `safety` | CSV formula guard, undoing imports, the backup reminder, the error net, midnight, a speed budget at 10,000 entries |
 | `a11y` | axe-core, WCAG 2.1 A/AA, every view and dialog, both themes |
-| `app` | server headers and CSP, installability, offline use, the standalone file |
+| `app` | server headers, CSP and compression, installability, offline use, the standalone file |
 
 The suites read as user-acceptance scripts: one realistic flow per test,
 with a named `check` at each step. They're soft assertions, so a failure

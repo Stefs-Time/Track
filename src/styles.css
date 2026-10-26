@@ -590,6 +590,9 @@ ul.wishlist li:hover .wbtn, ul.wishlist li:focus-within .wbtn { display: grid; }
 .wbtn.kill:hover { background: var(--danger-soft); color: var(--danger); }
 
 /* backup & data */
+.backupstat { margin: -4px 4px 10px; color: var(--ink-3); font-size: 12px; }
+.backupstat.due { padding: 8px 10px; margin: -2px 0 10px; border-radius: 10px; background: var(--accent-soft); color: var(--ink); font-weight: 600; }
+.backupstat.due::before { content: "●"; margin-right: 6px; color: var(--accent); }
 .tools-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
 .tools-grid button {
   display: flex;
