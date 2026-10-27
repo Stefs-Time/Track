@@ -76,6 +76,50 @@ app.use((req, res, next) => {
   next();
 });
 
+/**
+ * Caching and type headers for a file in dist/, shared by the precompressed
+ * route and the plain static one so both send exactly the same headers.
+ */
+function applyHeaders(res, file) {
+  const name = path.basename(file);
+  if (name.endsWith(".html")) {
+    res.set({ "Content-Security-Policy": pageCsp(), "Cache-Control": "no-cache" });
+  } else if (name === "sw.js" || name === "manifest.webmanifest") {
+    // the browser must always check these, or updates never land
+    res.set("Cache-Control", "no-cache");
+  } else {
+    res.set("Cache-Control", "public, max-age=604800");
+  }
+  if (name === "manifest.webmanifest") res.type("application/manifest+json");
+}
+
+/**
+ * The build writes .br and .gz copies of the text files (scripts/build.js).
+ * Send one of those when the browser accepts it: the page is several times
+ * smaller over the wire, and nothing is compressed per request.
+ */
+const ENCODINGS = [["br", ".br"], ["gzip", ".gz"]];
+function servePrecompressed(req, res, next) {
+  if (req.method !== "GET" && req.method !== "HEAD") return next();
+  const rel = req.path === "/" ? "index.html" : req.path.slice(1);
+  let file;
+  try {
+    file = path.join(DIST, decodeURIComponent(rel));
+  } catch {
+    return next();
+  }
+  if (!file.startsWith(DIST + path.sep)) return next(); // never leave dist/
+  if (!fs.existsSync(file + ".br")) return next(); // not a compressible file
+  res.vary("Accept-Encoding");
+  // our order, not the header's: browsers list gzip first but accept br too
+  const pick = ENCODINGS.find(([enc]) => req.acceptsEncodings(enc) === enc);
+  if (!pick || !fs.existsSync(file + pick[1])) return next();
+  applyHeaders(res, file);
+  if (!res.get("Content-Type")) res.type(path.extname(file));
+  res.set("Content-Encoding", pick[0]);
+  res.sendFile(file + pick[1], (err) => { if (err && !res.headersSent) next(err); });
+}
+
 app.get("/healthz", (req, res) => {
   res.set("Cache-Control", "no-store").json({ status: "ok", version });
 });
@@ -86,21 +130,8 @@ app.get("/download", (req, res) => {
   res.download(path.join(DIST, "Docket.html"), "Docket.html");
 });
 
-app.use(express.static(DIST, {
-  index: "index.html",
-  setHeaders(res, file) {
-    const name = path.basename(file);
-    if (name.endsWith(".html")) {
-      res.set({ "Content-Security-Policy": pageCsp(), "Cache-Control": "no-cache" });
-    } else if (name === "sw.js" || name === "manifest.webmanifest") {
-      // the browser must always check these, or updates never land
-      res.set("Cache-Control", "no-cache");
-    } else {
-      res.set("Cache-Control", "public, max-age=604800");
-    }
-    if (name === "manifest.webmanifest") res.type("application/manifest+json");
-  }
-}));
+app.use(servePrecompressed);
+app.use(express.static(DIST, { index: "index.html", setHeaders: applyHeaders }));
 
 app.use((req, res) => {
   res.status(404).json({ error: "Not found", path: req.path });

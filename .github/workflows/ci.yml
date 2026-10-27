@@ -19,6 +19,8 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
+      - name: No known high-severity vulnerabilities in what ships
+        run: npm audit --omit=dev --audit-level=high
       - name: Lint and syntax check
         run: npm run check
       - run: npx playwright install --with-deps chromium

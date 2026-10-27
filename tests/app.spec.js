@@ -26,6 +26,20 @@ test.describe("server", () => {
     check(/attachment; filename="?Docket.html"?/.test(dl.headers()["content-disposition"] || ""), "/download serves the single file as an attachment");
     check((await dl.text()).includes("<title>Docket"), "…and it is the app");
 
+    // precompressed at build time: brotli preferred, gzip as a fallback, plain otherwise
+    for (const [accept, enc] of [["gzip, deflate, br", "br"], ["gzip", "gzip"], ["identity", undefined]]) {
+      const r = await request.get("/", { headers: { "Accept-Encoding": accept } });
+      const rh = r.headers();
+      check(rh["content-encoding"] === enc, `Accept-Encoding "${accept}" gets ${enc || "uncompressed"}: ${rh["content-encoding"]}`);
+      check(/accept-encoding/i.test(rh.vary || ""), "…marked Vary: Accept-Encoding");
+      check(rh["content-type"].startsWith("text/html") && /sha256-/.test(rh["content-security-policy"] || ""), "…with the page's type and CSP");
+      check((await r.text()).includes("<title>Docket"), "…and it decodes to the app");
+    }
+    const sw = await request.get("/sw.js", { headers: { "Accept-Encoding": "br" } });
+    check(sw.headers()["content-encoding"] === "br" && sw.headers()["cache-control"] === "no-cache", "the service worker is compressed and still revalidated");
+    const escape = await request.get("/%2e%2e/package.json", { headers: { "Accept-Encoding": "br" } });
+    check(escape.status() === 404, "paths can't climb out of dist/");
+
     const missing = await request.get("/no-such-page");
     check(missing.status() === 404, "unknown paths 404");
     check((await missing.json()).error === "Not found", "…with a JSON body");

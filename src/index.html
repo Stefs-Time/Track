@@ -61,7 +61,7 @@
     <section>
       <h2>Recurring <span class="qcount" id="recCount"></span></h2>
       <div class="wish-add">
-        <input type="text" id="newRec" placeholder="Happens often…" autocomplete="off" aria-label="New recurring task">
+        <input type="text" id="newRec" placeholder="Happens often…" autocomplete="off" maxlength="1000" aria-label="New recurring task">
         <button id="addRecBtn" data-tip="Add a recurring task" aria-label="Add a recurring task">+</button>
         <div class="jobwrap" id="recJobWrap">
           <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span>
@@ -75,6 +75,7 @@
 
     <section class="tools">
       <h2>Backup &amp; data</h2>
+      <p class="backupstat" id="backupStat" role="status"></p>
       <div class="tools-grid">
         <button id="exportBtn" data-tip="Back up everything — log, jobs, wishlist and recurring — to a JSON file"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg></span>Export JSON</button>
         <button id="importBtn" data-tip="Merge a JSON backup back in — duplicates are skipped"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 8 5-5 5 5"/><path d="M12 3v12"/></svg></span>Import JSON</button>
@@ -124,7 +125,7 @@
           <button type="button" class="jobclear" id="jobClear" data-tip="Stop logging against this job" aria-label="Clear job"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></span></button>
         </div>
         <div class="inwrap">
-          <input type="text" id="newItem" placeholder="What did you do?" autocomplete="off" aria-label="What did you do?">
+          <input type="text" id="newItem" placeholder="What did you do?" autocomplete="off" maxlength="1000" aria-label="What did you do?">
           <kbd class="enterhint">Enter ↵</kbd>
         </div>
         <button id="addBtn" aria-label="Add entry"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>Add</button>
@@ -160,7 +161,7 @@
     <section class="wishpanel">
       <h2>Wishlist <span class="qcount" id="wishCount"></span></h2>
       <div class="wish-add">
-        <input type="text" id="newWish" placeholder="Needs doing…" autocomplete="off" aria-label="New wishlist item">
+        <input type="text" id="newWish" placeholder="Needs doing…" autocomplete="off" maxlength="1000" aria-label="New wishlist item">
         <button id="addWishBtn" data-tip="Add to the wishlist" aria-label="Add to the wishlist">+</button>
         <div class="jobwrap" id="wishJobWrap">
           <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span>
@@ -264,15 +265,15 @@ Recurring,Timesheet,</pre>
       <ul>
         <li>The header row is optional — but to import jobs, include it with <b>Job</b> as the third heading. Dates can be <b>2026-07-01</b> or <b>01/07/2026</b> style (day-first).</li>
         <li>Comma, semicolon or tab delimited — detected automatically.</li>
-        <li>Re-importing is safe: duplicates and unreadable rows are skipped and reported. The same task on two different jobs isn't a duplicate.</li>
-        <li><b>Export CSV</b> writes the same format, so you can export → edit in Excel → import back.</li>
+        <li>Re-importing is safe: duplicates and unreadable rows are skipped and reported. The same task on two different jobs isn't a duplicate. Changed your mind? Every import has an <b>Undo</b>.</li>
+        <li><b>Export CSV</b> writes the same format, so you can export → edit in Excel → import back. Text that Excel would read as a formula (starting with = + - or @) gets an apostrophe in front, and loses it again on import.</li>
       </ul>
 
       <h3><span class="tick">●</span> Backups &amp; where your data lives</h3>
       <ul>
         <li>Data is stored by <b>this browser, on this computer</b>. Stick to one browser (e.g. always Edge).</li>
         <li><b>Export JSON</b> saves everything — including jobs and the wishlist — to a file; <b>Import JSON</b> merges it back in. Use it to move to another browser or PC, or as a safety net.</li>
-        <li>Clearing the browser's site data erases the log — keep an occasional export.</li>
+        <li>Clearing the browser's site data erases the log — keep an occasional export. Under <b>Backup &amp; data</b> Docket shows when you last exported, and reminds you when it's been two weeks and the log has changed since.</li>
         <li>Open in two tabs? They stay in step — a change in one appears in the other.</li>
         <li>If the browser blocks storage, Docket still works but shows <b>Not saved</b> — export before you close it.</li>
         <li><b>Clear data…</b> wipes the log, jobs, wishlist and/or recurring tasks — you tick which. Use it to start fresh,

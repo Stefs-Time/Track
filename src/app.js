@@ -126,7 +126,19 @@
     Object.keys(data).forEach(function (d) {
       if (!data[d] || data[d].length === 0) delete data[d];
     });
-    writeStore(STORE_KEY, JSON.stringify(data));
+    if (writeStore(STORE_KEY, JSON.stringify(data))) askToKeepData();
+  }
+  // Browsers may clear a site's storage under pressure (Safari does after a
+  // week without visits). Asking for persistent storage tells them not to.
+  // Chrome and Edge decide quietly; Firefox may ask the user once. Asked only
+  // after something has been saved, and only once.
+  var PERSIST_KEY = "track.persist.v1";
+  function askToKeepData() {
+    if (!navigator.storage || !navigator.storage.persist || readStore(PERSIST_KEY)) return;
+    setPref(PERSIST_KEY, "asked");
+    navigator.storage.persist().then(function (granted) {
+      setPref(PERSIST_KEY, granted ? "granted" : "declined");
+    }, function () { /* not available here (e.g. file://) — nothing to do */ });
   }
   function newId() {
     return Date.now() + "-" + Math.random().toString(36).slice(2, 7);
@@ -145,6 +157,7 @@
   // A job groups entries across days (a client, site or project). Entries
   // point at a job by id, so renaming a job never touches the log itself.
   var JOB_MAX = 60;
+  var TEXT_MAX = 1000; // an entry or list item; stops a stray paste of a whole document
   function cleanJobName(name) {
     return String(name || "").replace(/\s+/g, " ").trim().slice(0, JOB_MAX);
   }
@@ -260,11 +273,18 @@
     var p = iso.split("-");
     return new Date(+p[0], +p[1] - 1, +p[2]);
   }
-  function prettyDate(iso) {
-    return dateObj(iso).toLocaleDateString(undefined, {
-      weekday: "long", day: "numeric", month: "long", year: "numeric"
-    });
+  // Formatting through the locale is slow when it happens thousands of times
+  // per redraw (a long Job view, the search index), so each format gets one
+  // reusable formatter and every label is remembered — a date's label never
+  // changes while the page is open.
+  var FMT_LONG = new Intl.DateTimeFormat(undefined, { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+  var FMT_MONTH = new Intl.DateTimeFormat(undefined, { month: "long", year: "numeric" });
+  var dateLabels = {};
+  function formatOnce(fmt, tag, iso) {
+    var key = tag + iso;
+    return dateLabels[key] || (dateLabels[key] = fmt.format(dateObj(iso)));
   }
+  function prettyDate(iso) { return formatOnce(FMT_LONG, "L", iso); }
   // "Today — Thursday 17 July 2026" when the date is near enough to name.
   function dayHeading(iso) {
     var rel = iso === todayISO() ? "Today"
@@ -291,9 +311,7 @@
     var maxDay = new Date(first.getFullYear(), first.getMonth() + 1, 0).getDate();
     return isoOf(new Date(first.getFullYear(), first.getMonth(), Math.min(d.getDate(), maxDay)));
   }
-  function monthLabel(iso) {
-    return dateObj(iso).toLocaleDateString(undefined, { month: "long", year: "numeric" });
-  }
+  function monthLabel(iso) { return formatOnce(FMT_MONTH, "M", iso); }
   function weekLabel(iso) {
     var ws = dateObj(weekStart(iso));
     var we = dateObj(shiftDay(weekStart(iso), 6));
@@ -331,11 +349,16 @@
     job: '<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>',
     grid: '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>'
   };
+  // Each icon is parsed once; every button gets a cheap copy of it.
+  var iconTemplates = {};
   function icon(name) {
-    var s = document.createElement("span");
-    s.className = "ic";
-    s.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ICONS[name] + '</svg>';
-    return s;
+    if (!iconTemplates[name]) {
+      var t = document.createElement("span");
+      t.className = "ic";
+      t.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ICONS[name] + '</svg>';
+      iconTemplates[name] = t;
+    }
+    return iconTemplates[name].cloneNode(true);
   }
 
   // The small job tag on an entry; clicking it opens everything on that job.
@@ -469,6 +492,7 @@
 
     renderSidebar();
     renderJobs();
+    renderBackupStatus();
     renderWishlist();
     renderRecurring();
     markScrollable();
@@ -632,6 +656,7 @@
     var input = document.createElement("input");
     input.type = "text";
     input.autocomplete = "off";
+    input.maxLength = TEXT_MAX;
     var jobText = cleanJobName($("newJob").value);
     var known = jobByName(jobText);
     input.placeholder = "Add to " + LONGDOW[dd.getDay()] + (jobText ? " · " + (known ? known.text : jobText) : "") + "…";
@@ -1167,6 +1192,7 @@
 
     var input = document.createElement("input");
     input.type = "text";
+    input.maxLength = TEXT_MAX;
     input.value = item.text;
     input.setAttribute("aria-label", "Entry text");
 
@@ -1811,6 +1837,7 @@
 
     var input = document.createElement("input");
     input.type = "text";
+    input.maxLength = TEXT_MAX;
     input.value = item.text;
     input.setAttribute("aria-label", "Edit " + QUEUE[kind].noun);
 
@@ -2123,6 +2150,50 @@
     URL.revokeObjectURL(a.href);
   }
 
+  // ---------- backups ----------
+  // Docket's data lives only in this browser, so the Backup section shows
+  // when the last export was and turns into a gentle reminder when the log
+  // has grown since and it's been a while (or there's never been one).
+  var BACKUP_KEY = "track.lastbackup.v1";
+  var BACKUP_DAYS = 14;
+  function noteBackup() {
+    setPref(BACKUP_KEY, JSON.stringify({ at: todayISO(), entries: entryTotals().n }));
+    renderBackupStatus();
+  }
+  function renderBackupStatus() {
+    var el = $("backupStat");
+    var last = null;
+    try { last = JSON.parse(readStore(BACKUP_KEY) || "null"); } catch (e) { last = null; }
+    var n = entryTotals().n;
+    var days = last && last.at ? Math.round((dateObj(todayISO()) - dateObj(last.at)) / 86400000) : null;
+    var due = last ? days >= BACKUP_DAYS && n !== last.entries : n >= 20;
+    el.textContent = !last ? (n ? "No backup yet" + (due ? " — export one to keep your log safe" : "") : "")
+      : "Last backup " + (days === 0 ? "today" : days === 1 ? "yesterday" : days + " days ago") +
+        (due ? " — time for a fresh one" : "");
+    el.classList.toggle("due", due);
+    el.hidden = el.textContent === "";
+  }
+
+  // ---------- whole-state snapshots ----------
+  // Big changes (Clear data, imports) are undone by putting back a copy of
+  // everything taken just before. The version check in runUndo makes sure
+  // that only happens while nothing newer has been saved.
+  function snapshotState() {
+    return JSON.stringify({ data: data, jobs: jobs, wishlist: wishlist, recurring: recurring });
+  }
+  function restoreState(snap) {
+    var s = JSON.parse(snap);
+    data = s.data;
+    jobs = s.jobs;
+    wishlist = s.wishlist;
+    recurring = s.recurring;
+    save();
+    saveJobs();
+    saveWishlist();
+    saveRecurring();
+    render();
+  }
+
   // ---------- CSV ----------
   // Handles quoted fields, "" escapes, CRLF, and auto-detects , ; or tab.
   function parseCSV(text) {
@@ -2157,6 +2228,15 @@
     });
   }
 
+  // CSV injection guard: spreadsheet apps run a cell that starts with = + - @
+  // (or a tab / carriage return) as a formula, so a shared export could carry
+  // one. Such cells are written with a leading apostrophe, which Excel and
+  // Sheets show as plain text; importing strips it again, so round trips are
+  // exact. (OWASP "CSV Injection" guidance.)
+  var FORMULA_START = /^[=+\-@\t\r]/;
+  function csvSafe(s) { return FORMULA_START.test(s) ? "'" + s : s; }
+  function csvUnsafe(s) { return s.charAt(0) === "'" && FORMULA_START.test(s.slice(1)) ? s.slice(1) : s; }
+
   function csvQuote(s) {
     return /[",;\t\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
   }
@@ -2171,7 +2251,7 @@
     var used = {};
     function row(first, it) {
       if (jobById(it.job)) used[it.job] = true;
-      lines.push(first + "," + csvQuote(it.text) + "," + csvQuote(jobName(it)));
+      lines.push(first + "," + csvQuote(csvSafe(it.text)) + "," + csvQuote(csvSafe(jobName(it))));
     }
     days.forEach(function (d) {
       data[d].forEach(function (it) { row(d, it); });
@@ -2182,10 +2262,11 @@
     // Jobs nothing points at still belong in the export: a row with only
     // the Job column recreates them on import.
     jobs.forEach(function (j) {
-      if (!used[j.id]) lines.push(",," + csvQuote(j.text));
+      if (!used[j.id]) lines.push(",," + csvQuote(csvSafe(j.text)));
     });
     // BOM so Excel opens it as UTF-8
     downloadFile("docket-export-" + todayISO() + ".csv", "﻿" + lines.join("\r\n"), "text/csv");
+    noteBackup();
     toast("CSV exported");
   }
 
@@ -2198,6 +2279,8 @@
     reader.onload = function () {
       var rows = parseCSV(String(reader.result));
       if (rows.length === 0) { toast("CSV is empty"); return; }
+      var before = snapshotState();
+      var undoImport = function () { restoreState(before); toast("Import undone"); };
       var LIST_ROW = /^(wishlist|recurring)$/i;
       var first = String(rows[0][0] || "").trim();
       var start = parseDateFlexible(first) || LIST_ROW.test(first) ? 0 : 1; // skip header row
@@ -2208,7 +2291,7 @@
       var jobsBefore = jobs.length;
       for (var i = start; i < rows.length; i++) {
         var day = parseDateFlexible(rows[i][0]);
-        var cells = rows[i].map(function (f) { return f.trim(); });
+        var cells = rows[i].map(function (f) { return csvUnsafe(f.trim()); });
         var jobText = jobCol ? cleanJobName(cells[2]) : "";
         if (jobCol) cells.splice(2, 1);
         var text = cells.slice(1)
@@ -2237,13 +2320,13 @@
         (listAdded.r ? " · " + listAdded.r + " recurring" : "") +
         (filled ? " · " + filled + " given their job" : "");
       if (added === 0 && (newJobs || listAdded.w || listAdded.r || filled)) {
-        toast("Imported" + jobNote.replace(/^ ·/, "") + (skipped ? " — " + skipped + " skipped" : ""));
+        toast("Imported" + jobNote.replace(/^ ·/, "") + (skipped ? " — " + skipped + " skipped" : ""), undoImport, 15000);
       } else if (added === 0) {
         toast("Nothing imported — " + skipped + " row" + (skipped === 1 ? "" : "s") + " skipped (duplicate or unreadable)" + jobNote);
       } else {
         toast("Imported " + added + " entr" + (added === 1 ? "y" : "ies") +
           " across " + dayCount + " day" + (dayCount === 1 ? "" : "s") + jobNote +
-          (skipped ? " — " + skipped + " skipped" : ""));
+          (skipped ? " — " + skipped + " skipped" : ""), undoImport, 15000);
       }
     };
     reader.readAsText(file);
@@ -2259,6 +2342,7 @@
     payload._docket = { version: 2, exported: new Date().toISOString() };
     downloadFile("docket-backup-" + todayISO() + ".json",
       JSON.stringify(payload, null, 2), "application/json");
+    noteBackup();
     toast("Backup exported");
   }
 
@@ -2271,6 +2355,7 @@
           throw new Error("bad format");
         }
         var added = 0, filled = 0;
+        var before = snapshotState();
         var ctx = newImport(Array.isArray(incoming._jobs));
         // Jobs merge by name; the backup's job ids are mapped onto local ones.
         var jobMap = {};
@@ -2305,10 +2390,13 @@
         saveWishlist();
         saveRecurring();
         render();
-        toast(added === 0 && filled === 0
-          ? "Nothing new — everything in that backup is already here"
-          : "Imported " + added + " item" + (added === 1 ? "" : "s") +
-            (filled ? " · " + filled + " given their job" : ""));
+        if (added === 0 && filled === 0) {
+          toast("Nothing new — everything in that backup is already here");
+        } else {
+          toast("Imported " + added + " item" + (added === 1 ? "" : "s") +
+            (filled ? " · " + filled + " given their job" : ""),
+            function () { restoreState(before); toast("Import undone"); }, 15000);
+        }
       } catch (e) {
         toast("Import failed — not a valid Docket backup file");
       }
@@ -2509,7 +2597,7 @@
     if (back) back.focus();
   }
   function clearData(p) {
-    var snap = JSON.stringify({ data: data, jobs: jobs, wishlist: wishlist, recurring: recurring });
+    var snap = snapshotState();
     var gone = [];
     var t = entryTotals();
     if (p.log && t.n) { data = {}; gone.push(plural(t.n, "entry", "entries")); }
@@ -2535,16 +2623,7 @@
     saveRecurring();
     render();
     toast("Cleared " + gone.join(", "), function () {
-      var s = JSON.parse(snap);
-      data = s.data;
-      jobs = s.jobs;
-      wishlist = s.wishlist;
-      recurring = s.recurring;
-      save();
-      saveJobs();
-      saveWishlist();
-      saveRecurring();
-      render();
+      restoreState(snap);
       toast("Restored — everything is back");
     }, 15000);
   }
@@ -2576,7 +2655,10 @@
   var searchHits = [];
   var searchActive = 0;
 
+  // Built once per change to the data (dataVersion), not per keystroke.
+  var searchIndex = { version: -1, items: [] };
   function searchCorpus() {
+    if (searchIndex.version === dataVersion) return searchIndex.items;
     var out = [];
     jobs.forEach(function (j) {
       out.push({ kind: "job", id: j.id, text: j.text, job: j.id, hay: j.text });
@@ -2592,6 +2674,8 @@
         out.push({ kind: q[0], id: it.id, text: it.text, job: it.job, hay: it.text + " " + jobName(it) + " " + q[2] });
       });
     });
+    out.forEach(function (h) { h.hay = h.hay.toLowerCase(); });
+    searchIndex = { version: dataVersion, items: out };
     return out;
   }
 
@@ -2636,8 +2720,7 @@
       $("searchSum").textContent = searchHits.length ? "Recent entries — type to search everything" : "Nothing logged yet — type to search jobs and lists";
     } else {
       var all = corpus.filter(function (h) {
-        var hay = h.hay.toLowerCase();
-        return words.every(function (w) { return hay.indexOf(w) !== -1; });
+        return words.every(function (w) { return h.hay.indexOf(w) !== -1; });
       });
       total = all.length;
       searchHits = all.slice(0, SEARCH_LIMIT);
@@ -2964,6 +3047,35 @@
     toast("Docket installed — open it from your Start menu, dock or desktop");
   });
 
+  // ---------- unexpected errors ----------
+  // A bug in one handler shouldn't fail silently and leave the screen out of
+  // step. Say so (at most every 10 seconds) — everything already saved is safe.
+  var lastErrorToast = 0;
+  function reportError(err) {
+    if (window.console) console.error(err);
+    if (Date.now() - lastErrorToast < 10000) return;
+    lastErrorToast = Date.now();
+    toast("Something went wrong — what's saved is safe. If anything looks off, reload the page.", null, 8000);
+  }
+  window.addEventListener("error", function (e) { reportError(e.error || e.message); });
+  window.addEventListener("unhandledrejection", function (e) { reportError(e.reason); });
+
+  // ---------- a new day while Docket is open ----------
+  // Left open past midnight, "today" would otherwise stay yesterday — and new
+  // entries would land there. When the date changes, anyone who was looking
+  // at today follows it; someone viewing another date is left where they are.
+  var knownToday = todayISO();
+  function followToday() {
+    var now = todayISO();
+    if (now === knownToday) return;
+    if (currentDate === knownToday) { currentDate = now; editingId = null; }
+    knownToday = now;
+    render();
+  }
+  document.addEventListener("visibilitychange", function () { if (!document.hidden) followToday(); });
+  window.addEventListener("focus", followToday);
+  setInterval(followToday, 60000);
+
   // ---------- other tabs ----------
   // With Docket open in two tabs, each would otherwise save its own stale
   // copy over the other's work. The browser tells every other tab when one
@@ -2976,6 +3088,7 @@
     wishlist = loadList(WISH_KEY);
     recurring = loadList(REC_KEY);
     jobs = loadList(JOB_KEY, cleanJob);
+    dataVersion++;   // the data changed: refresh anything cached against it
     lastUndo = null; // undo closures point at the old copies
     if (editingId && !findEntry(editingId)) editingId = null;
     if (queueEdit && !queueList(queueEdit.kind).some(function (it) { return it.id === queueEdit.id; })) queueEdit = null;
