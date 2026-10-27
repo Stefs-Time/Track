@@ -77,5 +77,13 @@ async function shoot(browser, name, viewport, steps, colorScheme = "light") {
   await shoot(browser, "job.jpg", desk, (p) => p.locator("#jobList li", { hasText: "Smith House" }).locator(".jobrow").click());
   await shoot(browser, "month.jpg", desk, (p) => p.click('#viewTabs button[data-view="month"]'));
   await shoot(browser, "phone-dark.jpg", { width: 390, height: 844 }, null, "dark");
+  // a printed weekly report, as it comes out on A4 (794px wide at 96dpi, less margins)
+  await shoot(browser, "report.jpg", { width: 690, height: 900 }, async (p) => {
+    await p.click('#viewTabs button[data-view="week"]');
+    await p.evaluate(() => { window.print = () => {}; });
+    await p.click("#printBtn");
+    await p.emulateMedia({ media: "print" });
+    await p.addStyleTag({ content: "body.print-report { padding: 32px 36px; }" }); // stand-in for the page margins
+  });
   await browser.close();
 })();

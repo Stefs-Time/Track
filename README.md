@@ -17,7 +17,7 @@ It comes two ways, from the same code:
 - **Wishlist and Recurring.** Queue things to do, or keep often-repeated tasks. Both can carry a job, and logging one (↳ or drag) carries the job onto the entry.
 - **Recurring tasks on a schedule.** Tick the days a task is due (a Friday timesheet, weekday site checks) and it's offered under **Due today** at the top of today's log: one click logs it, ✕ skips it for the day.
 - **Archive finished jobs.** They leave the Jobs list and the job boxes, but keep all their work. **Show archived** finds them; logging new work on one brings it back.
-- **Printable job report.** **Print / PDF** in the Job view gives a clean report: the job's dates and totals, every entry by day, and what's still to do. Save it as a PDF to email with an invoice.
+- **Print / PDF reports.** Print the open day, week, month or job (the button, or Ctrl+P) as a report in Docket's own look: totals, a By-job split, every entry by day in its job's colour, and for a job, what's still to do. Save as PDF to email it with an invoice.
 - **Search everything.** `/` or Ctrl+K finds any entry, job, wishlist or recurring item — by words, job or date — and jumps straight to it.
 - **Reorder anywhere.** Drag entries up or down in the Day, Week or Job view, or use ↑ ↓ on the keyboard; touch screens get ▲ ▼ buttons. Copies and exports follow your order.
 - **Quick add from the week.** The + on any Week card logs straight onto that day.
@@ -32,9 +32,9 @@ It comes two ways, from the same code:
 - **Keyboard shortcuts.** `/` search, `←` `→` move, `T` today, `D` `W` `M` views, `N` new entry, `J` job, `C` copy, `Ctrl+Z` undo, `Esc` leave a box, `?` guide.
 - **Built-in guide.** It opens on first use, and the **?** button brings it back. Every control explains itself on hover or keyboard focus.
 
-| Job view | Month view | Dark, on a phone |
-|---|---|---|
-| ![Job view](docs/screenshots/job.jpg) | ![Month view](docs/screenshots/month.jpg) | ![Phone layout in dark mode](docs/screenshots/phone-dark.jpg) |
+| Job view | Month view | Dark, on a phone | A printed weekly report |
+|---|---|---|---|
+| ![Job view](docs/screenshots/job.jpg) | ![Month view](docs/screenshots/month.jpg) | ![Phone layout in dark mode](docs/screenshots/phone-dark.jpg) | ![Weekly report, as printed](docs/screenshots/report.jpg) |
 
 ## Your data
 

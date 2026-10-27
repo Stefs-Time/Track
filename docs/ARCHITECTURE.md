@@ -56,7 +56,7 @@ The file is ordered so that each section only depends on the ones above it
 | backups, snapshots | the last-backup line, automatic backup to a folder, whole-state snapshots for undoing a clear or import |
 | CSV / JSON backup | import and export, the CSV formula guard |
 | wiring | event listeners for the static page controls |
-| printable job report | `buildReport` and the print hooks |
+| printable reports | `buildReport` for the open day, week, month or job, and the print hooks |
 | clear data, search, help | the three dialogs |
 | keyboard shortcuts, hover hints | global key handling and the tooltip |
 | theme, installable app | light/dark, manifest and service-worker registration |
@@ -186,10 +186,19 @@ and `parseSchedule` turn days into words and back; the CSV uses them.
 
 ## Printing
 
-`buildReport` fills `#printReport` with the job's report (text nodes only).
-The Print / PDF button, and `beforeprint` while the Job view is open, add
-`body.print-report`; the print stylesheet then shows only the report.
-`afterprint` removes the class. Other views print the page as it is.
+`buildReport` fills `#printReport` with a report of the open view (text
+nodes only): the day, week or month (`viewDays`, shared with Copy) or the
+job. The Print / PDF button and `beforeprint` (Ctrl+P, the browser menu) add
+`body.print-report`; the print stylesheet then hides the app and shows only
+the report. `afterprint` removes the class. The button won't print an empty
+period; it says so instead.
+
+The report is styled to match the app but always on the light palette:
+paper is white, so the print block defines its own `--p-*` colours and
+switches the canvas to `color-scheme: light`. `print-color-adjust: exact`
+keeps tiles, bars and job colours from being dropped. Job colours arrive the
+same way as on screen, as `--job` set by `tintJob`; a job's report sets it on
+the whole report.
 
 ## Two tabs, blocked storage, damaged data
 
@@ -233,7 +242,7 @@ real server in Chromium:
 | `layout` | three columns on PC, the small-laptop and phone fallbacks |
 | `robustness` | blocked storage, damaged data, two tabs, stale undo |
 | `safety` | CSV formula guard, undoing imports, the backup reminder, the error net, midnight, a speed budget at 10,000 entries |
-| `organise` | archiving and restoring jobs, the printable job report |
+| `organise` | archiving and restoring jobs, printable day, week, month and job reports |
 | `recurring` | recurring schedules, the Due today strip, schedules and archived jobs through CSV and JSON |
 | `autobackup` | automatic backup to a folder: writing, pruning, remembering, pausing, turning off |
 | `a11y` | axe-core, WCAG 2.1 A/AA, every view and dialog, both themes |

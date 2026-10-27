@@ -99,46 +99,101 @@ test("archive a finished job, find it again, and bring it back", async ({ page }
   check(errors.length === 0, "no page errors " + JSON.stringify(errors));
 });
 
-test("print a job as a clean report", async ({ page }) => {
+const printed = (page) => page.evaluate(() => window.printed);
+const stubPrint = (page) => page.evaluate(() => { window.printed = 0; window.print = () => { window.printed++; }; });
+const reportClass = (page) => page.evaluate(() => document.body.classList.contains("print-report"));
+
+test("print a job as a report that looks like the app", async ({ page }) => {
   await seed(page, seedData());
   await page.goto("/");
-  check(!(await page.isVisible("#printJobBtn")), "Print / PDF only shows in the Job view");
   await jobRow(page, "j1").locator(".jobrow").click();
-  await page.evaluate(() => { window.printed = 0; window.print = () => { window.printed++; }; });
-  await page.click("#printJobBtn");
-  check(await page.evaluate(() => window.printed) === 1, "it opens the print dialog");
+  await stubPrint(page);
+  await page.click("#printBtn");
+  check(await printed(page) === 1, "Print / PDF opens the print dialog");
 
   const r = page.locator("#printReport");
-  check(await r.locator("h1").textContent() === "Smith House", "the report is titled with the job");
-  check((await r.locator(".rp-meta").textContent()).startsWith("3 entries over 2 days"), "with its totals: " + await r.locator(".rp-meta").textContent());
-  const days = await r.locator(".rp-day:not(.rp-todo) h2").allTextContents();
-  check(days.length === 2 && days[0].includes(String(new Date(Y + "T12:00").getDate())), "days run oldest first: " + days);
-  const lines = await r.locator(".rp-day:not(.rp-todo) li").allTextContents();
+  check(await r.locator(".rp-kind").textContent() === "Job report", "it says what it is");
+  check(await r.locator(".rp-brand").textContent() === "Docket" && await r.locator(".rp-glyph svg").count() === 1, "under the Docket mark");
+  check(await r.locator("h1").textContent() === "Smith House", "titled with the job");
+  check(await r.evaluate((el) => el.style.getPropertyValue("--job")) === "#3e7bfa", "the job's colour runs through it");
+  const stat = async (i) => r.locator(".rp-stat").nth(i).textContent();
+  check(await stat(0) === "3Entries" && await stat(1) === "2Days worked", "stat tiles with its totals: " + await stat(0) + " / " + await stat(1));
+  const days = await r.locator(".rp-day .rp-cd").allTextContents();
+  check(days.length === 2 && days[0] === String(new Date(Y + "T12:00").getDate()), "a date chip per day, oldest first: " + days);
+  const lines = await r.locator(".rp-day .rp-t").allTextContents();
   check(JSON.stringify(lines) === JSON.stringify(["Measured kitchen windows", "Installed blinds, lounge", "Fitted handles"]),
     "only this job's entries, in log order: " + lines);
+  check(await r.locator(".rp-pill").count() === 0, "no job tags — every line is this job's");
   check(JSON.stringify(await r.locator(".rp-todo li").allTextContents()) === JSON.stringify(["Order paint"]), "what's still to do is listed");
+  check(await r.locator(".rp-split").count() === 0, "no By job split on a job's own report");
 
-  // on paper, only the report shows
-  await page.emulateMedia({ media: "print" });
+  // on paper, only the report shows — on white, whatever the theme
+  await page.emulateMedia({ media: "print", colorScheme: "dark" });
   check(await r.isVisible(), "the report prints");
   check(!(await page.isVisible(".app")) && !(await page.isVisible(".mast")), "the app itself doesn't");
+  check(await page.evaluate(() => getComputedStyle(document.body).backgroundColor) === "rgb(255, 255, 255)", "on a white page, even in dark mode");
+  check(await r.locator(".rp-stat").first().evaluate((el) => getComputedStyle(el).printColorAdjust) === "exact", "colours are printed, not dropped");
   await page.evaluate(() => window.dispatchEvent(new Event("afterprint")));
-  await page.emulateMedia({ media: "screen" });
-  check(!(await page.evaluate(() => document.body.classList.contains("print-report"))), "afterwards the page is back to normal");
+  await page.emulateMedia({ media: "screen", colorScheme: "light" });
+  check(!(await reportClass(page)), "afterwards the page is back to normal");
 
-  // Ctrl+P (beforeprint) in the Job view gives the report too; in the Day view, the page
+  // Ctrl+P (beforeprint) gives the report too
   await page.evaluate(() => window.dispatchEvent(new Event("beforeprint")));
-  check(await page.evaluate(() => document.body.classList.contains("print-report")), "Ctrl+P in the Job view prints the report");
+  check(await reportClass(page), "Ctrl+P prints the report");
   await page.evaluate(() => window.dispatchEvent(new Event("afterprint")));
-  await page.click('#viewTabs button[data-view="day"]');
-  await page.evaluate(() => window.dispatchEvent(new Event("beforeprint")));
-  check(!(await page.evaluate(() => document.body.classList.contains("print-report"))), "…but not from other views");
 
   // entry text is text, never markup
+  await page.click('#viewTabs button[data-view="day"]');
   await page.fill("#newJob", "Smith House");
   await page.fill("#newItem", "<img src=x onerror=alert(1)>");
   await page.press("#newItem", "Enter");
   await jobRow(page, "j1").locator(".jobrow").click();
-  await page.click("#printJobBtn");
+  await page.click("#printBtn");
   check(await r.locator("img").count() === 0 && (await r.textContent()).includes("<img"), "the report shows entries as plain text");
+});
+
+test("print the open day, week or month", async ({ page }) => {
+  await seed(page, seedData());
+  await page.goto("/");
+  await stubPrint(page);
+  const r = page.locator("#printReport");
+  const sameWeek = await page.evaluate(([a, b]) => {
+    const mon = (iso) => { const d = new Date(iso + "T12:00"); d.setDate(d.getDate() - (d.getDay() + 6) % 7); return d.toDateString(); };
+    return mon(a) === mon(b);
+  }, [T, Y]);
+  const sameMonth = T.slice(0, 7) === Y.slice(0, 7);
+
+  // the day
+  check(await page.isVisible("#printBtn"), "Print / PDF is there in the Day view");
+  await page.click("#printBtn");
+  check(await r.locator(".rp-kind").textContent() === "Daily log", "the Day view prints a daily log");
+  check((await r.locator("h1").textContent()).includes(String(new Date(T + "T12:00").getFullYear())), "titled with the date");
+  check(await r.locator(".rp-day").count() === 1 && await r.locator(".rp-t").count() === 3, "with that day's three entries");
+  check(JSON.stringify(await r.locator(".rp-pill").allTextContents()) === JSON.stringify(["Smith House", "Smith House"]), "each tagged with its job");
+  check(await r.locator(".rp-list li.has-job").first().evaluate((el) => el.style.getPropertyValue("--job")) === "#3e7bfa", "…in the job's colour");
+  const split = await r.locator(".rp-srow").allTextContents();
+  check(JSON.stringify(split) === JSON.stringify(["Smith House2", "No job1"]), "a By job split, busiest first: " + split);
+  check(await r.locator(".rp-stat").count() === 2, "tiles: entries and jobs");
+
+  // the week
+  await page.click('#viewTabs button[data-view="week"]');
+  await page.click("#printBtn");
+  check(await r.locator(".rp-kind").textContent() === "Weekly report", "the Week view prints a weekly report");
+  check((await r.locator("h1").textContent()).startsWith("Week of"), "titled with the week");
+  check(await r.locator(".rp-day").count() === (sameWeek ? 2 : 1), "only days with work appear");
+
+  // the month
+  await page.click('#viewTabs button[data-view="month"]');
+  await page.click("#printBtn");
+  check(await r.locator(".rp-kind").textContent() === "Monthly report", "the Month view prints a monthly report");
+  check(await r.locator(".rp-stat").first().textContent() === (sameMonth ? "5Entries" : "3Entries"), "with the month's total");
+  check(await r.locator(".rp-cd").first().textContent() === String(new Date((sameMonth ? Y : T) + "T12:00").getDate()), "days in date order");
+  check(await printed(page) === 3, "each one went to the print dialog");
+
+  // an empty period says so instead of printing a blank page
+  await page.click("#nextDay");
+  await page.click("#nextDay");
+  await page.click("#printBtn");
+  check(await printed(page) === 3, "nothing to print, so no print dialog");
+  check((await page.textContent("#toast")).startsWith("Nothing to print"), "…and a message says why");
 });

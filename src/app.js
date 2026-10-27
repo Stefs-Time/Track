@@ -537,7 +537,8 @@
     $("navDate").dataset.tip = inJob ? "Every entry logged against this job" : "Pick a date from the calendar";
     $("todayBtn").style.display = inJob ? "none" : "";
     $("logJobBtn").style.display = inJob ? "" : "none";
-    $("printJobBtn").style.display = inJob ? "" : "none";
+    var printNoun = inJob ? "job" : view;
+    $("printBtn").dataset.tip = "Print this " + printNoun + " as a tidy report, or save it as a PDF — shortcut: Ctrl+P";
 
     // The heading names the view; the navigator below it owns the date.
     if (inJob) {
@@ -2335,8 +2336,22 @@
   }
 
   // What the copy buttons copy follows the active view: day, week, or month.
+  // The days the open Day, Week or Month view covers.
+  function viewDays() {
+    var days = [];
+    if (view === "week") {
+      for (var i = 0; i < 7; i++) days.push(shiftDay(weekStart(currentDate), i));
+    } else if (view === "month") {
+      var d = dateObj(currentDate);
+      var n = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+      for (var day = 1; day <= n; day++) days.push(isoOf(new Date(d.getFullYear(), d.getMonth(), day)));
+    } else {
+      days.push(currentDate);
+    }
+    return days;
+  }
+
   function viewAsText(withHeading) {
-    var days;
     if (view === "job") {
       var st = jobStats()[currentJob];
       if (!st) return "";
@@ -2345,18 +2360,7 @@
       }).join(withHeading ? "\n\n" : "\n");
       return withHeading ? jobById(currentJob).text + "\n\n" + body : body;
     }
-    if (view === "week") {
-      days = [];
-      for (var i = 0; i < 7; i++) days.push(shiftDay(weekStart(currentDate), i));
-    } else if (view === "month") {
-      var d = dateObj(currentDate);
-      var n = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
-      days = [];
-      for (var day = 1; day <= n; day++) days.push(isoOf(new Date(d.getFullYear(), d.getMonth(), day)));
-    } else {
-      days = [currentDate];
-    }
-    return days.filter(function (iso) {
+    return viewDays().filter(function (iso) {
       return (data[iso] || []).length > 0;
     }).map(function (iso) {
       return dayAsText(iso, withHeading);
@@ -3038,57 +3042,162 @@
     this.value = "";
   });
 
-  // ---------- printable job report ----------
-  // Print (or Save as PDF) from the Job view gives a clean report instead of
-  // the screen: the job, its date span and totals, every entry by day in
-  // log order, and what's still to do on it. Built from text nodes only.
-  function buildReport(jobId) {
-    var job = jobById(jobId);
+  // ---------- printable reports ----------
+  // Print / PDF (or Ctrl+P) prints a report of whatever is open — the day,
+  // week, month or job — instead of the screen. It's built in #printReport
+  // from text nodes only, and the print stylesheet dresses it like the app:
+  // the light palette, the Docket mark, stat tiles and each job's colour.
+  var REPORT_KIND = { day: "Daily log", week: "Weekly report", month: "Monthly report", job: "Job report" };
+  function buildReport() {
     var out = $("printReport");
     out.innerHTML = "";
-    if (!job) return false;
-    var st = jobStats()[jobId] || { n: 0, days: [], first: null, last: null };
+    out.className = "printreport";
+    out.style.removeProperty("--job");
+    var job = view === "job" ? jobById(currentJob) : null;
+    if (view === "job" && !job) return 0;
+    if (job) { out.classList.add("is-job"); tintJob(out, job.id); } // the job's colour runs through its report
     function el(tag, cls, text) {
       var e = document.createElement(tag);
       if (cls) e.className = cls;
       if (text !== undefined) e.textContent = text;
       return e;
     }
-    out.appendChild(el("p", "rp-kicker", "Job report"));
-    out.appendChild(el("h1", null, job.text));
-    var span = !st.first ? "Nothing logged yet"
-      : st.first === st.last ? prettyDate(st.first) : prettyDate(st.first) + " – " + prettyDate(st.last);
-    out.appendChild(el("p", "rp-span", span));
-    out.appendChild(el("p", "rp-meta",
-      plural(st.n, "entry", "entries") + " over " + plural(st.days.length, "day", "days") +
-      " · printed " + prettyDate(todayISO())));
-    st.days.slice().sort().forEach(function (d) {
-      var sec = el("section", "rp-day");
-      sec.appendChild(el("h2", null, prettyDate(d)));
-      var ul = el("ul");
-      (data[d] || []).forEach(function (it) { if (it.job === jobId) ul.appendChild(el("li", null, it.text)); });
-      sec.appendChild(ul);
-      out.appendChild(sec);
+    function shortDate(iso) {
+      var dd = dateObj(iso);
+      return dd.getDate() + " " + MON[dd.getMonth()] + " " + dd.getFullYear();
+    }
+    function entriesOn(d) {
+      return (data[d] || []).filter(function (it) { return !job || it.job === job.id; });
+    }
+    var days = job ? ((jobStats()[job.id] || { days: [] }).days.slice().sort()) : viewDays();
+    var worked = days.filter(function (d) { return entriesOn(d).length > 0; });
+    var n = worked.reduce(function (sum, d) { return sum + entriesOn(d).length; }, 0);
+
+    // heading: the Docket mark, what this is, and what it covers
+    var head = el("header", "rp-head");
+    var brand = el("div", "rp-brand");
+    var mark = el("span", "rp-glyph");
+    var svg = $("brandGlyph").cloneNode(true); // the app's own mark (fixed markup)
+    svg.removeAttribute("id");
+    mark.appendChild(svg);
+    brand.appendChild(mark);
+    brand.appendChild(el("span", "rp-name", "Docket"));
+    head.appendChild(brand);
+    head.appendChild(el("span", "rp-kind", REPORT_KIND[view]));
+    out.appendChild(head);
+
+    var title = el("h1", "rp-title");
+    if (job) title.appendChild(el("span", "rp-dot"));
+    title.appendChild(document.createTextNode(job ? job.text
+      : view === "week" ? weekLabel(currentDate)
+      : view === "month" ? monthLabel(currentDate) : prettyDate(currentDate)));
+    out.appendChild(title);
+    var sub = job ? (worked.length ? (worked[0] === worked[worked.length - 1] ? prettyDate(worked[0])
+        : prettyDate(worked[0]) + " – " + prettyDate(worked[worked.length - 1])) : "Nothing logged yet") : "";
+    if (sub) out.appendChild(el("p", "rp-sub", sub));
+
+    // stat tiles, like the app's
+    var stats = el("div", "rp-stats");
+    function tile(value, label) {
+      var t = el("div", "rp-stat");
+      t.appendChild(el("span", "rp-sn", String(value)));
+      t.appendChild(el("span", "rp-sl", label));
+      stats.appendChild(t);
+    }
+    tile(n, n === 1 ? "Entry" : "Entries");
+    if (view !== "day") tile(worked.length, worked.length === 1 ? "Day worked" : "Days worked");
+    var perJob = {}, noJob = 0;
+    worked.forEach(function (d) {
+      entriesOn(d).forEach(function (it) {
+        if (jobById(it.job)) perJob[it.job] = (perJob[it.job] || 0) + 1; else noJob++;
+      });
     });
-    var todo = wishlist.filter(function (it) { return it.job === jobId; });
+    var jobIds = Object.keys(perJob).sort(function (a, b) { return perJob[b] - perJob[a] || jobById(a).text.localeCompare(jobById(b).text); });
+    if (job) {
+      var last = worked[worked.length - 1];
+      tile(last ? dateObj(last).getDate() + " " + MON[dateObj(last).getMonth()] : "—", "Last logged");
+    } else {
+      tile(jobIds.length, jobIds.length === 1 ? "Job" : "Jobs");
+    }
+    out.appendChild(stats);
+
+    // how the work split between jobs
+    if (!job && jobIds.length) {
+      var split = el("section", "rp-split");
+      split.appendChild(el("h2", "rp-h", "By job"));
+      var rows = jobIds.map(function (id) { return [id, jobById(id).text, perJob[id]]; });
+      if (noJob) rows.push([null, "No job", noJob]);
+      rows.forEach(function (r) {
+        var row = el("div", "rp-srow");
+        if (r[0]) tintJob(row, r[0]); else row.classList.add("none");
+        row.appendChild(el("span", "rp-dot"));
+        row.appendChild(el("span", "rp-sname", r[1]));
+        var track = el("span", "rp-track");
+        var fill = el("span", "rp-fill");
+        fill.style.width = Math.max(3, Math.round(100 * r[2] / n)) + "%";
+        track.appendChild(fill);
+        row.appendChild(track);
+        row.appendChild(el("span", "rp-scount", String(r[2])));
+        split.appendChild(row);
+      });
+      out.appendChild(split);
+    }
+
+    // every day with work, as a card with its date chip
+    if (!worked.length) out.appendChild(el("p", "rp-empty", job ? "Nothing logged against this job yet." : "Nothing logged."));
+    worked.forEach(function (d) {
+      var dd = dateObj(d), list = entriesOn(d);
+      var card = el("section", "rp-day");
+      var chip = el("div", "rp-chip");
+      chip.appendChild(el("span", "rp-cm", MON[dd.getMonth()]));
+      chip.appendChild(el("span", "rp-cd", String(dd.getDate())));
+      card.appendChild(chip);
+      var body = el("div", "rp-dbody");
+      var h = el("h2", "rp-dh");
+      h.appendChild(el("span", "rp-dw", LONGDOW[dd.getDay()]));
+      h.appendChild(el("span", "rp-dsub", shortDate(d)));
+      h.appendChild(el("span", "rp-n", String(list.length)));
+      body.appendChild(h);
+      var ol = el("ol", "rp-list");
+      list.forEach(function (it) {
+        var li = el("li");
+        var j = jobById(it.job);
+        if (j) { tintJob(li, j.id); li.classList.add("has-job"); }
+        li.appendChild(el("span", "rp-t", it.text));
+        if (j && !job) li.appendChild(el("span", "rp-pill", j.text));
+        ol.appendChild(li);
+      });
+      body.appendChild(ol);
+      card.appendChild(body);
+      out.appendChild(card);
+    });
+
+    // a job report ends with what's still to do on it
+    var todo = job ? wishlist.filter(function (it) { return it.job === job.id; }) : [];
     if (todo.length) {
-      var sec = el("section", "rp-day rp-todo");
-      sec.appendChild(el("h2", null, "Still to do"));
+      var t = el("section", "rp-todo");
+      t.appendChild(el("h2", "rp-h", "Still to do"));
       var ul = el("ul");
       todo.forEach(function (it) { ul.appendChild(el("li", null, it.text)); });
-      sec.appendChild(ul);
-      out.appendChild(sec);
+      t.appendChild(ul);
+      out.appendChild(t);
     }
-    out.appendChild(el("p", "rp-foot", "Docket · " + job.text));
-    return true;
+    out.appendChild(el("footer", "rp-foot", "Printed " + prettyDate(todayISO()) + " · Docket"));
+    return n;
   }
-  // Ctrl+P in the Job view prints the report too; elsewhere, the page.
+  // Ctrl+P (or the browser's own Print) prints the open view's report too.
   function preparePrint() {
-    if (view === "job" && buildReport(currentJob)) document.body.classList.add("print-report");
+    buildReport();
+    document.body.classList.add("print-report");
   }
   window.addEventListener("beforeprint", preparePrint);
   window.addEventListener("afterprint", function () { document.body.classList.remove("print-report"); });
-  $("printJobBtn").addEventListener("click", function () {
+  $("printBtn").addEventListener("click", function () {
+    if (buildReport() === 0 && !(view === "job" && wishlist.some(function (it) { return it.job === currentJob; }))) {
+      var noun = view === "job" ? "job" : view;
+      toast("Nothing to print — this " + noun + " has no entries");
+      return;
+    }
     preparePrint();
     window.print();
   });
