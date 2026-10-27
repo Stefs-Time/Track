@@ -2,6 +2,20 @@
 
 All notable changes to Docket. Versions follow [Semantic Versioning](https://semver.org/).
 
+## [2.7.0] — 2026-10-27
+
+### Added
+- **Print the day, week or month**, not just a job. **Print / PDF** now sits with the
+  copy buttons in every view, and Ctrl+P prints the open view as a report too. An
+  empty day, week or month says so rather than printing a blank page.
+
+### Changed
+- **Reports look like Docket.** The Docket mark and a report label, stat tiles (the
+  first in the accent colour, or the job's colour on a job report), a **By job**
+  split with colour bars showing where the time went, and each day as a card with
+  a date chip and its entries in their job colours. They always print on white,
+  even in dark mode, with the colours kept.
+
 ## [2.6.0] — 2026-10-27
 
 ### Added
