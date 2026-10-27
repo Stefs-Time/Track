@@ -48,13 +48,15 @@ The file is ordered so that each section only depends on the ones above it
 | date helpers | ISO dates, week/month arithmetic, the forgiving CSV date parser |
 | rendering | `render()` and one renderer per view: Day, Week, Month, Job |
 | reordering a day | `placeEntry` / `stepEntry` and the drag, keyboard and touch handles |
-| jobs sidebar | the Jobs list: open, rename, recolour, delete, drop-to-link |
+| jobs sidebar | the Jobs list: open, rename, recolour, archive, delete, drop-to-link |
 | entries anywhere | `findEntry`, `moveEntry`, `linkToJob`, drop targets |
-| wishlist & recurring | the two sidebar lists, their editor and sending items to a day |
+| wishlist & recurring | the two sidebar lists, their editor (with a recurring task's days) and sending items to a day |
+| due today | the Due today strip: scheduled recurring tasks not yet logged or skipped today |
 | actions | adding and removing entries, copy to clipboard, toasts and undo |
-| backups, snapshots | the last-backup line, whole-state snapshots for undoing a clear or import |
+| backups, snapshots | the last-backup line, automatic backup to a folder, whole-state snapshots for undoing a clear or import |
 | CSV / JSON backup | import and export, the CSV formula guard |
 | wiring | event listeners for the static page controls |
+| printable job report | `buildReport` and the print hooks |
 | clear data, search, help | the three dialogs |
 | keyboard shortcuts, hover hints | global key handling and the tooltip |
 | theme, installable app | light/dark, manifest and service-worker registration |
@@ -153,6 +155,41 @@ field, ↳ buttons).
   minute. If you were looking at today, you move to the new today.
 - **Length limits:** entry and list boxes take up to 1,000 characters,
   job names 60.
+- **Automatic backup to a folder:** where `showDirectoryPicker` exists, the
+  user picks a folder and every successful `writeStore` schedules a write
+  (`scheduleAutoBackup`, 2s debounce) of `backupJSON()` to that day's
+  `docket-backup-YYYY-MM-DD.json`. Writes run one at a time, a result that
+  arrives after the folder was changed or turned off is dropped, and
+  `pruneAutoBackups` removes only Docket's own dated files beyond the newest
+  30. The folder handle is kept in IndexedDB (`handleStore`), the only
+  storage that can hold one. A later session may need the user's OK again:
+  the state is then `paused` until **Resume** (a click is required to ask).
+  Tests stub only the picker, handing back a folder from the browser's
+  private file system, so the rest is the real API.
+
+## Jobs: archived, and the job boxes
+
+A job's `archived` flag hides it from the Jobs list (until **Show archived**)
+and from the job boxes' suggestions. Nothing that points at it changes.
+User-facing job boxes go through `useJob`, which restores an archived job
+when new work is logged against it; imports call `ensureJob` directly, so
+restoring a backup never un-archives. `setArchived` is the one place the
+flag changes, with Undo.
+
+## Recurring schedules
+
+`days` on a recurring task is a sorted list of weekdays (0 = Sunday, as
+`Date.getDay` counts). `dueToday` offers each scheduled task on its days
+until it's logged (same words and job, `loggedOn`) or skipped. Skips are a
+preference for today only (`track.skipped.v1`), not data. `scheduleLabel`
+and `parseSchedule` turn days into words and back; the CSV uses them.
+
+## Printing
+
+`buildReport` fills `#printReport` with the job's report (text nodes only).
+The Print / PDF button, and `beforeprint` while the Job view is open, add
+`body.print-report`; the print stylesheet then shows only the report.
+`afterprint` removes the class. Other views print the page as it is.
 
 ## Two tabs, blocked storage, damaged data
 
@@ -196,6 +233,9 @@ real server in Chromium:
 | `layout` | three columns on PC, the small-laptop and phone fallbacks |
 | `robustness` | blocked storage, damaged data, two tabs, stale undo |
 | `safety` | CSV formula guard, undoing imports, the backup reminder, the error net, midnight, a speed budget at 10,000 entries |
+| `organise` | archiving and restoring jobs, the printable job report |
+| `recurring` | recurring schedules, the Due today strip, schedules and archived jobs through CSV and JSON |
+| `autobackup` | automatic backup to a folder: writing, pruning, remembering, pausing, turning off |
 | `a11y` | axe-core, WCAG 2.1 A/AA, every view and dialog, both themes |
 | `app` | server headers, CSP and compression, installability, offline use, the standalone file |
 

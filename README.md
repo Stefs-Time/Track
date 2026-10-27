@@ -15,6 +15,9 @@ It comes two ways, from the same code:
 - **Jobs.** Set a job once and log several entries against it. Each entry shows its job, and the **Job view** gathers everything on a job across every day, with totals. **Copy Job** gives you an invoice-ready list.
 - **Uses the whole screen.** On a PC, your lists sit on the left, the log fills the middle, and the Wishlist has its own panel on the right. Smaller screens fold neatly into fewer columns.
 - **Wishlist and Recurring.** Queue things to do, or keep often-repeated tasks. Both can carry a job, and logging one (↳ or drag) carries the job onto the entry.
+- **Recurring tasks on a schedule.** Tick the days a task is due (a Friday timesheet, weekday site checks) and it's offered under **Due today** at the top of today's log: one click logs it, ✕ skips it for the day.
+- **Archive finished jobs.** They leave the Jobs list and the job boxes, but keep all their work. **Show archived** finds them; logging new work on one brings it back.
+- **Printable job report.** **Print / PDF** in the Job view gives a clean report: the job's dates and totals, every entry by day, and what's still to do. Save it as a PDF to email with an invoice.
 - **Search everything.** `/` or Ctrl+K finds any entry, job, wishlist or recurring item — by words, job or date — and jumps straight to it.
 - **Reorder anywhere.** Drag entries up or down in the Day, Week or Job view, or use ↑ ↓ on the keyboard; touch screens get ▲ ▼ buttons. Copies and exports follow your order.
 - **Quick add from the week.** The + on any Week card logs straight onto that day.
@@ -24,7 +27,7 @@ It comes two ways, from the same code:
 - **Light and dark.** Follows your system, or pin either with the theme button.
 - **Copy to clipboard.** Copy the open day, week, month or job as a dated bulleted list, or just the lines.
 - **Undo** for deletes, moves, links, imports and **Clear data** — the button, or Ctrl+Z for a minute afterwards.
-- **Import and export.** JSON is the exact backup. CSV opens in Excel. Both carry everything, including jobs. See [docs/DATA-FORMAT.md](docs/DATA-FORMAT.md).
+- **Import and export.** JSON is the exact backup. CSV opens in Excel. Both carry everything, including jobs, archived jobs and recurring schedules. See [docs/DATA-FORMAT.md](docs/DATA-FORMAT.md).
 - **Backup reminder.** Shows when you last exported, and nudges you when it's been a while and the log has changed.
 - **Keyboard shortcuts.** `/` search, `←` `→` move, `T` today, `D` `W` `M` views, `N` new entry, `J` job, `C` copy, `Ctrl+Z` undo, `Esc` leave a box, `?` guide.
 - **Built-in guide.** It opens on first use, and the **?** button brings it back. Every control explains itself on hover or keyboard focus.
@@ -37,7 +40,7 @@ It comes two ways, from the same code:
 
 - Docket saves to the browser's local storage as you type. There's no account and no cloud copy.
 - Data belongs to **one browser on one device**. The installed app and the standalone file each keep their own. To move between them, or to a new computer, use **Export JSON** in one and **Import JSON** in the other.
-- Clearing the browser's site data erases the log, so keep an occasional **Export JSON** as a backup. The **Backup & data** section shows when you last exported and reminds you when it's been two weeks and the log has changed.
+- Clearing the browser's site data erases the log, so keep backups. In Chrome and Edge on a computer, **Back up automatically to a folder** does it for you: pick a folder once (OneDrive or Dropbox gives you an off-computer copy) and Docket writes `docket-backup-YYYY-MM-DD.json` there after every change, keeping the newest 30. Elsewhere, use **Export JSON** now and then. The **Backup & data** section shows when you last exported and reminds you when it's been two weeks and the log has changed.
 - Docket asks the browser to keep its storage **persistent**, so it isn't cleared to free space.
 - **CSV exports are safe to open in Excel:** text that would run as a formula (starting `=`, `+`, `-` or `@`) is written with a leading apostrophe, which import removes again.
 - **Left open overnight?** Today moves on to the new date by itself.

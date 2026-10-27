@@ -1,6 +1,6 @@
 {
   "name": "docket",
-  "version": "2.5.0",
+  "version": "2.6.0",
   "private": true,
   "description": "Docket — a daily work log with jobs. Installable offline web app (PWA) that also runs as a single, double-click HTML file.",
   "keywords": [

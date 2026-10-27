@@ -2,6 +2,33 @@
 
 All notable changes to Docket. Versions follow [Semantic Versioning](https://semver.org/).
 
+## [2.6.0] — 2026-10-27
+
+### Added
+- **Archive finished jobs.** A finished job leaves the Jobs list and the job boxes,
+  with all its work kept. **Show archived** under the list finds it, its Job view
+  says it's archived with a **Restore** button, and search still finds it. Logging
+  new work on an archived job brings it back. Undo works as usual.
+- **Printable job report.** **Print / PDF** in the Job view (or Ctrl+P there) prints
+  a clean report: the job, its dates and totals, every entry by day in log order,
+  and what's still on the wishlist for it. Save as PDF to email it with an invoice.
+- **Recurring tasks on a schedule.** Tick the days a recurring task is due in its
+  editor. On those days it appears under **Due today** at the top of today's log.
+  **Log** adds it with its job; **✕** skips it until next time. The Recurring list
+  shows each schedule and marks what's due.
+- **Automatic backup to a folder** (Chrome and Edge on a computer). Pick a folder
+  once, and Docket writes `docket-backup-YYYY-MM-DD.json` there a moment after
+  every change, keeping the newest 30. A OneDrive or Dropbox folder makes it an
+  off-computer copy. If the browser asks for permission again in a later session,
+  it pauses and offers **Resume**.
+
+### Changed
+- CSV exports gain a fourth column, **Repeats**, for recurring schedules, and an
+  `Archived` row for each archived job. JSON backups carry `archived` on jobs and
+  `days` on recurring tasks. Older files still import.
+- Job pill text is a little darker (lighter in dark mode), so every job colour
+  passes WCAG AA on the side panels too.
+
 ## [2.5.0] — 2026-10-26
 
 A full audit: security, correctness, speed and keeping your data safe. Nothing
