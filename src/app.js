@@ -58,11 +58,40 @@
     if (typeof it.job === "string" && it.job !== "") out.job = it.job;
     return out;
   }
+  // A job: {id, text, color, archived?}. Archived jobs keep their entries
+  // and colour but drop out of the Jobs list and the job boxes.
   function cleanJob(j) {
     if (!j || typeof j !== "object" || typeof j.text !== "string" || j.text.trim() === "") return null;
     var out = { id: uniqueId(j.id), text: j.text.trim() };
     if (typeof j.color === "number" && j.color % 1 === 0) out.color = j.color; // range-checked once colours load
+    if (j.archived === true) out.archived = true;
     return out;
+  }
+  // A recurring task may repeat on set weekdays: days is a sorted list of
+  // 0–6 (Sunday–Saturday, as Date.getDay counts them). No days = no schedule.
+  function cleanDays(d) {
+    if (!Array.isArray(d)) return null;
+    var out = [];
+    d.forEach(function (n) {
+      if (typeof n === "number" && n % 1 === 0 && n >= 0 && n <= 6 && out.indexOf(n) === -1) out.push(n);
+    });
+    return out.length ? out.sort() : null;
+  }
+  function cleanRec(it) {
+    var out = cleanItem(it);
+    var days = out && it && typeof it === "object" ? cleanDays(it.days) : null;
+    if (days) out.days = days;
+    return out;
+  }
+  // JSON with object keys in a fixed order, so a record whose fields were
+  // added in a different order isn't mistaken for a damaged one.
+  function canon(v) {
+    return JSON.stringify(v, function (k, val) {
+      if (!val || typeof val !== "object" || Array.isArray(val)) return val;
+      var o = {};
+      Object.keys(val).sort().forEach(function (key) { o[key] = val[key]; });
+      return o;
+    });
   }
   function load() {
     seenIds = {};
@@ -82,14 +111,14 @@
     seenIds = {};
     var got = readJSON(key, []);
     var out = Array.isArray(got.value) ? got.value.map(clean || cleanItem).filter(Boolean) : [];
-    if (got.raw && JSON.stringify(out) !== JSON.stringify(got.value)) repairs[key] = got.raw;
+    if (got.raw && canon(out) !== canon(got.value)) repairs[key] = got.raw;
     return out;
   }
 
   var data = load();                          // { "YYYY-MM-DD": [{id, text, job?}, …] } — job is a job id
   var wishlist = loadList(WISH_KEY);          // [{id, text, job?}, …]
-  var recurring = loadList(REC_KEY);          // [{id, text, job?}, …]
-  var jobs = loadList(JOB_KEY, cleanJob);     // [{id, text, color}, …] — text is the job's name
+  var recurring = loadList(REC_KEY, cleanRec); // [{id, text, job?, days?}, …]
+  var jobs = loadList(JOB_KEY, cleanJob);     // [{id, text, color, archived?}, …] — text is the job's name
   var currentDate = todayISO();
   var currentJob = null;      // job id shown by the Job view
   var editingId = null;
@@ -111,6 +140,7 @@
         toast("Saving again — your log is being stored");
       }
       pulseSaved();
+      scheduleAutoBackup();
       return true;
     } catch (e) {
       failSaved();
@@ -182,6 +212,22 @@
     jobs.push(job);
     saveJobs();
     return job.id;
+  }
+  // The job boxes use this: picking an archived job for new work means it
+  // isn't finished after all, so it comes back to the Jobs list. (Imports
+  // call ensureJob directly — restoring a backup never un-archives.)
+  function useJob(name) {
+    var id = ensureJob(name);
+    var j = jobById(id);
+    if (j && j.archived) {
+      delete j.archived;
+      saveJobs();
+      toast("“" + j.text + "” is back in your Jobs — it was archived");
+    }
+    return id;
+  }
+  function activeJobs() {
+    return jobs.filter(function (j) { return !j.archived; });
   }
 
   // Every job has a colour, shown on its pills, entries, calendar bars and
@@ -296,6 +342,35 @@
   var LONGDOW = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
   var MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   function shortDow(iso) { return DOW[dateObj(iso).getDay()]; }
+
+  // Recurring schedules, weeks shown Monday first. Labels read naturally
+  // ("Every Friday", "Weekdays") and are also what the CSV carries.
+  var WEEK_ORDER = [1, 2, 3, 4, 5, 6, 0];
+  function scheduleLabel(days) {
+    if (!days || !days.length) return "";
+    var key = days.join("");
+    if (key === "0123456") return "Every day";
+    if (key === "12345") return "Weekdays";
+    if (key === "06") return "Weekends";
+    if (days.length === 1) return "Every " + LONGDOW[days[0]];
+    return WEEK_ORDER.filter(function (d) { return days.indexOf(d) !== -1; })
+      .map(function (d) { return DOW[d]; }).join(" ");
+  }
+  // The reverse, forgiving: "Fri", "fridays", "Mon, Wed", "weekdays", "daily".
+  function parseSchedule(text) {
+    var t = String(text || "").toLowerCase().replace(/every/g, " ").trim();
+    if (t === "") return null;
+    if (/^(day|daily)$/.test(t.replace(/\s+/g, ""))) return [0, 1, 2, 3, 4, 5, 6];
+    if (/^weekdays?$/.test(t)) return [1, 2, 3, 4, 5];
+    if (/^weekends?$/.test(t)) return [0, 6];
+    var names = DOW.map(function (d) { return d.toLowerCase(); });
+    var out = [];
+    t.split(/[^a-z]+/).forEach(function (w) {
+      var i = w.length >= 3 ? names.indexOf(w.slice(0, 3)) : -1;
+      if (i !== -1) out.push(i);
+    });
+    return cleanDays(out);
+  }
   function isoOf(d) {
     return d.getFullYear() + "-" +
       String(d.getMonth() + 1).padStart(2, "0") + "-" +
@@ -347,7 +422,11 @@
     x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
     send: '<polyline points="15 10 20 15 15 20"/><path d="M4 4v7a4 4 0 0 0 4 4h12"/>',
     job: '<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>',
-    grid: '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>'
+    grid: '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
+    archive: '<rect x="2" y="3" width="20" height="5" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/>',
+    restore: '<rect x="2" y="3" width="20" height="5" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h2"/><path d="M20 8v11a2 2 0 0 1-2 2h-2"/><path d="m9 15 3-3 3 3"/><path d="M12 12v9"/>',
+    check: '<path d="M20 6 9 17l-5-5"/>',
+    repeat: '<path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/>'
   };
   // Each icon is parsed once; every button gets a cheap copy of it.
   var iconTemplates = {};
@@ -458,6 +537,7 @@
     $("navDate").dataset.tip = inJob ? "Every entry logged against this job" : "Pick a date from the calendar";
     $("todayBtn").style.display = inJob ? "none" : "";
     $("logJobBtn").style.display = inJob ? "" : "none";
+    $("printJobBtn").style.display = inJob ? "" : "none";
 
     // The heading names the view; the navigator below it owns the date.
     if (inJob) {
@@ -531,6 +611,7 @@
       ol.appendChild(item.id === editingId ? buildEditor(item, currentDate) : buildEntry(item, idx, currentDate));
     });
 
+    renderDue();
     $("sheet").style.display = list.length === 0 ? "none" : "";
     $("emptyMsg").style.display = list.length === 0 ? "" : "none";
     $("clearDay").style.display = list.length === 0 ? "none" : "";
@@ -668,7 +749,7 @@
       var v = input.value.trim();
       if (v === "") { input.focus(); return; }
       var entry = { id: newId(), text: v };
-      var jid = ensureJob($("newJob").value);
+      var jid = useJob($("newJob").value);
       if (jid) entry.job = jid;
       if (!data[d]) data[d] = [];
       data[d].push(entry);
@@ -848,6 +929,21 @@
     function shortDate(iso) {
       var dd = dateObj(iso);
       return dd.getDate() + " " + MON[dd.getMonth()];
+    }
+    if (job.archived) {
+      var note = document.createElement("div");
+      note.className = "archnote";
+      note.appendChild(icon("archive"));
+      var nt = document.createElement("span");
+      nt.textContent = "Archived — this job is hidden from the Jobs list and the job boxes. Everything on it is still here.";
+      note.appendChild(nt);
+      var rb = document.createElement("button");
+      rb.type = "button";
+      rb.textContent = "Restore";
+      rb.dataset.tip = "Put this job back in the Jobs list";
+      rb.addEventListener("click", function () { setArchived(job.id, false); });
+      note.appendChild(rb);
+      wrap.appendChild(note);
     }
     stat(st.n, "Entries", "Entries logged against " + job.text);
     stat(days.length, days.length === 1 ? "Day worked" : "Days worked", "Days with at least one entry on this job");
@@ -1224,7 +1320,7 @@
       if (v === "") { removeItem(item.id); return; }
       var changed = false;
       if (v !== item.text) { item.text = v; changed = true; }
-      var jid = ensureJob(jobInput.value);
+      var jid = useJob(jobInput.value);
       if ((item.job || null) !== jid) {
         if (jid) item.job = jid; else delete item.job;
         changed = true;
@@ -1388,20 +1484,27 @@
 
   // ---------- jobs sidebar ----------
   var renamingJob = null;
+  var showArchived = false; // the archived jobs are folded away until asked for
 
   // Most recently worked jobs first; jobs with nothing logged sit at the end.
+  // Archived jobs are left out of the list and the job boxes' suggestions.
   function renderJobs() {
     var stats = jobStats();
-    $("jobCount").textContent = jobs.length ? "· " + jobs.length : "";
+    var active = activeJobs();
+    var archivedN = jobs.length - active.length;
+    if (archivedN === 0) showArchived = false;
+    $("jobCount").textContent = active.length ? "· " + active.length : "";
 
     var opts = $("jobOptions");
     opts.innerHTML = "";
     var sorted = jobs.slice().sort(function (a, b) {
+      if (!a.archived !== !b.archived) return a.archived ? 1 : -1;
       var la = stats[a.id] ? stats[a.id].last : "", lb = stats[b.id] ? stats[b.id].last : "";
       if (la !== lb) return la < lb ? 1 : -1;
       return a.text.localeCompare(b.text);
     });
     sorted.forEach(function (j) {
+      if (j.archived) return;
       var o = document.createElement("option");
       o.value = j.text;
       opts.appendChild(o);
@@ -1409,20 +1512,20 @@
 
     var ul = $("jobList");
     ul.innerHTML = "";
-    if (jobs.length === 0) {
+    if (active.length === 0) {
       var li0 = document.createElement("li");
       var span = document.createElement("span");
       span.className = "nothing";
-      span.textContent = "No jobs yet — type one in the Job box";
+      span.textContent = archivedN ? "Every job is archived" : "No jobs yet — type one in the Job box";
       li0.appendChild(span);
       ul.appendChild(li0);
-      return;
     }
 
     sorted.forEach(function (j) {
+      if (j.archived && !showArchived) return;
       var st = stats[j.id];
       var li = document.createElement("li");
-      li.className = "row" + (view === "job" && currentJob === j.id ? " current" : "");
+      li.className = "row" + (j.archived ? " archived" : "") + (view === "job" && currentJob === j.id ? " current" : "");
 
       if (renamingJob === j.id) {
         var input = document.createElement("input");
@@ -1478,7 +1581,7 @@
       }
       var open = wishlist.filter(function (it) { return it.job === j.id; }).length +
         recurring.filter(function (it) { return it.job === j.id; }).length;
-      row.dataset.tip = (st
+      row.dataset.tip = (j.archived ? "Archived · " : "") + (st
         ? st.n + " entr" + (st.n === 1 ? "y" : "ies") + " over " + st.days.length + " day" + (st.days.length === 1 ? "" : "s")
         : "Nothing logged yet") +
         (open ? " · " + open + " on the wishlist/recurring" : "") + " — click to see it all";
@@ -1501,12 +1604,61 @@
       kill.setAttribute("aria-label", "Delete job " + j.text);
       kill.addEventListener("click", function () { removeJob(j.id); });
 
+      var arch = document.createElement("button");
+      arch.className = "wbtn arch";
+      arch.appendChild(icon(j.archived ? "restore" : "archive"));
+      arch.dataset.tip = j.archived
+        ? "Restore this job to the Jobs list"
+        : "Archive this job — finished work leaves the list, everything on it stays. You can Undo";
+      arch.setAttribute("aria-label", (j.archived ? "Restore job " : "Archive job ") + j.text);
+      arch.addEventListener("click", function () { setArchived(j.id, !j.archived); });
+
       li.appendChild(row);
       li.appendChild(ren);
+      li.appendChild(arch);
       li.appendChild(kill);
       li.dataset.job = j.id;
       makeJobDropTarget(li, function () { return j.id; });
       ul.appendChild(li);
+    });
+
+    if (archivedN) {
+      var tli = document.createElement("li");
+      tli.className = "archtoggle";
+      var tb = document.createElement("button");
+      tb.type = "button";
+      tb.id = "archToggle";
+      tb.setAttribute("aria-expanded", showArchived ? "true" : "false");
+      tb.appendChild(icon("archive"));
+      tb.appendChild(document.createTextNode(showArchived ? "Hide archived" : "Show " + archivedN + " archived"));
+      tb.dataset.tip = showArchived ? "Fold the archived jobs away again" : "Finished jobs you archived — open one, or restore it";
+      tb.addEventListener("click", function () {
+        showArchived = !showArchived;
+        renderJobs();
+        $("archToggle").focus();
+      });
+      tli.appendChild(tb);
+      ul.appendChild(tli);
+    }
+  }
+
+  // Archiving hides a finished job from the Jobs list and the job boxes.
+  // Nothing on it changes: its entries, colour and Job view all stay.
+  function setArchived(id, on) {
+    var j = jobById(id);
+    if (!j || !!j.archived === on) return;
+    if (on) {
+      j.archived = true;
+      retargetJobBoxes(j.text, ""); // stop offering a finished job for new work
+    } else {
+      delete j.archived;
+    }
+    saveJobs();
+    render();
+    toast(on ? "“" + j.text + "” archived — find it under Show archived" : "“" + j.text + "” is back in your Jobs", function () {
+      if (on) delete j.archived; else j.archived = true;
+      saveJobs();
+      render();
     });
   }
 
@@ -1514,8 +1666,11 @@
     var input = $("newJobSide");
     var name = cleanJobName(input.value);
     if (name === "") return;
-    if (jobByName(name)) {
-      toast("“" + jobByName(name).text + "” is already a job");
+    var known = jobByName(name);
+    if (known && known.archived) {
+      setArchived(known.id, false);
+    } else if (known) {
+      toast("“" + known.text + "” is already a job");
     } else {
       ensureJob(name);
       toast("Job added — pick it in the Job box to log against it");
@@ -1747,10 +1902,7 @@
     if (!item) return;
     if (!data[day]) data[day] = [];
     var job = jobById(item.job) ? item.job : null;
-    var dup = data[day].some(function (it) {
-      return it.text === item.text && (jobById(it.job) ? it.job : null) === job;
-    });
-    if (dup) { toast("Already logged on " + shortDow(day) + " " + day); return; }
+    if (loggedOn(day, item)) { toast("Already logged on " + shortDow(day) + " " + day); return; }
     var entry = { id: newId(), text: item.text };
     if (job) entry.job = job;
     data[day].push(entry);
@@ -1761,6 +1913,91 @@
       save();
       render();
     });
+  }
+
+  // Has this recurring task (same words, same job) been logged on that day?
+  function loggedOn(day, item) {
+    var job = jobById(item.job) ? item.job : null;
+    return (data[day] || []).some(function (it) {
+      return it.text === item.text && (jobById(it.job) ? it.job : null) === job;
+    });
+  }
+
+  // ---------- due today ----------
+  // A recurring task with a schedule is offered on the days it's due, at
+  // the top of today's log, until it's logged or skipped for the day.
+  // Skips only last the day, so they're a preference, not data.
+  var SKIP_KEY = "track.skipped.v1";
+  function skippedToday() {
+    try {
+      var sk = JSON.parse(readStore(SKIP_KEY) || "null");
+      return sk && sk.day === todayISO() && Array.isArray(sk.ids) ? sk.ids : [];
+    } catch (e) { return []; }
+  }
+  function dueToday() {
+    var today = todayISO(), dow = dateObj(today).getDay(), skipped = skippedToday();
+    return recurring.filter(function (it) {
+      return it.days && it.days.indexOf(dow) !== -1 && skipped.indexOf(it.id) === -1 && !loggedOn(today, it);
+    });
+  }
+  function skipToday(id) {
+    var item = recurring.find(function (it) { return it.id === id; });
+    if (!item) return;
+    var before = skippedToday();
+    setPref(SKIP_KEY, JSON.stringify({ day: todayISO(), ids: before.concat(id) }));
+    render();
+    toast("“" + item.text + "” skipped for today", function () {
+      setPref(SKIP_KEY, JSON.stringify({ day: todayISO(), ids: before }));
+      render();
+    });
+  }
+  // Keep the keyboard on the strip after an item leaves it.
+  function refocusDue() {
+    var next = $("dueBar").querySelector(".dlog");
+    (next || $("newItem")).focus({ preventScroll: true });
+  }
+  function renderDue() {
+    var bar = $("dueBar");
+    var due = view === "day" && currentDate === todayISO() ? dueToday() : [];
+    bar.innerHTML = "";
+    bar.hidden = due.length === 0;
+    if (!due.length) return;
+    var head = document.createElement("p");
+    head.className = "duehead";
+    head.appendChild(icon("repeat"));
+    head.appendChild(document.createTextNode("Due today"));
+    bar.appendChild(head);
+    var ul = document.createElement("ul");
+    due.forEach(function (it) {
+      var li = document.createElement("li");
+      li.dataset.id = it.id;
+      tintJob(li, it.job);
+      var t = document.createElement("span");
+      t.className = "dt";
+      t.textContent = it.text;
+      li.appendChild(t);
+      var pill = jobPill(it);
+      if (pill) li.appendChild(pill);
+      var log = document.createElement("button");
+      log.type = "button";
+      log.className = "dlog";
+      log.appendChild(icon("check"));
+      log.appendChild(document.createTextNode("Log"));
+      log.dataset.tip = "Log it today — it stays in Recurring for next time";
+      log.setAttribute("aria-label", "Log “" + it.text + "” today");
+      log.addEventListener("click", function () { assignRecurringToDay(it.id, todayISO()); refocusDue(); });
+      var skip = document.createElement("button");
+      skip.type = "button";
+      skip.className = "dskip";
+      skip.appendChild(icon("x"));
+      skip.dataset.tip = "Not today — it's offered again next time it's due";
+      skip.setAttribute("aria-label", "Skip “" + it.text + "” today");
+      skip.addEventListener("click", function () { skipToday(it.id); refocusDue(); });
+      li.appendChild(log);
+      li.appendChild(skip);
+      ul.appendChild(li);
+    });
+    bar.appendChild(ul);
   }
 
   function moveWishToDay(id, day) {
@@ -1793,7 +2030,7 @@
     if (v === "") return;
     var item = { id: newId(), text: v };
     var box = jobBoxes[kind];
-    var jid = ensureJob(box.input.value);
+    var jid = useJob(box.input.value);
     if (jid) {
       item.job = jid;
       setJobInput(box, jobById(jid).text);
@@ -1855,13 +2092,50 @@
     jobInput.setAttribute("aria-label", "Job for this " + QUEUE[kind].noun);
     jobWrap.appendChild(jobInput);
 
+    // recurring tasks can repeat on chosen weekdays
+    var picked = (item.days || []).slice();
+    var daysRow = null;
+    if (kind === "r") {
+      daysRow = document.createElement("div");
+      daysRow.className = "dayspick";
+      daysRow.setAttribute("role", "group");
+      daysRow.setAttribute("aria-label", "Due on");
+      var dl = document.createElement("span");
+      dl.className = "dl";
+      dl.textContent = "Due on";
+      daysRow.appendChild(dl);
+      WEEK_ORDER.forEach(function (d) {
+        var b = document.createElement("button");
+        b.type = "button";
+        b.textContent = DOW[d].charAt(0);
+        b.dataset.tip = LONGDOW[d];
+        b.setAttribute("aria-label", LONGDOW[d]);
+        var sync = function () {
+          var on = picked.indexOf(d) !== -1;
+          b.classList.toggle("on", on);
+          b.setAttribute("aria-pressed", on ? "true" : "false");
+        };
+        b.addEventListener("click", function () {
+          var at = picked.indexOf(d);
+          if (at === -1) picked.push(d); else picked.splice(at, 1);
+          sync();
+        });
+        sync();
+        daysRow.appendChild(b);
+      });
+    }
+
     function commit() {
       var v = input.value.trim();
       queueEdit = null;
       if (v === "") { removeQueueItem(kind, item.id); return; }
       item.text = v;
-      var jid = ensureJob(jobInput.value);
+      var jid = useJob(jobInput.value);
       if (jid) item.job = jid; else delete item.job;
+      if (kind === "r") {
+        var days = cleanDays(picked);
+        if (days) item.days = days; else delete item.days;
+      }
       saveQueue(kind);
       render();
     }
@@ -1891,6 +2165,7 @@
 
     li.appendChild(input);
     li.appendChild(jobWrap);
+    if (daysRow) li.appendChild(daysRow);
     li.appendChild(row);
     if (queueEditFocus) {
       queueEditFocus = false;
@@ -1903,6 +2178,7 @@
   function renderQueue(kind, ul, cfg) {
     var list = queueList(kind);
     ul.innerHTML = "";
+    var dueIds = kind === "r" ? dueToday().map(function (it) { return it.id; }) : [];
 
     if (list.length === 0) {
       var li0 = document.createElement("li");
@@ -1941,6 +2217,15 @@
         pill.draggable = false;
         body.appendChild(pill);
       }
+      if (item.days) {
+        var due = dueIds.indexOf(item.id) !== -1;
+        var sched = document.createElement("span");
+        sched.className = "sched";
+        sched.appendChild(icon("repeat"));
+        sched.appendChild(document.createTextNode((due ? "Due today · " : "") + scheduleLabel(item.days)));
+        li.classList.toggle("due", due);
+        body.appendChild(sched);
+      }
 
       li.addEventListener("dragstart", function (e) {
         e.dataTransfer.setData("text/plain", kind + ":" + item.id);
@@ -1961,7 +2246,7 @@
       var edit = document.createElement("button");
       edit.className = "wbtn edit";
       edit.appendChild(icon("pencil"));
-      edit.dataset.tip = "Edit the text or set its job";
+      edit.dataset.tip = kind === "r" ? "Edit the text, its job, or the days it's due" : "Edit the text or set its job";
       edit.setAttribute("aria-label", "Edit " + QUEUE[kind].noun);
       edit.addEventListener("click", function () { startQueueEdit(kind, item.id); });
 
@@ -2007,7 +2292,7 @@
     var v = input.value.trim();
     if (v === "") return;
     var entry = { id: newId(), text: v };
-    var jid = ensureJob($("newJob").value);
+    var jid = useJob($("newJob").value);
     if (jid) {
       entry.job = jid;
       setJobBox(jobById(jid).text); // tidy the box to the job's canonical name
@@ -2171,7 +2456,181 @@
       : "Last backup " + (days === 0 ? "today" : days === 1 ? "yesterday" : days + " days ago") +
         (due ? " — time for a fresh one" : "");
     el.classList.toggle("due", due);
-    el.hidden = el.textContent === "";
+    // while auto-backup is saving, its own line says everything
+    el.hidden = el.textContent === "" || auto.state === "on";
+  }
+
+  // ---------- automatic backup to a folder ----------
+  // Where the browser allows it (Chrome and Edge on a computer), Docket can
+  // keep a backup file in a folder the user picks — OneDrive or Dropbox
+  // makes that an off-device copy. Each change is written a moment later to
+  // that day's docket-backup-YYYY-MM-DD.json, and only the newest
+  // AUTO_KEEP of those files are kept. The folder handle lives in
+  // IndexedDB, the only storage that can hold one. The browser may ask
+  // again for permission in a later session: auto-backup then pauses
+  // and shows a Resume button, since asking needs a click.
+  var AUTO_FILE = /^docket-backup-\d{4}-\d{2}-\d{2}\.json$/;
+  var AUTO_KEEP = 30;
+  var AUTO_DELAY = 2000;
+  var auto = {
+    supported: typeof window.showDirectoryPicker === "function" && "indexedDB" in window,
+    dir: null,      // the chosen folder (FileSystemDirectoryHandle)
+    state: "off",   // off | on | paused (needs permission) | error
+    at: null,       // when the last write finished
+    timer: null,
+    busy: false,
+    again: false
+  };
+
+  // One small key-value store in IndexedDB for the folder handle.
+  function handleStore(mode, op) {
+    return new Promise(function (resolve, reject) {
+      var open = indexedDB.open("docket", 1);
+      open.onupgradeneeded = function () { open.result.createObjectStore("kv"); };
+      open.onerror = function () { reject(open.error); };
+      open.onsuccess = function () {
+        var db = open.result;
+        var tx = db.transaction("kv", mode);
+        var req = op(tx.objectStore("kv"));
+        tx.oncomplete = function () { db.close(); resolve(req.result); };
+        tx.onerror = tx.onabort = function () { db.close(); reject(tx.error); };
+      };
+    });
+  }
+
+  async function autoAllowed(ask) {
+    var opts = { mode: "readwrite" };
+    if ((await auto.dir.queryPermission(opts)) === "granted") return true;
+    return ask && (await auto.dir.requestPermission(opts)) === "granted";
+  }
+
+  function scheduleAutoBackup() {
+    if (!auto || !auto.dir || auto.state === "paused") return; // writes during start-up come before auto exists
+    clearTimeout(auto.timer);
+    auto.timer = setTimeout(writeAutoBackup, AUTO_DELAY);
+  }
+
+  // Writes are one at a time; a change during a write queues one more.
+  async function writeAutoBackup() {
+    clearTimeout(auto.timer);
+    auto.timer = null;
+    var dir = auto.dir;
+    if (!dir) return;
+    if (auto.busy) { auto.again = true; return; }
+    auto.busy = true;
+    var state;
+    try {
+      if (!(await autoAllowed(false))) {
+        state = "paused";
+      } else {
+        var file = await dir.getFileHandle("docket-backup-" + todayISO() + ".json", { create: true });
+        var out = await file.createWritable();
+        await out.write(backupJSON());
+        await out.close();
+        await pruneAutoBackups(dir);
+        state = "on";
+      }
+    } catch (e) {
+      state = "error";
+    }
+    auto.busy = false;
+    // turned off or moved to another folder meanwhile: this result is stale
+    if (auto.dir !== dir) { if (auto.again) { auto.again = false; scheduleAutoBackup(); } return; }
+    auto.state = state;
+    if (state === "on") { auto.at = new Date(); noteBackup(); }
+    renderAutoBackup();
+    renderBackupStatus();
+    if (auto.again) { auto.again = false; scheduleAutoBackup(); }
+  }
+
+  // Only Docket's own dated files are ever removed, oldest first.
+  async function pruneAutoBackups(dir) {
+    var names = [];
+    var it = dir.values();
+    for (var r = await it.next(); !r.done; r = await it.next()) {
+      if (r.value.kind === "file" && AUTO_FILE.test(r.value.name)) names.push(r.value.name);
+    }
+    names.sort();
+    while (names.length > AUTO_KEEP) await dir.removeEntry(names.shift());
+  }
+
+  async function chooseAutoFolder() {
+    var dir;
+    try {
+      dir = await window.showDirectoryPicker({ id: "docket-backup", mode: "readwrite", startIn: "documents" });
+    } catch (e) {
+      return; // the picker was cancelled
+    }
+    auto.dir = dir;
+    auto.state = "on";
+    try {
+      await handleStore("readwrite", function (st) { return st.put(dir, "backupDir"); });
+    } catch (e) {
+      toast("Auto-backup is on for now, but this browser can't remember the folder next time");
+    }
+    await writeAutoBackup();
+    $("autoOffBtn").focus(); // the button that was clicked is gone now
+    if (auto.state === "on") toast("Auto-backup on — every change is saved to “" + dir.name + "”");
+    else if (auto.state === "error") toast("Couldn't write to “" + dir.name + "” — try another folder");
+  }
+
+  async function resumeAutoBackup() {
+    try {
+      if (await autoAllowed(true)) { auto.state = "on"; await writeAutoBackup(); }
+      else toast("The browser didn't allow it — auto-backup stays paused");
+    } catch (e) {
+      auto.state = "error";
+    }
+    renderAutoBackup();
+  }
+
+  async function stopAutoBackup() {
+    var name = auto.dir ? auto.dir.name : "";
+    clearTimeout(auto.timer);
+    auto.dir = null;
+    auto.state = "off";
+    auto.at = null;
+    try { await handleStore("readwrite", function (st) { return st.delete("backupDir"); }); } catch (e) { /* nothing stored */ }
+    renderAutoBackup();
+    renderBackupStatus();
+    toast("Auto-backup off — the files already in “" + name + "” stay there");
+  }
+
+  function renderAutoBackup() {
+    var box = $("autoBackup");
+    box.hidden = !auto.supported;
+    if (!auto.supported) return;
+    var name = auto.dir ? "“" + auto.dir.name + "”" : "";
+    var stat = $("autoStat");
+    stat.className = "autostat " + auto.state;
+    stat.textContent = auto.state === "on"
+      ? "Auto-backup to " + name + (auto.at ? " · saved " + auto.at.toTimeString().slice(0, 5) : "")
+      : auto.state === "paused" ? "Auto-backup to " + name + " is paused — the browser needs your OK"
+      : auto.state === "error" ? "Couldn't save to " + name + " — it may have moved. Pick the folder again"
+      : "";
+    stat.hidden = auto.state === "off";
+    $("autoOnBtn").hidden = auto.state !== "off";
+    $("autoResumeBtn").hidden = auto.state !== "paused";
+    $("autoChangeBtn").hidden = auto.state === "off" || auto.state === "paused";
+    $("autoOffBtn").hidden = auto.state === "off";
+  }
+
+  // On start, pick up a folder chosen in an earlier session.
+  async function loadAutoBackup() {
+    if (!auto.supported) return;
+    try {
+      var dir = await handleStore("readonly", function (st) { return st.get("backupDir"); });
+      if (dir) {
+        auto.dir = dir;
+        auto.state = (await autoAllowed(false)) ? "on" : "paused";
+        if (auto.state === "on") scheduleAutoBackup();
+      }
+    } catch (e) {
+      auto.dir = null;
+      auto.state = "off";
+    }
+    renderAutoBackup();
+    renderBackupStatus();
   }
 
   // ---------- whole-state snapshots ----------
@@ -2192,6 +2651,14 @@
     saveWishlist();
     saveRecurring();
     render();
+  }
+
+  // An imported schedule lands on the matching recurring task (same words,
+  // same job), unless that task already has one of its own.
+  function fillDays(text, jobId, days) {
+    var same = recurring.filter(function (it) { return it.text === text; });
+    var it = same.find(function (r) { return (jobById(r.job) ? r.job : null) === (jobId || null); }) || same[0];
+    if (it && !it.days) it.days = days;
   }
 
   // ---------- CSV ----------
@@ -2247,22 +2714,26 @@
       toast("Nothing to export");
       return;
     }
-    var lines = ["Date,Task,Job"];
+    var lines = ["Date,Task,Job,Repeats"];
     var used = {};
     function row(first, it) {
       if (jobById(it.job)) used[it.job] = true;
-      lines.push(first + "," + csvQuote(csvSafe(it.text)) + "," + csvQuote(csvSafe(jobName(it))));
+      lines.push(first + "," + csvQuote(csvSafe(it.text)) + "," + csvQuote(csvSafe(jobName(it))) +
+        (it.days ? "," + scheduleLabel(it.days) : ""));
     }
     days.forEach(function (d) {
       data[d].forEach(function (it) { row(d, it); });
     });
-    // The lists ride along with "Wishlist" / "Recurring" in the Date column.
+    // The lists ride along with "Wishlist" / "Recurring" in the Date column;
+    // a recurring task's schedule goes in Repeats ("Every Friday", "Weekdays").
     wishlist.forEach(function (it) { row("Wishlist", it); });
     recurring.forEach(function (it) { row("Recurring", it); });
     // Jobs nothing points at still belong in the export: a row with only
-    // the Job column recreates them on import.
+    // the Job column recreates them on import. "Archived" in the Date
+    // column marks a job as archived.
     jobs.forEach(function (j) {
-      if (!used[j.id]) lines.push(",," + csvQuote(csvSafe(j.text)));
+      if (j.archived) lines.push("Archived,," + csvQuote(csvSafe(j.text)));
+      else if (!used[j.id]) lines.push(",," + csvQuote(csvSafe(j.text)));
     });
     // BOM so Excel opens it as UTF-8
     downloadFile("docket-export-" + todayISO() + ".csv", "﻿" + lines.join("\r\n"), "text/csv");
@@ -2272,7 +2743,8 @@
 
   // Expected shape: one entry per row — date in the first column, task in the
   // second (extra columns are appended to the task). A header row naming the
-  // third column "Job" (or Project/Client) makes that column the entry's job.
+  // third column "Job" (or Project/Client) makes that column the entry's job,
+  // and a fourth headed "Repeats" holds recurring tasks' schedules.
   // Merges, skips duplicates.
   function importCSV(file) {
     var reader = new FileReader();
@@ -2285,24 +2757,35 @@
       var first = String(rows[0][0] || "").trim();
       var start = parseDateFlexible(first) || LIST_ROW.test(first) ? 0 : 1; // skip header row
       var jobCol = start === 1 && /^(job|project|client|group)$/i.test(String(rows[0][2] || "").trim());
+      var repCol = jobCol && /^(repeats?|schedule|due)$/i.test(String(rows[0][3] || "").trim());
       var added = 0, skipped = 0, filled = 0, daysTouched = {};
       var ctx = newImport(jobCol);
       var listAdded = { w: 0, r: 0 };
       var jobsBefore = jobs.length;
+      var hadJob = {};
+      jobs.forEach(function (j) { hadJob[j.id] = true; });
       for (var i = start; i < rows.length; i++) {
         var day = parseDateFlexible(rows[i][0]);
         var cells = rows[i].map(function (f) { return csvUnsafe(f.trim()); });
+        var repeats = repCol ? parseSchedule(cells.splice(3, 1)[0]) : null;
         var jobText = jobCol ? cleanJobName(cells[2]) : "";
         if (jobCol) cells.splice(2, 1);
         var text = cells.slice(1)
           .filter(function (f) { return f !== ""; })
           .join(", ");
-        // a job-only row (no date, no task) is a job with nothing logged yet
-        if (jobText && cells[0] === "" && text === "") { ensureJob(jobText); continue; }
+        // a job-only row (no date, no task) is a job with nothing logged yet;
+        // "Archived" in the date column archives it, if this import made it
+        if (jobText && text === "" && (cells[0] === "" || /^archived( job)?$/i.test(cells[0]))) {
+          var jid = ensureJob(jobText);
+          if (cells[0] !== "" && !hadJob[jid]) jobById(jid).archived = true;
+          continue;
+        }
         var listKind = LIST_ROW.test(cells[0]) ? cells[0].charAt(0).toLowerCase() : null;
         if ((!day && !listKind) || text === "") { skipped++; continue; }
         var target = listKind ? queueList(listKind) : (data[day] || (data[day] = []));
-        var result = mergeItem(target, text, ensureJob(jobText), ctx);
+        var rowJob = ensureJob(jobText);
+        var result = mergeItem(target, text, rowJob, ctx);
+        if (listKind === "r" && repeats) fillDays(text, rowJob, repeats);
         if (result === "dup") { skipped++; continue; }
         if (result === "updated") { filled++; continue; }
         if (listKind) { listAdded[listKind]++; continue; }
@@ -2310,6 +2793,7 @@
         added++;
       }
       save();
+      saveJobs();
       saveWishlist();
       saveRecurring();
       render();
@@ -2333,15 +2817,19 @@
   }
 
   // ---------- JSON backup ----------
-  function exportData() {
+  // The backup file: every day of the log by date, plus the lists and jobs.
+  // The same text is what Export JSON downloads and auto-backup writes.
+  function backupJSON() {
     var payload = {};
     Object.keys(data).forEach(function (d) { payload[d] = data[d]; });
     payload._wishlist = wishlist;
     payload._recurring = recurring;
     payload._jobs = jobs;
     payload._docket = { version: 2, exported: new Date().toISOString() };
-    downloadFile("docket-backup-" + todayISO() + ".json",
-      JSON.stringify(payload, null, 2), "application/json");
+    return JSON.stringify(payload, null, 2);
+  }
+  function exportData() {
+    downloadFile("docket-backup-" + todayISO() + ".json", backupJSON(), "application/json");
     noteBackup();
     toast("Backup exported");
   }
@@ -2365,6 +2853,7 @@
             var had = !!jobByName(j.text);
             var local = ensureJob(j.text, j.color);
             if (local) { jobMap[j.id] = local; if (!had) added++; }
+            if (local && !had && j.archived === true) jobById(local).archived = true;
           });
         }
         // Entries, wishlist and recurring all merge by the same rule.
@@ -2374,9 +2863,12 @@
             var text = (it && typeof it.text === "string") ? it.text
                      : (typeof it === "string") ? it : null;
             if (!text) return;
-            var r = mergeItem(target, text, (it && jobMap[it.job]) || null, ctx);
+            var jid = (it && jobMap[it.job]) || null;
+            var r = mergeItem(target, text, jid, ctx);
             if (r === "added") added++;
             if (r === "updated") filled++;
+            var days = target === recurring && it ? cleanDays(it.days) : null;
+            if (days) fillDays(text, jid, days);
           });
         }
         mergeAll(incoming._wishlist, wishlist);
@@ -2387,6 +2879,7 @@
           mergeAll(incoming[day], data[day]);
         });
         save();
+        saveJobs();
         saveWishlist();
         saveRecurring();
         render();
@@ -2531,10 +3024,73 @@
     this.value = "";
   });
   $("exportBtn").addEventListener("click", exportData);
+  $("autoOnBtn").addEventListener("click", chooseAutoFolder);
+  $("autoChangeBtn").addEventListener("click", chooseAutoFolder);
+  $("autoResumeBtn").addEventListener("click", resumeAutoBackup);
+  $("autoOffBtn").addEventListener("click", stopAutoBackup);
+  // leaving the page: write a pending change now rather than lose it
+  document.addEventListener("visibilitychange", function () {
+    if (document.hidden && auto.timer) writeAutoBackup();
+  });
   $("importBtn").addEventListener("click", function () { $("importFile").click(); });
   $("importFile").addEventListener("change", function () {
     if (this.files && this.files[0]) importData(this.files[0]);
     this.value = "";
+  });
+
+  // ---------- printable job report ----------
+  // Print (or Save as PDF) from the Job view gives a clean report instead of
+  // the screen: the job, its date span and totals, every entry by day in
+  // log order, and what's still to do on it. Built from text nodes only.
+  function buildReport(jobId) {
+    var job = jobById(jobId);
+    var out = $("printReport");
+    out.innerHTML = "";
+    if (!job) return false;
+    var st = jobStats()[jobId] || { n: 0, days: [], first: null, last: null };
+    function el(tag, cls, text) {
+      var e = document.createElement(tag);
+      if (cls) e.className = cls;
+      if (text !== undefined) e.textContent = text;
+      return e;
+    }
+    out.appendChild(el("p", "rp-kicker", "Job report"));
+    out.appendChild(el("h1", null, job.text));
+    var span = !st.first ? "Nothing logged yet"
+      : st.first === st.last ? prettyDate(st.first) : prettyDate(st.first) + " – " + prettyDate(st.last);
+    out.appendChild(el("p", "rp-span", span));
+    out.appendChild(el("p", "rp-meta",
+      plural(st.n, "entry", "entries") + " over " + plural(st.days.length, "day", "days") +
+      " · printed " + prettyDate(todayISO())));
+    st.days.slice().sort().forEach(function (d) {
+      var sec = el("section", "rp-day");
+      sec.appendChild(el("h2", null, prettyDate(d)));
+      var ul = el("ul");
+      (data[d] || []).forEach(function (it) { if (it.job === jobId) ul.appendChild(el("li", null, it.text)); });
+      sec.appendChild(ul);
+      out.appendChild(sec);
+    });
+    var todo = wishlist.filter(function (it) { return it.job === jobId; });
+    if (todo.length) {
+      var sec = el("section", "rp-day rp-todo");
+      sec.appendChild(el("h2", null, "Still to do"));
+      var ul = el("ul");
+      todo.forEach(function (it) { ul.appendChild(el("li", null, it.text)); });
+      sec.appendChild(ul);
+      out.appendChild(sec);
+    }
+    out.appendChild(el("p", "rp-foot", "Docket · " + job.text));
+    return true;
+  }
+  // Ctrl+P in the Job view prints the report too; elsewhere, the page.
+  function preparePrint() {
+    if (view === "job" && buildReport(currentJob)) document.body.classList.add("print-report");
+  }
+  window.addEventListener("beforeprint", preparePrint);
+  window.addEventListener("afterprint", function () { document.body.classList.remove("print-report"); });
+  $("printJobBtn").addEventListener("click", function () {
+    preparePrint();
+    window.print();
   });
 
   // ---------- clear data ----------
@@ -2661,7 +3217,7 @@
     if (searchIndex.version === dataVersion) return searchIndex.items;
     var out = [];
     jobs.forEach(function (j) {
-      out.push({ kind: "job", id: j.id, text: j.text, job: j.id, hay: j.text });
+      out.push({ kind: "job", id: j.id, text: j.text, job: j.id, archived: !!j.archived, hay: j.text + (j.archived ? " archived" : "") });
     });
     Object.keys(data).sort().reverse().forEach(function (d) {
       var label = prettyDate(d);
@@ -2742,7 +3298,7 @@
         var dd = dateObj(h.day);
         where.textContent = DOW[dd.getDay()] + " " + dd.getDate() + " " + MON[dd.getMonth()] + " " + dd.getFullYear();
       } else {
-        where.textContent = h.kind === "job" ? "Job" : h.kind === "w" ? "Wishlist" : "Recurring";
+        where.textContent = h.kind === "job" ? (h.archived ? "Archived job" : "Job") : h.kind === "w" ? "Wishlist" : "Recurring";
         where.classList.add("kind");
       }
       var what = document.createElement("span");
@@ -3086,7 +3642,7 @@
     if (e.key !== null && DATA_KEYS.indexOf(e.key) === -1) return;
     data = load();
     wishlist = loadList(WISH_KEY);
-    recurring = loadList(REC_KEY);
+    recurring = loadList(REC_KEY, cleanRec);
     jobs = loadList(JOB_KEY, cleanJob);
     dataVersion++;   // the data changed: refresh anything cached against it
     lastUndo = null; // undo closures point at the old copies
@@ -3096,6 +3652,8 @@
   });
 
   render();
+  renderAutoBackup();
+  loadAutoBackup();
 
   if (storageBlocked) {
     failSaved();

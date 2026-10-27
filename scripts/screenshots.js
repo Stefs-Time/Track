@@ -46,7 +46,7 @@ function sampleData() {
     "track.jobs.v1": JSON.stringify(jobs),
     "track.tasks.v1": JSON.stringify(tasks),
     "track.wishlist.v1": JSON.stringify([{ id: "w1", text: "Order paint", job: "j1" }, { id: "w2", text: "Book electrician", job: "j2" }, { id: "w3", text: "Renew insurance" }]),
-    "track.recurring.v1": JSON.stringify([{ id: "r1", text: "Timesheet" }, { id: "r2", text: "Site safety check", job: "j2" }])
+    "track.recurring.v1": JSON.stringify([{ id: "r1", text: "Timesheet", days: [new Date().getDay()] }, { id: "r2", text: "Site safety check", job: "j2" }])
   };
 }
 

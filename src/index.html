@@ -70,12 +70,21 @@
         </div>
       </div>
       <ul class="wishlist" id="recList"></ul>
-      <div class="wish-hint">Drag or ↳ to log it on a day — it stays in this list</div>
+      <div class="wish-hint">Drag or ↳ to log it on a day — it stays in this list. ✎ sets the days it's due</div>
     </section>
 
     <section class="tools">
       <h2>Backup &amp; data</h2>
       <p class="backupstat" id="backupStat" role="status"></p>
+      <div class="autobackup" id="autoBackup" hidden>
+        <p class="autostat" id="autoStat" role="status" hidden></p>
+        <div class="autobtns">
+          <button id="autoOnBtn" data-tip="Pick a folder (OneDrive or Dropbox works well) and Docket saves a backup there after every change"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/><path d="m9 13 2 2 4-4"/></svg></span>Back up automatically to a folder</button>
+          <button id="autoResumeBtn" class="primary" hidden data-tip="Let Docket write to the folder again">Resume auto-backup</button>
+          <button id="autoChangeBtn" class="quiet" hidden data-tip="Save the backups to a different folder">Change folder</button>
+          <button id="autoOffBtn" class="quiet" hidden data-tip="Stop saving to the folder — files already there stay">Turn off</button>
+        </div>
+      </div>
       <div class="tools-grid">
         <button id="exportBtn" data-tip="Back up everything — log, jobs, wishlist and recurring — to a JSON file"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg></span>Export JSON</button>
         <button id="importBtn" data-tip="Merge a JSON backup back in — duplicates are skipped"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 8 5-5 5 5"/><path d="M12 3v12"/></svg></span>Import JSON</button>
@@ -103,6 +112,7 @@
         <button id="copyDay" data-tip="Date heading + bulleted list — ready to paste into an email or invoice. Shortcut: C"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span><span id="copyDayLabel">Copy Day to Clipboard</span></button>
         <button id="copyPlain" data-tip="Just the lines, one per line — no date heading"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg></span>Copy Items Only</button>
         <button id="logJobBtn" style="display:none" data-tip="Set this as the job and start logging on the open day — shortcut: N"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span>Log Work on This Job</button>
+        <button id="printJobBtn" style="display:none" data-tip="A clean report of this job — every entry by day, ready to print or save as a PDF"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></span>Print / PDF</button>
         <button id="todayBtn" data-tip="Back to today — shortcut: T"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M12 14h.01"/></svg></span>Jump to Today</button>
       </div>
     </section>
@@ -131,6 +141,7 @@
         <button id="addBtn" aria-label="Add entry"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>Add</button>
       </div>
 
+      <section class="duebar" id="dueBar" aria-label="Recurring tasks due today" hidden></section>
       <div class="sheet" id="sheet"><ol class="items" id="itemList"></ol></div>
       <div class="empty" id="emptyMsg">
         <svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><rect x="9" y="6" width="14" height="21" rx="2.5" stroke="currentColor" stroke-width="1.6"/><rect x="12" y="3.5" width="8" height="4.5" rx="1.5" fill="currentColor" stroke="none"/><path d="M12 16l2.6 2.6 5.4-5.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -213,6 +224,8 @@
         <li>Every job has its own <b>colour</b> — on its pills, down the edge of its entries, and on the calendar. Click the coloured dot beside a job in the sidebar to change it.</li>
         <li>The <b>Month</b> calendar names each day's jobs, busiest first, with a bar showing how the day split between them.</li>
         <li>Change an entry's job with the <b>✎ pencil</b>. Rename or delete a job from the sidebar; deleting a job keeps everything that was on it.</li>
+        <li><b>Finished a job?</b> Hover it and click the <b>archive</b> box. It leaves the Jobs list and the Job box's suggestions, but everything on it stays — <b>Show archived</b> under the list brings it back into view, and <b>Restore</b> returns it. Logging new work against an archived job restores it by itself.</li>
+        <li><b>Print / PDF</b> in the Job view gives a clean report of the job — its dates and totals, every entry by day, and what's still to do. Choose <i>Save as PDF</i> in the print dialog to keep or email it.</li>
       </ul>
 
       <h3><span class="tick">●</span> Copy &amp; paste</h3>
@@ -236,7 +249,7 @@
         <li><kbd>←</kbd> <kbd>→</kbd> — previous / next day (steps by week or month in those views)</li>
         <li><kbd>T</kbd> — jump to today &nbsp;·&nbsp; <kbd>D</kbd> <kbd>W</kbd> <kbd>M</kbd> — switch to Day, Week or Month view</li>
         <li><kbd>N</kbd> — start typing a new entry &nbsp;·&nbsp; <kbd>J</kbd> — pick the job for new entries</li>
-        <li><kbd>C</kbd> — copy the open day, week, month or job</li>
+        <li><kbd>C</kbd> — copy the open day, week, month or job &nbsp;·&nbsp; <kbd>Ctrl</kbd> <kbd>P</kbd> in the Job view — print its report</li>
         <li><kbd>?</kbd> — open this guide &nbsp;·&nbsp; <kbd>Esc</kbd> — close it</li>
       </ul>
 
@@ -252,16 +265,18 @@
         <li>Add tasks you do again and again to <b>Recurring</b> in the sidebar.</li>
         <li>Drag one onto any day (or click <b>↳</b> for the open day) to log it — <b>it stays in the list</b> so you can use it next time.</li>
         <li>If it's already on that day (same job), Docket skips the duplicate and tells you.</li>
+        <li><b>Due on set days?</b> Click its <b>✎</b> and tick the days (say, <b>F</b> for a Friday timesheet). On those days it appears under <b>Due today</b> at the top of today's log: <b>Log</b> adds it, <b>✕</b> skips it until next time.</li>
       </ul>
 
       <h3><span class="tick">●</span> CSV import / export (Excel)</h3>
       <p>Bulk-load the month to date from a spreadsheet. One entry per row: date first, task second, and optionally a job third.
-        Put <b>Wishlist</b> or <b>Recurring</b> in the date column to load those lists instead.</p>
-      <pre>Date,Task,Job
+        Put <b>Wishlist</b> or <b>Recurring</b> in the date column to load those lists instead; a fourth <b>Repeats</b> column gives a recurring task its days.</p>
+      <pre>Date,Task,Job,Repeats
 2026-07-01,"Installed blinds, lounge",Smith House
 02/07/2026,Quoted new office fit-out,
 Wishlist,Order paint,Smith House
-Recurring,Timesheet,</pre>
+Recurring,Timesheet,,Every Friday
+Archived,,Garden shed</pre>
       <ul>
         <li>The header row is optional — but to import jobs, include it with <b>Job</b> as the third heading. Dates can be <b>2026-07-01</b> or <b>01/07/2026</b> style (day-first).</li>
         <li>Comma, semicolon or tab delimited — detected automatically.</li>
@@ -274,11 +289,12 @@ Recurring,Timesheet,</pre>
         <li>Data is stored by <b>this browser, on this computer</b>. Stick to one browser (e.g. always Edge).</li>
         <li><b>Export JSON</b> saves everything — including jobs and the wishlist — to a file; <b>Import JSON</b> merges it back in. Use it to move to another browser or PC, or as a safety net.</li>
         <li>Clearing the browser's site data erases the log — keep an occasional export. Under <b>Backup &amp; data</b> Docket shows when you last exported, and reminds you when it's been two weeks and the log has changed since.</li>
+        <li><b>Back up automatically to a folder</b> (Chrome and Edge on a computer): pick a folder once — a OneDrive or Dropbox folder gives you an off-computer copy — and Docket saves a backup there after every change, one file per day, keeping the last 30. If the browser asks for permission again later, click <b>Resume auto-backup</b>.</li>
         <li>Open in two tabs? They stay in step — a change in one appears in the other.</li>
         <li>If the browser blocks storage, Docket still works but shows <b>Not saved</b> — export before you close it.</li>
         <li><b>Clear data…</b> wipes the log, jobs, wishlist and/or recurring tasks — you tick which. Use it to start fresh,
           e.g. clear everything then <b>Import JSON</b> to reload a backup cleanly. It offers to export a backup first, and an <b>Undo</b> pops up afterwards.</li>
-        <li>Both <b>JSON</b> and <b>CSV</b> hold everything — the log, jobs, wishlist and recurring tasks, each with its job. JSON is the exact backup; CSV is the one to open in Excel.</li>
+        <li>Both <b>JSON</b> and <b>CSV</b> hold everything — the log, jobs (archived or not), wishlist and recurring tasks with their days, each with its job. JSON is the exact backup; CSV is the one to open in Excel.</li>
       </ul>
 
       <h3><span class="tick">●</span> Install it as an app</h3>
@@ -344,6 +360,7 @@ Recurring,Timesheet,</pre>
 </div>
 
 <div id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+<div class="printreport" id="printReport"></div>
 
 <script src="app.js"></script>
 </body>
