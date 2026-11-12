@@ -16,7 +16,16 @@ const STATES = [
   ["auto-backup on", async (p) => { await p.keyboard.press("Escape"); await p.click("#autoOnBtn"); await p.waitForSelector("#autoStat.on"); }],
   ["guide", async (p) => p.click("#helpBtn")],
   ["Clear data dialog", async (p) => { await p.keyboard.press("Escape"); await p.click("#clearAllBtn"); }],
-  ["search", async (p) => { await p.keyboard.press("Escape"); await p.click("#searchBtn"); await p.fill("#searchInput", "smith"); }]
+  ["search", async (p) => { await p.keyboard.press("Escape"); await p.click("#searchBtn"); await p.fill("#searchInput", "smith"); }],
+  // the message bar, held fully shown (on its own it fades on a timer)
+  ["message", async (p) => {
+    await p.keyboard.press("Escape");
+    await p.evaluate(() => {
+      const t = document.getElementById("toast");
+      t.textContent = "Entry deleted";
+      t.classList.add("show");
+    });
+  }, true]
 ];
 
 for (const scheme of ["light", "dark"]) {
@@ -36,8 +45,15 @@ for (const scheme of ["light", "dark"]) {
       });
       await page.goto("/");
       const found = [];
-      for (const [name, go] of STATES) {
+      for (const [name, go, keepToast] of STATES) {
         await go(page);
+        // a message fading on its own timer would be scanned half-transparent,
+        // and fail contrast by luck of timing; it gets its own state instead
+        await page.evaluate((keep) => {
+          const t = document.getElementById("toast");
+          t.style.transition = "none";
+          if (!keep) t.classList.remove("show");
+        }, !!keepToast);
         await settle(page);
         const { violations } = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]).analyze();
         violations.forEach((v) => found.push(`${name}: ${v.id} — ${v.nodes.map((n) => n.target.join(" ")).join(", ")}`));

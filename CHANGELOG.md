@@ -17,6 +17,12 @@ A visual, security and functional audit: fixes only, no new features.
 - On phones, a **Due today** task with a job squeezed its name into a narrow column.
   The task now has its own line, with its job and buttons beneath.
 
+### Tests
+- The accessibility scan could fail by timing: a message fading out on its own
+  timer was sometimes scanned half-transparent (this failed the 2.7 pull request
+  check once). Messages are now held still during scans, and the message bar has
+  its own fully-shown accessibility check.
+
 ### Documentation
 - The guide and README list every action Undo covers, and Ctrl+P among the
   shortcuts. Stale references in the test config and docs are corrected.
