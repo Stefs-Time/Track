@@ -2601,10 +2601,12 @@
     auto.dir = null;
     auto.state = "off";
     auto.at = null;
-    try { await handleStore("readwrite", function (st) { return st.delete("backupDir"); }); } catch (e) { /* nothing stored */ }
+    // the screen answers at once; forgetting the folder can finish after
     renderAutoBackup();
     renderBackupStatus();
+    $("autoOnBtn").focus(); // the button that was clicked is gone now
     toast("Auto-backup off — the files already in “" + name + "” stay there");
+    try { await handleStore("readwrite", function (st) { return st.delete("backupDir"); }); } catch (e) { /* nothing stored */ }
   }
 
   function renderAutoBackup() {

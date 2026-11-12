@@ -14,10 +14,19 @@ A visual, security and functional audit: fixes only, no new features.
   25 MB are refused straight away with a message; real backups are a few MB.
 - Skipping a task under **Due today** in one tab left it showing in another open
   tab until that tab redrew. Both tabs now stay in step.
+- **Turn off** auto-backup now updates the screen at once, instead of after the
+  browser finished forgetting the folder.
 - On phones, a **Due today** task with a job squeezed its name into a narrow column.
   The task now has its own line, with its job and buttons beneath.
 
-### Tests
+### Tests and CI
+- **CI was failing before any test ran:** GitHub moved `ubuntu-latest` to Ubuntu
+  26.04, where Playwright 1.56 can't install its browser. CI and Release now run on
+  `ubuntu-24.04`, and the test tooling is updated to Playwright 1.63.
+- Newer Chromium crashes when a stored private-file-system folder is read back from
+  IndexedDB in a throwaway, incognito-like profile. That's a browser bug that
+  real use doesn't hit (a normal profile works). The auto-backup tests now run in a
+  normal persistent profile, like real use.
 - The accessibility scan could fail by timing: a message fading out on its own
   timer was sometimes scanned half-transparent (this failed the 2.7 pull request
   check once). Messages are now held still during scans, and the message bar has
