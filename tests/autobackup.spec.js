@@ -91,6 +91,18 @@ test("back up to a folder automatically after every change", async ({ page }) =>
   check(!files["docket-backup-2020-01-01.json"] && !files["docket-backup-2020-01-03.json"] && files["docket-backup-2020-01-04.json"], "the oldest files are removed first");
   check(files[todayFile] && files["my notes.txt"] === "keep me", "today's backup and other files are never touched");
 
+  // Change folder: later backups go to the new one
+  await page.evaluate(() => {
+    window.showDirectoryPicker = async () => (await navigator.storage.getDirectory()).getDirectoryHandle("Other folder", { create: true });
+  });
+  await page.click("#autoChangeBtn");
+  await page.waitForFunction(() => document.getElementById("autoStat").textContent.includes("Other folder"));
+  const moved = await page.evaluate(async (name) => {
+    const dir = await (await navigator.storage.getDirectory()).getDirectoryHandle("Other folder");
+    return (await (await dir.getFileHandle(name)).getFile()).text();
+  }, todayFile);
+  check(moved.includes("Third entry"), "Change folder writes the backup to the new folder straight away");
+
   // turn it off
   await page.click("#autoOffBtn");
   check(await page.isVisible("#autoOnBtn") && !(await page.isVisible("#autoStat")), "Turn off goes back to the offer");

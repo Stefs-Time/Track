@@ -33,7 +33,6 @@ test('Clear data, Undo, and clear → re-import round trips', async ({ page }) =
   check(J._jobs.length === 3 && J._wishlist.length === 1 && J._recurring.length === 2 && J._docket.version === 2, 'JSON has jobs, wishlist, recurring, format tag');
   const [dc] = await Promise.all([page.waitForEvent('download'), page.click('#csvExportBtn')]);
   const csv = fs.readFileSync(await dc.path(), 'utf8');
-  console.log(csv);
   check(/\r\n,,Garden shed$/.test(csv), 'CSV keeps job with no entries as job-only row');
 
   // Dialog
@@ -89,7 +88,6 @@ test('Clear data, Undo, and clear → re-import round trips', async ({ page }) =
   await importFile(page, '#csvFile', { name: 'c.csv', mimeType: 'text/csv', buffer: Buffer.from(csv) });
   const after = summary(await state());
   check(JSON.stringify(after.entries) === JSON.stringify(before.entries) && JSON.stringify(after.jobs) === JSON.stringify(before.jobs), 'CSV re-import restores entries, jobs (incl. empty job), quotes');
-  console.log('toast:', await page.textContent('#toast'));
   check((await page.textContent('#toast')).includes('3 new jobs'), 'CSV import reports new jobs');
 
   // Mobile dialog

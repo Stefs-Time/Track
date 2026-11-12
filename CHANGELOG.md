@@ -2,6 +2,50 @@
 
 All notable changes to Docket. Versions follow [Semantic Versioning](https://semver.org/).
 
+## [2.7.4] — 2026-11-12
+
+A repository audit, tidy-up and documentation update. The app itself is unchanged.
+
+### Fixed
+- `.env.example` said to copy it to `.env`, but nothing read that file. The server
+  now loads `.env` on start if it's there; variables already set (such as Railway's)
+  still win, and nothing is printed when there's no file.
+
+### Changed
+- Requires **Node.js 22.9 or newer**: Node 20 reached end of life in April 2026.
+- CI and Release use `actions/checkout`, `setup-node` and `upload-artifact` v7,
+  which run on Node 24 (v4 ran on the retired Node 20 runtime, with a warning on
+  every run).
+- Tests no longer print debug output (CSV dumps, copied text) into the CI log.
+
+### Documentation
+- README: a table of every `npm` command, the complete project layout, automatic
+  folder backup in the feature list, how `.env` and Railway variables combine,
+  what CI checks, and screenshots and the lockfile in the release steps.
+- ARCHITECTURE: what CI runs and why Playwright and the runner are pinned, and
+  where the server's settings come from.
+
+## [2.7.3] — 2026-11-12
+
+A testing, UAT, UI and UX audit: fixes only, no new features.
+
+### Fixed
+- **Copy Items Only** in the Week and Month views left a blank line between days,
+  though it promises "one per line" (and the Day and Job views keep to that). It
+  now gives one line per entry everywhere; the headed copy still separates days.
+
+### Tests
+- A test-coverage audit matched every control against the suites. A new `journeys`
+  suite walks through what none of them did: the stat tiles and week/month
+  summaries, Copy Week and Copy Month, Clear this day and its Undo, moving by ← → T
+  and the date picker, opening a day from the Month view, folding a month in Recent
+  days and its calendar icon, every + button, the floating +, the job ✕ on a list,
+  and the ✕ on the guide and Clear data dialogs. Auto-backup's **Change folder** is
+  now tested too.
+- Also checked, with nothing to fix: very long words and links, 1,000-character
+  entries and pasted line breaks wrap without breaking the layout on PC or phone,
+  and the message bar never sits under the floating +.
+
 ## [2.7.2] — 2026-11-12
 
 A user-acceptance, UI and UX audit: fixes only, no new features.

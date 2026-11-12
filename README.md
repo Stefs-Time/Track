@@ -29,6 +29,7 @@ It comes two ways, from the same code:
 - **Undo** for deletes, moves, links, archiving, skips, imports and **Clear data** — the button, or Ctrl+Z for a minute afterwards.
 - **Import and export.** JSON is the exact backup. CSV opens in Excel. Both carry everything, including jobs, archived jobs and recurring schedules. See [docs/DATA-FORMAT.md](docs/DATA-FORMAT.md).
 - **Backup reminder.** Shows when you last exported, and nudges you when it's been a while and the log has changed.
+- **Automatic backup to a folder** (Chrome and Edge on a computer). Pick a folder once and every change is saved there as a dated JSON backup, keeping the newest 30.
 - **Keyboard shortcuts.** `/` search, `←` `→` move, `T` today, `D` `W` `M` views, `N` new entry, `J` job, `C` copy, `Ctrl+P` print a report, `Ctrl+Z` undo, `Esc` leave a box, `?` guide.
 - **Built-in guide.** It opens on first use, and the **?** button brings it back. Every control explains itself on hover or keyboard focus.
 
@@ -57,36 +58,52 @@ Docket is built to WCAG 2.1 AA. An automated axe-core check covers every view an
 
 ## Development
 
-Requires **Node.js 20+** (22 recommended; see `.nvmrc`).
+Requires **Node.js 22.9 or newer** (see `.nvmrc`; Node 20 is end-of-life).
 
 ```bash
 npm install
-npm run dev      # rebuilds on change and serves http://localhost:3000
-npm test         # builds, then runs the Playwright end-to-end suite (incl. accessibility)
-npm run check    # ESLint + syntax checks
+npx playwright install chromium   # once per machine: the browser the tests drive
+npm run dev                       # rebuilds on change and serves http://localhost:3000
 ```
 
-The first time on a new machine, install the test browser with `npx playwright install chromium`.
+| Command | What it does |
+|---|---|
+| `npm run dev` | Builds, then rebuilds whenever `src/` changes and restarts the server when `server.js` does |
+| `npm run build` | Writes `dist/` (the served page, the standalone `Docket.html`, precompressed copies) |
+| `npm start` | Builds, then runs the production server |
+| `npm test` | Builds, then runs every Playwright suite: features, user journeys, accessibility, the server |
+| `npm run check` | ESLint plus syntax checks of the browser scripts |
+| `npm run screenshots` | Regenerates the images in `docs/screenshots/` |
+| `npm run icons` | Renders the PNG app icons from `src/icons/icon.svg` |
+
+Local settings go in an optional `.env` (copy `.env.example`); the server reads it on start.
 
 ### How it's put together
 
 ```
 src/
-  index.html             page markup
-  styles.css             all styles
+  index.html             page markup, including the built-in guide
+  styles.css             all styles: design tokens, light and dark, print
   app.js                 all behaviour (plain JS, no framework, no runtime deps)
   sw.js                  service worker (offline support)
   manifest.webmanifest   PWA manifest
   icons/                 app icons (icon.svg is the source)
 scripts/
-  build.js               inlines CSS + JS into one file → dist/
+  build.js               inlines CSS + JS into one file, precompresses → dist/
   dev.js                 build-watch + server, cross-platform
   screenshots.js         regenerates docs/screenshots/
   icons.js               renders the PNG icons from icons/icon.svg
+tests/                   Playwright suites (see docs/ARCHITECTURE.md for what each covers)
+docs/
+  ARCHITECTURE.md        how the code fits together, and the rules every change follows
+  DATA-FORMAT.md         the JSON and CSV formats, storage keys, validation
+  screenshots/           images used in this README
+.github/workflows/       CI on every push and pull request; Release on version tags
 server.js                Express server for hosting the app
-tests/                   Playwright end-to-end and accessibility suites
-docs/                    architecture, data formats and screenshots
+railway.json             Railway build, start and health-check settings
+playwright.config.js     test runner settings
 eslint.config.js         lint rules
+CHANGELOG.md             what changed in each version
 ```
 
 The code is split into separate files to make it easy to work on. `npm run build` inlines it back into one self-contained page, which is what keeps the double-click download working. The build writes `dist/index.html` (served by the server) and `dist/Docket.html` (the standalone download). `dist/` is generated output and isn't committed.
@@ -111,7 +128,7 @@ Docket needs no database. All data stays in each user's browser, so the server o
 | `PORT` | `3000` | Port to listen on. Railway sets this for you. |
 | `HOST` | `0.0.0.0` | Interface to bind. |
 
-See `.env.example`. There are no secrets to configure.
+On Railway, set these in the service's **Variables** if you need to change them. Locally, put them in a `.env` file (see `.env.example`), which the server reads on start; variables already set in the environment always win. There are no secrets to configure.
 
 **Endpoints**
 
@@ -125,8 +142,9 @@ The build precompresses the page (brotli and gzip), so it downloads at about a f
 
 ## Releasing
 
-1. Bump `version` in `package.json` and add a section to `CHANGELOG.md`.
-2. Commit, then tag and push the same version: `git tag vX.Y.Z && git push origin vX.Y.Z`.
-3. The **Release** workflow runs the tests and publishes a GitHub Release with `Docket.html` attached, ready to download.
+1. Bump `version` in `package.json` (then `npm install --package-lock-only` to match the lockfile) and add a section to `CHANGELOG.md`.
+2. If the look changed, run `npm run screenshots`.
+3. Commit, then tag and push the same version: `git tag vX.Y.Z && git push origin vX.Y.Z`.
+4. The **Release** workflow checks the tag matches `package.json`, runs the tests, and publishes a GitHub Release with `Docket.html` attached, ready to download.
 
-CI runs lint and the full test suite on every push and pull request. Each run also uploads the built `Docket.html` as an artifact.
+**CI** runs on every push and pull request: a dependency audit of what ships (`npm audit --omit=dev`, failing on high severity), lint, then the full test suite. Each run uploads the built `Docket.html`, and the test report when something fails. CI and Release run on a pinned `ubuntu-24.04`, because a new `ubuntu-latest` image can arrive before Playwright supports it.

@@ -83,7 +83,6 @@ test('Jobs: log against a job, see all its work, rename, delete, copy, export', 
   await page.click('#copyDay');
   const jclip = await page.evaluate(() => navigator.clipboard.readText());
   check(jclip.startsWith('Smith House\n\n') && jclip.includes('- Old entry from before jobs') && !jclip.includes('(Smith House)'), 'job copy: heading + days, no bracket tags');
-  console.log('--- job copy ---\n' + jclip + '\n---');
   await page.click('#copyPlain');
   const jplain = await page.evaluate(() => navigator.clipboard.readText());
   check(jplain.split('\n').length === 4, 'job items-only copy is 4 lines');

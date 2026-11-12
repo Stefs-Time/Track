@@ -232,6 +232,8 @@ the whole report.
   via `applyHeaders` and `Vary: Accept-Encoding`. The page goes out at about
   a fifth of its size, and nothing is compressed per request;
 - `/healthz` for the platform and `/download` for the standalone file;
+- `PORT` and `HOST` from the environment, or from an optional `.env`
+  (`process.loadEnvFile`, which never overrides a variable already set);
 - JSON 404s and a graceful shutdown on `SIGTERM`.
 
 ## Tests and checks
@@ -250,8 +252,9 @@ real server in Chromium:
 | `safety` | CSV formula guard, undoing imports, the backup reminder, the error net, midnight, a speed budget at 10,000 entries |
 | `organise` | archiving and restoring jobs, printable day, week, month and job reports |
 | `recurring` | recurring schedules, the Due today strip, schedules and archived jobs through CSV and JSON |
-| `autobackup` | automatic backup to a folder: writing, pruning, remembering, pausing, turning off |
+| `autobackup` | automatic backup to a folder: writing, pruning, remembering, changing folder, pausing, turning off |
 | `a11y` | axe-core, WCAG 2.1 A/AA, every view and dialog (and the message bar), both themes |
+| `journeys` | the totals, copying a week or month, Clear this day, moving by date, Recent days' month controls, the + buttons, the floating +, dialogs' ✕ |
 | `usability` | the skip link and Tab stops, friendly day names in messages, phone first view, 24 px tap targets |
 | `app` | server headers, CSP and compression, installability, offline use, the standalone file |
 
@@ -260,4 +263,12 @@ with a named `check` at each step. They're soft assertions, so a failure
 reports every broken step, not just the first.
 
 `npm run check` runs ESLint (`eslint.config.js`, the recommended rule set)
-and syntax-checks the browser scripts. CI runs both on every push.
+and syntax-checks the browser scripts.
+
+CI (`.github/workflows/ci.yml`) runs, in order: `npm audit --omit=dev
+--audit-level=high`, `npm run check`, then `npm test`. Keep the Playwright
+version in `package.json` exact: CI installs the browser that version expects,
+and a mismatched browser fails in confusing ways. Runners are pinned to
+`ubuntu-24.04` for the same reason. Tests that need storage to survive a
+reload of a stored folder handle (the auto-backup suite) use a persistent
+profile, as real browsers do.

@@ -9,11 +9,16 @@
  * Environment:
  *   PORT  port to listen on (Railway sets this; default 3000)
  *   HOST  interface to bind (default 0.0.0.0)
+ * A .env file beside this one is read if present (see .env.example).
+ * Variables already set, such as Railway's, always win over it.
  */
 "use strict";
 
 const fs = require("node:fs");
 const path = require("node:path");
+
+const ENV_FILE = path.join(__dirname, ".env");
+if (fs.existsSync(ENV_FILE)) process.loadEnvFile(ENV_FILE);
 const crypto = require("node:crypto");
 const express = require("express");
 

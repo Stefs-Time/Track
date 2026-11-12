@@ -2378,11 +2378,13 @@
       }).join(withHeading ? "\n\n" : "\n");
       return withHeading ? jobById(currentJob).text + "\n\n" + body : body;
     }
+    // headed copies separate days with a blank line; Copy Items Only is
+    // one line per entry, as its hint promises (and as the Job view does)
     return viewDays().filter(function (iso) {
       return (data[iso] || []).length > 0;
     }).map(function (iso) {
       return dayAsText(iso, withHeading);
-    }).join("\n\n");
+    }).join(withHeading ? "\n\n" : "\n");
   }
 
   function copyText(text, doneMsg, emptyMsg) {
