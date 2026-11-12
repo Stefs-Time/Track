@@ -232,6 +232,8 @@ the whole report.
   via `applyHeaders` and `Vary: Accept-Encoding`. The page goes out at about
   a fifth of its size, and nothing is compressed per request;
 - `/healthz` for the platform and `/download` for the standalone file;
+- `PORT` and `HOST` from the environment, or from an optional `.env`
+  (`process.loadEnvFile`, which never overrides a variable already set);
 - JSON 404s and a graceful shutdown on `SIGTERM`.
 
 ## Tests and checks
@@ -261,4 +263,12 @@ with a named `check` at each step. They're soft assertions, so a failure
 reports every broken step, not just the first.
 
 `npm run check` runs ESLint (`eslint.config.js`, the recommended rule set)
-and syntax-checks the browser scripts. CI runs both on every push.
+and syntax-checks the browser scripts.
+
+CI (`.github/workflows/ci.yml`) runs, in order: `npm audit --omit=dev
+--audit-level=high`, `npm run check`, then `npm test`. Keep the Playwright
+version in `package.json` exact: CI installs the browser that version expects,
+and a mismatched browser fails in confusing ways. Runners are pinned to
+`ubuntu-24.04` for the same reason. Tests that need storage to survive a
+reload of a stored folder handle (the auto-backup suite) use a persistent
+profile, as real browsers do.

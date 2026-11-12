@@ -118,7 +118,6 @@ test('Wishlist and Recurring items carry jobs end to end', async ({ page }) => {
   check(JSON.parse(json)._wishlist.some(w => w.job), 'JSON wishlist items carry job');
   const [dc] = await Promise.all([page.waitForEvent('download'), page.click('#csvExportBtn')]);
   const csv = fs.readFileSync(await dc.path(), 'utf8');
-  console.log(csv);
   check(/\r\nWishlist,Buy screws|Wishlist,Legacy wish \(edited\),Smith House/.test(csv) && /Recurring,Site check,Office refit/.test(csv), 'CSV has Wishlist/Recurring rows with jobs');
   for (const [name, file, sel, mime] of [['JSON', json, '#importFile', 'application/json'], ['CSV', csv, '#csvFile', 'text/csv']]) {
     await page.click('#clearAllBtn'); await page.click('#clearGo');

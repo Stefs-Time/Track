@@ -2,6 +2,29 @@
 
 All notable changes to Docket. Versions follow [Semantic Versioning](https://semver.org/).
 
+## [2.7.4] — 2026-11-12
+
+A repository audit, tidy-up and documentation update. The app itself is unchanged.
+
+### Fixed
+- `.env.example` said to copy it to `.env`, but nothing read that file. The server
+  now loads `.env` on start if it's there; variables already set (such as Railway's)
+  still win, and nothing is printed when there's no file.
+
+### Changed
+- Requires **Node.js 22.9 or newer**: Node 20 reached end of life in April 2026.
+- CI and Release use `actions/checkout`, `setup-node` and `upload-artifact` v7,
+  which run on Node 24 (v4 ran on the retired Node 20 runtime, with a warning on
+  every run).
+- Tests no longer print debug output (CSV dumps, copied text) into the CI log.
+
+### Documentation
+- README: a table of every `npm` command, the complete project layout, automatic
+  folder backup in the feature list, how `.env` and Railway variables combine,
+  what CI checks, and screenshots and the lockfile in the release steps.
+- ARCHITECTURE: what CI runs and why Playwright and the runner are pinned, and
+  where the server's settings come from.
+
 ## [2.7.3] — 2026-11-12
 
 A testing, UAT, UI and UX audit: fixes only, no new features.
