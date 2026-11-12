@@ -42,7 +42,9 @@ installed app and the standalone file.
 - `_docket.version` is the format version. Version 1 backups (from before
   jobs) have no `_jobs` and no `job` fields, and still import.
 
-**Importing merges.** Nothing already there is removed or overwritten:
+**Importing merges.** Nothing already there is removed or overwritten. Files
+over 25 MB are refused before they're read: years of entries come to a few
+MB, so a file that size is the wrong file.
 
 - Jobs merge **by name** (case-insensitive). The backup's job ids are mapped
   onto the local ones.
@@ -136,7 +138,7 @@ rename to Docket keeps loading.
 Every record is checked when Docket loads:
 
 - An entry or list item needs non-empty `text`. A bare string becomes the text, and a number is converted. A missing or duplicate `id` is replaced.
-- A day key must be `YYYY-MM-DD` and hold a list.
+- A day key must be a real date in `YYYY-MM-DD` form (`2026-02-30` is dropped, not shown as 2 March) and hold a list. JSON imports skip such days too.
 - A job needs a name. A missing colour, or one outside 0–7, is given a free colour. `archived` is kept only when it's `true`.
 - A recurring task's `days` keeps whole numbers 0–6, once each, sorted; an empty list means no schedule.
 

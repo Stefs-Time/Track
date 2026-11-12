@@ -93,13 +93,20 @@
       return o;
     });
   }
+  // A day key must be a real date: "2026-02-30" would otherwise be shown as
+  // a different day than it's stored under.
+  function isRealDay(d) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) return false;
+    var t = new Date(+d.slice(0, 4), +d.slice(5, 7) - 1, +d.slice(8, 10));
+    return t.getFullYear() === +d.slice(0, 4) && t.getMonth() === +d.slice(5, 7) - 1 && t.getDate() === +d.slice(8, 10);
+  }
   function load() {
     seenIds = {};
     var got = readJSON(STORE_KEY, {});
     var parsed = got.value, out = {};
     if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
       Object.keys(parsed).forEach(function (d) {
-        if (!/^\d{4}-\d{2}-\d{2}$/.test(d) || !Array.isArray(parsed[d])) return;
+        if (!isRealDay(d) || !Array.isArray(parsed[d])) return;
         var list = parsed[d].map(cleanItem).filter(Boolean);
         if (list.length) out[d] = list;
       });
@@ -2750,7 +2757,17 @@
   // third column "Job" (or Project/Client) makes that column the entry's job,
   // and a fourth headed "Repeats" holds recurring tasks' schedules.
   // Merges, skips duplicates.
+  // Docket's own backups are a few MB even after years of use; anything far
+  // bigger is the wrong file, and reading it would freeze the page.
+  var IMPORT_MAX = 25 * 1024 * 1024;
+  function tooBig(file) {
+    if (file.size <= IMPORT_MAX) return false;
+    toast("That file is too large to be a Docket backup (" + Math.round(file.size / 1048576) + " MB) — nothing was imported");
+    return true;
+  }
+
   function importCSV(file) {
+    if (tooBig(file)) return;
     var reader = new FileReader();
     reader.onload = function () {
       var rows = parseCSV(String(reader.result));
@@ -2839,6 +2856,7 @@
   }
 
   function importData(file) {
+    if (tooBig(file)) return;
     var reader = new FileReader();
     reader.onload = function () {
       try {
@@ -2878,7 +2896,7 @@
         mergeAll(incoming._wishlist, wishlist);
         mergeAll(incoming._recurring, recurring);
         Object.keys(incoming).forEach(function (day) {
-          if (!/^\d{4}-\d{2}-\d{2}$/.test(day) || !Array.isArray(incoming[day])) return;
+          if (!isRealDay(day) || !Array.isArray(incoming[day])) return;
           if (!data[day]) data[day] = [];
           mergeAll(incoming[day], data[day]);
         });
@@ -3748,6 +3766,7 @@
   var DATA_KEYS = [STORE_KEY, WISH_KEY, REC_KEY, JOB_KEY];
   window.addEventListener("storage", function (e) {
     if (e.key === THEME_KEY) { applyTheme(currentTheme()); return; }
+    if (e.key === SKIP_KEY) { render(); return; } // skipped in another tab: drop it from Due today here too
     if (e.key !== null && DATA_KEYS.indexOf(e.key) === -1) return;
     data = load();
     wishlist = loadList(WISH_KEY);

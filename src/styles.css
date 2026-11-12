@@ -1851,6 +1851,11 @@ ul.wishlist li.due .grip { color: var(--accent); }
   .mgrid { gap: 3px; }
   .mcell { border-radius: 9px; }
   .backupnote { flex-direction: column; align-items: stretch; }
+  /* Due today: the task on its own line, its job and buttons below */
+  .duebar li { flex-wrap: wrap; row-gap: 4px; }
+  .duebar .dt { flex-basis: 100%; }
+  .duebar li .jobpill { max-width: calc(100% - 130px); }
+  .duebar .dlog { margin-left: auto; }
   #clearOverlay .modal-foot button { padding: 0 16px; }
   #clearOverlay .modal-foot .dangerbtn { flex: 1; }
 }

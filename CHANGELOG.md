@@ -2,6 +2,25 @@
 
 All notable changes to Docket. Versions follow [Semantic Versioning](https://semver.org/).
 
+## [2.7.1] — 2026-11-12
+
+A visual, security and functional audit: fixes only, no new features.
+
+### Fixed
+- **Impossible dates in saved data or a backup** (such as `2026-02-30`) were shown
+  as a different day than they were stored under. They're now dropped on load (the
+  original kept under `.before-repair`, as for any repair) and skipped on import.
+- **A huge file chosen for import froze the page** while it was read. Files over
+  25 MB are refused straight away with a message; real backups are a few MB.
+- Skipping a task under **Due today** in one tab left it showing in another open
+  tab until that tab redrew. Both tabs now stay in step.
+- On phones, a **Due today** task with a job squeezed its name into a narrow column.
+  The task now has its own line, with its job and buttons beneath.
+
+### Documentation
+- The guide and README list every action Undo covers, and Ctrl+P among the
+  shortcuts. Stale references in the test config and docs are corrected.
+
 ## [2.7.0] — 2026-10-27
 
 ### Added

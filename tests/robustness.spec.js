@@ -1,9 +1,10 @@
 // Stability under the conditions that used to break Docket: blocked storage,
-// damaged saved data, two open tabs, and undo after later changes.
+// damaged saved data (impossible dates included), oversized imports, two
+// open tabs, and undo after later changes.
 "use strict";
 
 const { test } = require("@playwright/test");
-const { check, iso, seed, state } = require("./helpers");
+const { check, iso, seed, state, importFile } = require("./helpers");
 
 const T = iso(0);
 
@@ -130,4 +131,44 @@ test("a toast never blocks the button underneath it", async ({ page }) => {
   });
   await page.click("#helpDone", { timeout: 3000 });
   check(!(await page.isVisible("#helpOverlay .modal")), "the guide's button is clickable through the toast");
+});
+
+test("impossible dates are dropped, never shown as another day", async ({ page }) => {
+  await seed(page, {
+    "track.tasks.v1": { [T]: [{ id: "a", text: "Real day" }], "2026-02-30": [{ id: "b", text: "No such day" }], "2026-13-01": [{ id: "c", text: "No such month" }] }
+  });
+  await page.goto("/");
+  const s = await state(page);
+  check(JSON.stringify(Object.keys(s.tasks)) === JSON.stringify([T]), "only real dates are kept: " + Object.keys(s.tasks));
+  check((await page.evaluate(() => localStorage.getItem("track.tasks.v1.before-repair"))).includes("No such day"), "the original is kept as a backup");
+
+  // a backup carrying one is imported without it
+  const file = test.info().outputPath("odd.json");
+  require("node:fs").writeFileSync(file, JSON.stringify({ "2025-02-29": [{ text: "Not a leap year" }], "2024-02-29": [{ text: "Leap day" }] }));
+  await importFile(page, "#importFile", file);
+  const after = await state(page);
+  check(!after.tasks["2025-02-29"] && after.tasks["2024-02-29"], "import skips the impossible day and keeps the real one");
+});
+
+test("a file far too big to be a backup is refused, not read", async ({ page }) => {
+  await seed(page, {});
+  await page.goto("/");
+  await page.setInputFiles("#importFile", { name: "huge.json", mimeType: "application/json", buffer: Buffer.alloc(26 * 1024 * 1024, 32) });
+  await page.waitForFunction(() => document.getElementById("toast").textContent.includes("too large"));
+  check((await page.textContent("#toast")).includes("nothing was imported"), "it says so and imports nothing");
+});
+
+test("skipping a due task in one tab clears it in the other", async ({ context }) => {
+  await context.addInitScript((dow) => {
+    localStorage.setItem("track.helpseen.v1", "1");
+    if (!localStorage.getItem("track.recurring.v1")) localStorage.setItem("track.recurring.v1", JSON.stringify([{ id: "r", text: "Timesheet", days: [dow] }]));
+  }, new Date().getDay());
+  const a = await context.newPage();
+  const b = await context.newPage();
+  await a.goto("/");
+  await b.goto("/");
+  check(await b.isVisible("#dueBar"), "both tabs offer it");
+  await a.click("#dueBar .dskip");
+  await b.waitForFunction(() => document.getElementById("dueBar").hidden);
+  check(true, "the other tab drops it too");
 });
