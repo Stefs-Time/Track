@@ -73,8 +73,9 @@ test.describe("on a phone", () => {
     for (const view of ["day", "week"]) {
       if (view === "week") await page.click('#viewTabs button[data-view="week"]');
       const small = await page.evaluate(() => [...document.querySelectorAll('button:not([tabindex="-1"]), input')]
-        .filter((e) => { const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0 && (r.width < 24 || r.height < 24); })
-        .map((e) => String(e.className) + " " + Math.round(e.getBoundingClientRect().width) + "x" + Math.round(e.getBoundingClientRect().height)));
+        // laid-out size, so a row still easing in (scaled a hair) doesn't read as too small
+        .filter((e) => e.offsetWidth > 0 && e.offsetHeight > 0 && (e.offsetWidth < 24 || e.offsetHeight < 24))
+        .map((e) => String(e.className) + " " + e.offsetWidth + "x" + e.offsetHeight));
       check(small.length === 0, `${view}: every control is at least 24×24 px (WCAG 2.2): ` + small.join(", "));
     }
     check(!(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)), "no sideways scroll");

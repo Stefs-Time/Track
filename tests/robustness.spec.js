@@ -89,12 +89,6 @@ test("two open tabs see each other's changes instead of overwriting them", async
   await a.waitForFunction(() => document.querySelectorAll("#itemList li.entry").length === 2);
   const s = await state(a);
   check(JSON.stringify(s.tasks[T].map((e) => e.text)) === JSON.stringify(["From tab A", "From tab B"]), "both entries are saved: " + JSON.stringify(s.tasks[T]));
-
-  // a theme change in one tab reaches the other
-  await a.click("#themeBtn");
-  await a.click("#themeBtn"); // auto → light → dark
-  await b.waitForFunction(() => document.documentElement.dataset.theme === "dark");
-  check(true, "the theme follows across tabs");
 });
 
 test("undo never throws away work done after the action", async ({ page }) => {

@@ -1,43 +1,44 @@
 /* ==========================================================================
-   Docket — "Studio" design
-   Light-first warm canvas, one tangerine accent, and a colour per job.
-   Dark mode follows the system unless the theme button pins one
-   (html[data-theme="light" | "dark"]).
+   Docket — "Graphite" design
+   One look everywhere: a soft neutral graphite grey, one tangerine accent,
+   and a colour per job. There is no light/dark switch — the same calm grey
+   by day and by night. Printed reports are the one exception: always on white.
    ========================================================================== */
 
 /* ---------- tokens ---------- */
 :root {
-  color-scheme: light;
-  --bg: #f6f4ef;
-  --panel: #efebe3;
-  --surface: #ffffff;
-  --sunk: #f4f1ea;
-  --ink: #1d1b18;
-  --ink-2: #57524a;
-  --ink-3: #655f58;               /* ≥ 5:1 on every light surface (WCAG AA) */
-  --line: #e6e0d5;
-  --line-2: #d8d0c1;
-  --accent: #ff6a3d;
+  color-scheme: dark;
+  --bg: #1e2024;                  /* the page */
+  --panel: #23252a;               /* the side panel */
+  --surface: #2a2d33;             /* cards and inputs */
+  --sunk: #32353c;                /* wells: chips, stat tiles, hovered rows */
+  --ink: #f3f4f6;
+  --ink-2: #c5c8cf;
+  --ink-3: #a9adb6;               /* ≥ 4.5:1 on every surface (WCAG AA) */
+  --line: #383b42;
+  --line-2: #4a4e57;
+  --accent: #ff7a50;
   --accent-ink: #1d1b18;          /* text that sits on the accent */
-  --accent-text: #bf3f14;         /* accent used as text on light surfaces */
-  --accent-soft: rgba(255, 106, 61, 0.12);
-  --accent-ring: rgba(255, 106, 61, 0.38);
-  --wash: rgba(255, 106, 61, 0.08);   /* a soft accent surface (Due today, reminders) */
-  --bar: #ffb49c;                     /* activity bars with entries */
-  --heat-base: #ff6a3d;               /* calendar shading for a day with no job */
-  --heat-1: 14%;                      /* how strongly a day is shaded: 1, 2–3, 4+ entries */
-  --heat-2: 26%;
-  --heat-3: 40%;
-  --glow: rgba(255, 106, 61, 0.07);   /* the warm light at the top of the page */
-  --danger: #cf3131;
-  --danger-soft: rgba(207, 49, 49, 0.09);
-  --danger-ink: #ffffff;
-  --success: #188a4a;
-  --invert-bg: #1d1b18;           /* toasts and tooltips */
-  --invert-ink: #f6f4ef;
-  --shadow-sm: 0 1px 2px rgba(29, 27, 24, 0.06);
-  --shadow-md: 0 1px 2px rgba(29, 27, 24, 0.05), 0 10px 28px -12px rgba(29, 27, 24, 0.18);
-  --shadow-lg: 0 2px 6px rgba(29, 27, 24, 0.06), 0 28px 60px -20px rgba(29, 27, 24, 0.32);
+  --accent-text: #ffa181;         /* accent used as text on grey */
+  --accent-soft: rgba(255, 122, 80, 0.14);
+  --accent-ring: rgba(255, 122, 80, 0.45);
+  /* surfaces stay neutral grey: orange washed over grey reads as brown */
+  --wash: #2e3138;                /* a raised soft surface (Due today, reminders) */
+  --bar: #747983;                 /* activity bars with entries */
+  --heat-base: #b4b9c3;           /* calendar shading for a day with no job */
+  --heat-1: 13%;                  /* how strongly a day is shaded: 1, 2–3, 4+ entries */
+  --heat-2: 23%;
+  --heat-3: 34%;
+  --glow: rgba(255, 255, 255, 0.04);  /* the soft light at the top of the page */
+  --danger: #ff7b7b;
+  --danger-soft: rgba(255, 123, 123, 0.13);
+  --danger-ink: #1a1b1e;
+  --success: #55d692;
+  --invert-bg: #f3f4f6;           /* toasts and tooltips */
+  --invert-ink: #1a1b1e;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.28);
+  --shadow-md: 0 1px 2px rgba(0, 0, 0, 0.28), 0 12px 30px -12px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 2px 6px rgba(0, 0, 0, 0.35), 0 30px 60px -20px rgba(0, 0, 0, 0.65);
   --font: "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
   --display: "Segoe UI Variable Display", ui-rounded, "SF Pro Rounded", "Segoe UI", system-ui, -apple-system, sans-serif;
   --mono: ui-monospace, "Cascadia Mono", Consolas, monospace;
@@ -45,76 +46,6 @@
   --r: 12px;
   --r-lg: 18px;
   --ease: cubic-bezier(.2, .8, .2, 1);
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    color-scheme: dark;
-    --bg: #121316;
-    --panel: #17181c;
-    --surface: #1d1f23;
-    --sunk: #26282d;
-    --ink: #f1f2f4;
-    --ink-2: #b7bac1;
-    --ink-3: #9a9ea7;
-    --line: #2c2e33;
-    --line-2: #3a3d43;
-    --accent: #ff7a50;
-    --accent-ink: #1d1b18;
-    --accent-text: #ff9a78;
-    --accent-soft: rgba(255, 122, 80, 0.14);
-    --accent-ring: rgba(255, 122, 80, 0.45);
-    /* dark surfaces stay neutral grey: orange washed over dark reads as brown */
-    --wash: #1e2025;
-    --bar: #6b7079;
-    --heat-base: #aeb3bd;
-    --heat-1: 13%;
-    --heat-2: 23%;
-    --heat-3: 34%;
-    --glow: rgba(255, 255, 255, 0.035);
-    --danger: #ff7272;
-    --danger-soft: rgba(255, 114, 114, 0.12);
-    --danger-ink: #16171a;
-    --success: #4cd38a;
-    --invert-bg: #f1f2f4;
-    --invert-ink: #16171a;
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
-    --shadow-md: 0 1px 2px rgba(0, 0, 0, 0.4), 0 12px 30px -12px rgba(0, 0, 0, 0.6);
-    --shadow-lg: 0 2px 6px rgba(0, 0, 0, 0.45), 0 30px 60px -20px rgba(0, 0, 0, 0.75);
-  }
-}
-:root[data-theme="dark"] {
-  color-scheme: dark;
-  --bg: #121316;
-  --panel: #17181c;
-  --surface: #1d1f23;
-  --sunk: #26282d;
-  --ink: #f1f2f4;
-  --ink-2: #b7bac1;
-  --ink-3: #9a9ea7;
-  --line: #2c2e33;
-  --line-2: #3a3d43;
-  --accent: #ff7a50;
-  --accent-ink: #1d1b18;
-  --accent-text: #ff9a78;
-  --accent-soft: rgba(255, 122, 80, 0.14);
-  --accent-ring: rgba(255, 122, 80, 0.45);
-  /* dark surfaces stay neutral grey: orange washed over dark reads as brown */
-  --wash: #1e2025;
-  --bar: #6b7079;
-  --heat-base: #aeb3bd;
-  --heat-1: 13%;
-  --heat-2: 23%;
-  --heat-3: 34%;
-  --glow: rgba(255, 255, 255, 0.035);
-  --danger: #ff7272;
-  --danger-soft: rgba(255, 114, 114, 0.12);
-    --danger-ink: #16171a;
-  --success: #4cd38a;
-  --invert-bg: #f1f2f4;
-  --invert-ink: #16171a;
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 1px 2px rgba(0, 0, 0, 0.4), 0 12px 30px -12px rgba(0, 0, 0, 0.6);
-  --shadow-lg: 0 2px 6px rgba(0, 0, 0, 0.45), 0 30px 60px -20px rgba(0, 0, 0, 0.75);
 }
 
 /* ---------- base ---------- */
@@ -267,7 +198,7 @@ input::placeholder { color: var(--ink-3); }
 .saved-pill.failed { border-color: var(--danger); color: var(--ink); }
 .saved-pill.failed .dot { color: var(--danger); }
 @keyframes ping { 50% { transform: scale(1.5); } }
-.helpbtn, .themebtn {
+.helpbtn {
   display: grid;
   place-items: center;
   width: 34px;
@@ -279,8 +210,7 @@ input::placeholder { color: var(--ink-3); }
   font-weight: 700;
   font-size: 15px;
 }
-.helpbtn:hover, .themebtn:hover { color: var(--ink); border-color: var(--line-2); box-shadow: var(--shadow-sm); }
-.themebtn .ic svg { width: 17px; height: 17px; }
+.helpbtn:hover { color: var(--ink); border-color: var(--line-2); box-shadow: var(--shadow-sm); }
 /* search: a wide button on desktop, an icon on phones */
 .searchbtn {
   display: flex;
@@ -1840,7 +1770,8 @@ ul.wishlist li.due .grip { color: var(--accent); }
    Narrower screens
    ========================================================================== */
 @media (min-width: 1200px) {
-  .fab { right: calc(320px + 28px); } /* clear of the Wishlist panel */
+  /* sits in the gutter beside the Wishlist panel, clear of the entries */
+  .fab { right: calc(320px + (clamp(32px, 3vw, 64px) - 46px) / 2); width: 46px; height: 46px; border-radius: 16px; font-size: 26px; }
 }
 @media (max-width: 1199px) {
   .app { grid-template-columns: 272px minmax(0, 1fr); }
@@ -1938,12 +1869,12 @@ ul.wishlist li.due .grip { color: var(--accent); }
 
 /* ==========================================================================
    Printable reports (Print / PDF, or Ctrl+P) — the app's look on paper.
-   Always the light palette, whatever the screen theme: paper is white.
+   Always its own light palette: the screen is graphite, paper is white.
    ========================================================================== */
 .printreport { display: none; }
 @media print {
   @page { size: A4; margin: 14mm 14mm 16mm; }
-  /* paper is white: light canvas (and so white page margins) even in dark mode */
+  /* paper is white: light canvas, and so white page margins */
   :root:has(body.print-report) { color-scheme: light; background: #fff !important; }
   body.print-report { background: #fff !important; }
   body.print-report > :not(.printreport) { display: none !important; }

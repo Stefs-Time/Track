@@ -1,4 +1,4 @@
-// The "Studio" design's behaviour: a colour per job, and the theme switch.
+// The "Graphite" design's behaviour: a colour per job, and one look everywhere.
 "use strict";
 
 const fs = require("node:fs");
@@ -67,31 +67,24 @@ test("every job gets its own colour, shown everywhere and kept in backups", asyn
   check(errors.length === 0, "no page errors " + JSON.stringify(errors));
 });
 
-test.describe("theme", () => {
-  test.use({ colorScheme: "light" });
+// One look everywhere: no light/dark switch, and the system setting changes nothing.
+for (const scheme of ["light", "dark"]) {
+  test.describe("one graphite look, on a " + scheme + " system", () => {
+    test.use({ colorScheme: scheme });
 
-  test("follows the system, and the switch pins light or dark across reloads", async ({ page }) => {
-    await seed(page, {});
-    await page.goto("/");
-    const bg = () => page.evaluate(() => getComputedStyle(document.body).backgroundColor);
-    const light = await bg();
-    check(light === rgb("#f6f4ef"), "light system → light theme (" + light + ")");
-
-    await page.click("#themeBtn"); // auto → light
-    check(await page.evaluate(() => document.documentElement.dataset.theme) === "light", "first click pins light");
-    await page.click("#themeBtn"); // light → dark
-    check(await bg() === rgb("#121316"), "second click switches to dark");
-    check((await page.getAttribute("#themeBtn", "aria-label")).startsWith("Theme: dark"), "the button says which theme is on");
-
-    await page.reload();
-    check(await page.evaluate(() => document.documentElement.dataset.theme) === "dark", "dark survives a reload");
-    check(await bg() === rgb("#121316"), "…and is painted dark");
-
-    await page.click("#themeBtn"); // dark → auto
-    check(await page.evaluate(() => document.documentElement.hasAttribute("data-theme")) === false, "third click goes back to following the system");
-    check(await bg() === light, "…which is light here");
+    test("the same grey, with no theme switch and no leftover setting", async ({ page }) => {
+      // someone who had pinned the old light theme
+      await seed(page, { "track.theme.v1": "light" });
+      await page.goto("/");
+      const bg = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
+      check(bg === rgb("#1e2024"), "the page is graphite grey (" + bg + ")");
+      check(await page.locator("#themeBtn").count() === 0, "there is no theme button");
+      check(await page.evaluate(() => !document.documentElement.hasAttribute("data-theme")), "no theme is pinned on the page");
+      check(await page.evaluate(() => localStorage.getItem("track.theme.v1")) === null, "the old theme setting is tidied away");
+      check(await page.evaluate(() => getComputedStyle(document.documentElement).colorScheme) === "dark", "native controls (date picker, scrollbars) match");
+    });
   });
-});
+}
 
 test("the refined look: job-shaded calendar, slim empty days, doors on the totals, a greeting", async ({ page }) => {
   const T = iso(0);
@@ -132,8 +125,8 @@ test("the refined look: job-shaded calendar, slim empty days, doors on the total
   check(await page.textContent("#emptyTitle") === "Nothing logged for this day yet", "other empty days keep the plain message");
 });
 
-test.describe("dark mode stays grey", () => {
-  test.use({ colorScheme: "dark" });
+test.describe("surfaces stay grey", () => {
+  test.use({ colorScheme: "light" });
 
   test("soft surfaces are neutral, never brown", async ({ page }) => {
     const T = iso(0);
