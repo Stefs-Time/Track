@@ -2,6 +2,27 @@
 
 All notable changes to Docket. Versions follow [Semantic Versioning](https://semver.org/).
 
+## [2.7.3] — 2026-11-12
+
+A testing, UAT, UI and UX audit: fixes only, no new features.
+
+### Fixed
+- **Copy Items Only** in the Week and Month views left a blank line between days,
+  though it promises "one per line" (and the Day and Job views keep to that). It
+  now gives one line per entry everywhere; the headed copy still separates days.
+
+### Tests
+- A test-coverage audit matched every control against the suites. A new `journeys`
+  suite walks through what none of them did: the stat tiles and week/month
+  summaries, Copy Week and Copy Month, Clear this day and its Undo, moving by ← → T
+  and the date picker, opening a day from the Month view, folding a month in Recent
+  days and its calendar icon, every + button, the floating +, the job ✕ on a list,
+  and the ✕ on the guide and Clear data dialogs. Auto-backup's **Change folder** is
+  now tested too.
+- Also checked, with nothing to fix: very long words and links, 1,000-character
+  entries and pasted line breaks wrap without breaking the layout on PC or phone,
+  and the message bar never sits under the floating +.
+
 ## [2.7.2] — 2026-11-12
 
 A user-acceptance, UI and UX audit: fixes only, no new features.

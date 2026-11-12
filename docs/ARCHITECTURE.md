@@ -250,8 +250,9 @@ real server in Chromium:
 | `safety` | CSV formula guard, undoing imports, the backup reminder, the error net, midnight, a speed budget at 10,000 entries |
 | `organise` | archiving and restoring jobs, printable day, week, month and job reports |
 | `recurring` | recurring schedules, the Due today strip, schedules and archived jobs through CSV and JSON |
-| `autobackup` | automatic backup to a folder: writing, pruning, remembering, pausing, turning off |
+| `autobackup` | automatic backup to a folder: writing, pruning, remembering, changing folder, pausing, turning off |
 | `a11y` | axe-core, WCAG 2.1 A/AA, every view and dialog (and the message bar), both themes |
+| `journeys` | the totals, copying a week or month, Clear this day, moving by date, Recent days' month controls, the + buttons, the floating +, dialogs' ✕ |
 | `usability` | the skip link and Tab stops, friendly day names in messages, phone first view, 24 px tap targets |
 | `app` | server headers, CSP and compression, installability, offline use, the standalone file |
 
