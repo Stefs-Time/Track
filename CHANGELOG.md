@@ -2,6 +2,26 @@
 
 All notable changes to Docket. Versions follow [Semantic Versioning](https://semver.org/).
 
+## [2.8.0] — 2026-11-12
+
+A visual refinement for everyday use. Everything works as before.
+
+### Changed
+- **Dark mode is grey throughout.** The last warm-brown tints are gone: the Due
+  today box, backup reminders, the set Job box, activity bars and the calendar's
+  shading are neutral grey in dark mode, with orange kept for marks and borders.
+- **The Month calendar is shaded by job.** Each day takes its busiest job's colour,
+  deeper the busier the day, so the month shows at a glance where the time went.
+  Days with no job are shaded neutrally. Every job colour passes AA contrast at
+  every depth, in both themes.
+- **The Week view is calmer.** Empty days fold to a slim row (the + still adds to
+  them), so the days with work stand out.
+- **This week** and **This month** tiles open those views with a click.
+- **The Jobs list** shows a thin bar under each job: its share of the work.
+- **An empty today greets you** by time of day instead of "Nothing logged".
+- Icons on the Day / Week / Month tabs and the side-panel headings, a little light
+  on the This day tile, and a soft glow at the top of the page.
+
 ## [2.7.4] — 2026-11-12
 
 A repository audit, tidy-up and documentation update. The app itself is unchanged.

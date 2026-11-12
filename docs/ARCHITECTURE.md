@@ -124,6 +124,16 @@ by the renderer. Focus is restored explicitly afterwards (`refocusEntry`).
   `--surface`, `--accent`, `--job`, …), never literal colours, so both themes
   and the job palette keep working. Muted text (`--ink-3`) is tuned to
   pass WCAG AA on every surface; the accessibility test checks it.
+- **Dark mode stays neutral grey.** Orange washed thinly over a dark surface
+  reads as brown, so soft fills never use the accent directly. Use `--wash`
+  for a soft accent surface (Due today, reminders), `--bar` for activity
+  bars and `--heat-base` with `--heat-1/2/3` for calendar shading: each is
+  a warm tint in light mode and a grey in dark. The accent itself is for
+  solid marks, borders, text and focus rings. `design.spec.js` checks the
+  dark surfaces are not warm.
+- **Job colour is set once, on the container.** `tintJob(el, id)` sets
+  `--job`; children read it. A Month cell carries its busiest job's colour,
+  and a Jobs row also carries `--share` for its bar.
 
 ## Drag and drop
 
@@ -246,7 +256,7 @@ real server in Chromium:
 | `jobs`, `lists-and-jobs` | jobs end to end, list items with jobs |
 | `entries`, `reorder`, `ease` | moving, editing anywhere, reordering, search, undo, quick-add |
 | `clear-data` | Clear data, Undo, and clear → re-import round trips |
-| `design` | job colours, the theme switch |
+| `design` | job colours, the theme switch, the job-shaded calendar, slim empty days, clickable totals, the greeting, neutral dark surfaces |
 | `layout` | three columns on PC, the small-laptop and phone fallbacks |
 | `robustness` | blocked storage, damaged data and impossible dates, oversized imports, two tabs (including Due today skips), stale undo |
 | `safety` | CSV formula guard, undoing imports, the backup reminder, the error net, midnight, a speed budget at 10,000 entries |

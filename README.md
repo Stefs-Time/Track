@@ -11,7 +11,7 @@ It comes two ways, from the same code:
 
 ## Features
 
-- **Daily log.** Type what you did and press Enter. Day, Week and Month views, stat tiles and a 14-day activity chart.
+- **Daily log.** Type what you did and press Enter. Day, Week and Month views, a 14-day activity chart, and stat tiles that open the week or month with a click.
 - **Jobs.** Set a job once and log several entries against it. Each entry shows its job, and the **Job view** gathers everything on a job across every day, with totals. **Copy Job** gives you an invoice-ready list.
 - **Uses the whole screen.** On a PC, your lists sit on the left, the log fills the middle, and the Wishlist has its own panel on the right. Smaller screens fold neatly into fewer columns.
 - **Wishlist and Recurring.** Queue things to do, or keep often-repeated tasks. Both can carry a job, and logging one (↳ or drag) carries the job onto the entry.
@@ -23,8 +23,9 @@ It comes two ways, from the same code:
 - **Quick add from the week.** The + on any Week card logs straight onto that day.
 - **Move and edit anywhere.** Edit or delete entries from the Day, Week and Job views. Move an entry by changing its date or dragging it onto another day. Link anything to a job by dropping it on that job.
 - **A colour per job.** Each job's colour runs through its pills, entries, calendar bars and Job view, so you can tell work apart at a glance. Click a job's dot to change it.
-- **Month calendar.** Shaded like a heatmap by how busy each day was, with each day's jobs named, busiest first, and a bar showing how the day split.
-- **Light and dark.** Follows your system, or pin either with the theme button.
+- **Month calendar.** Each day is shaded in its busiest job's colour, deeper the busier it was, with the day's jobs named and a bar showing how the day split.
+- **A calm week.** Days with work show as cards; empty days fold to a slim row, so the week reads at a glance.
+- **Light and dark.** Follows your system, or pin either with the theme button. Dark mode is a true neutral grey throughout.
 - **Copy to clipboard.** Copy the open day, week, month or job as a dated bulleted list, or just the lines.
 - **Undo** for deletes, moves, links, archiving, skips, imports and **Clear data** — the button, or Ctrl+Z for a minute afterwards.
 - **Import and export.** JSON is the exact backup. CSV opens in Excel. Both carry everything, including jobs, archived jobs and recurring schedules. See [docs/DATA-FORMAT.md](docs/DATA-FORMAT.md).

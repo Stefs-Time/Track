@@ -92,3 +92,69 @@ test.describe("theme", () => {
     check(await bg() === light, "…which is light here");
   });
 });
+
+test("the refined look: job-shaded calendar, slim empty days, doors on the totals, a greeting", async ({ page }) => {
+  const T = iso(0);
+  await seed(page, {
+    "track.jobs.v1": [{ id: "j1", text: "Smith House", color: 0 }, { id: "j2", text: "Office fit-out", color: 1 }],
+    "track.tasks.v1": { [T]: [{ id: "a", text: "One", job: "j2" }, { id: "b", text: "Two", job: "j2" }, { id: "c", text: "Three", job: "j1" }, { id: "d", text: "Four" }] }
+  });
+  await page.goto("/");
+
+  // the Jobs list shows each job's share of the work
+  const share = (id) => page.locator(`#jobList li[data-job="${id}"]`).evaluate((el) => el.style.getPropertyValue("--share"));
+  check(await share("j2") === "100%" && await share("j1") === "50%", "job bars: the busiest is full, the others in proportion");
+
+  // the week and month totals open those views
+  await page.click("#statWeekBtn");
+  check(await page.textContent("#dayTitle") === "Weekly Overview", "the This week tile opens the Week view");
+  // empty days fold to a slim row; days with work keep their card
+  const busy = await page.locator(`.wday[data-day="${T}"]`).boundingBox();
+  const vacant = page.locator(".wday.vacant").first();
+  check(await vacant.count() === 1 || await page.locator(".wday.vacant").count() > 1, "this week has empty days");
+  check((await vacant.boundingBox()).height < 50 && busy.height > 100, "an empty day is one slim row; a day with work keeps its card");
+  check(!(await vacant.locator(".none").isVisible()) && await vacant.locator(".wadd").isVisible(), "…with its + still there");
+  await page.click('#viewTabs button[data-view="day"]');
+  await page.click("#statMonthBtn");
+  check(await page.textContent("#dayTitle") === "Monthly Calendar", "the This month tile opens the Month view");
+
+  // the calendar shades a day in its busiest job's colour
+  const cell = page.locator(`.mcell[data-day="${T}"]`);
+  check(await cell.evaluate((el) => el.style.getPropertyValue("--job")) === "#12a37f", "today's cell takes Office fit-out's green (2 of its 4 entries)");
+  const [r, g, b] = (await cell.evaluate((el) => getComputedStyle(el).backgroundColor)).match(/[\d.]+/g).map(Number);
+  check(g > r && g > b, `…so it's shaded green, not the accent: rgb(${r}, ${g}, ${b})`);
+
+  // an empty today greets you; another empty day just says so
+  await page.click('#viewTabs button[data-view="day"]');
+  await page.click("#clearDay");
+  check(/^Good (morning|afternoon|evening) — /.test(await page.textContent("#emptyTitle")), "an empty today has a greeting: " + await page.textContent("#emptyTitle"));
+  await page.click("#nextDay");
+  check(await page.textContent("#emptyTitle") === "Nothing logged for this day yet", "other empty days keep the plain message");
+});
+
+test.describe("dark mode stays grey", () => {
+  test.use({ colorScheme: "dark" });
+
+  test("soft surfaces are neutral, never brown", async ({ page }) => {
+    const T = iso(0);
+    await seed(page, {
+      "track.tasks.v1": { [T]: [{ id: "a", text: "No job" }], [iso(-1)]: [{ id: "b", text: "Yesterday" }] },
+      "track.recurring.v1": [{ id: "r", text: "Timesheet", days: [new Date().getDay()] }]
+    });
+    await page.goto("/");
+    // neutral = not warm: red no stronger than blue (brown is red well above blue)
+    const neutral = async (sel) => {
+      const css = await page.locator(sel).first().evaluate((el) => getComputedStyle(el).backgroundColor);
+      const n = css.match(/[\d.]+/g).map(Number);
+      const [r, g, b] = css.startsWith("color(") ? n.slice(0, 3).map((v) => Math.round(v * 255)) : n;
+      return { ok: r - b <= 6 && Math.max(r, g, b) - Math.min(r, g, b) <= 20, rgb: `rgb(${r}, ${g}, ${b})` };
+    };
+    let c = await neutral("#dueBar");
+    check(c.ok, "the Due today box is grey: " + c.rgb);
+    c = await neutral("#actStrip button.hit:not(.cur)");
+    check(c.ok, "activity bars are grey (only the open day is orange): " + c.rgb);
+    await page.click('#viewTabs button[data-view="month"]');
+    c = await neutral(`.mcell[data-day="${T}"]`);
+    check(c.ok, "a calendar day with no job is shaded grey: " + c.rgb);
+  });
+});
