@@ -631,6 +631,12 @@
     });
 
     renderDue();
+    // an empty today greets you; any other empty day just says so
+    var hour = new Date().getHours();
+    $("emptyTitle").textContent = currentDate !== todayISO() ? "Nothing logged for this day yet"
+      : hour < 12 ? "Good morning — what's first today?"
+      : hour < 17 ? "Good afternoon — what have you done so far?"
+      : "Good evening — what did you get done today?";
     $("sheet").style.display = list.length === 0 ? "none" : "";
     $("emptyMsg").style.display = list.length === 0 ? "" : "none";
     $("clearDay").style.display = list.length === 0 ? "none" : "";
@@ -838,6 +844,7 @@
         });
         jobOrder.sort(function (a, b) { return perJob[b] - perJob[a]; });
         var jobTip = jobOrder.map(function (id) { return jobById(id).text + " " + perJob[id]; }).join(", ");
+        if (jobOrder.length) tintJob(cell, jobOrder[0]); // the day is shaded in its busiest job's colour
         cell.dataset.tip = (list.length ? list.length + " entr" + (list.length === 1 ? "y" : "ies") : "No entries") +
           (jobTip ? " · " + jobTip : "") + " — click to open the day";
 
@@ -1540,10 +1547,13 @@
       ul.appendChild(li0);
     }
 
+    // each job's bar shows its share of the busiest job's entries
+    var busiest = jobs.reduce(function (m, j) { return Math.max(m, stats[j.id] ? stats[j.id].n : 0); }, 0);
     sorted.forEach(function (j) {
       if (j.archived && !showArchived) return;
       var st = stats[j.id];
       var li = document.createElement("li");
+      li.style.setProperty("--share", (st && busiest ? Math.max(6, Math.round(100 * st.n / busiest)) : 0) + "%");
       li.className = "row" + (j.archived ? " archived" : "") + (view === "job" && currentJob === j.id ? " current" : "");
 
       if (renamingJob === j.id) {
@@ -3012,6 +3022,9 @@
     if (view === "job") setView("day"); else render();
   }
   $("todayBtn").addEventListener("click", goToday);
+  // the week and month totals are doors into those views
+  $("statWeekBtn").addEventListener("click", function () { setView("week"); });
+  $("statMonthBtn").addEventListener("click", function () { setView("month"); });
   var tabBtns = document.querySelectorAll("#viewTabs button");
   for (var t = 0; t < tabBtns.length; t++) {
     tabBtns[t].addEventListener("click", function () { setView(this.dataset.view); });

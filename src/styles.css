@@ -22,9 +22,13 @@
   --accent-text: #bf3f14;         /* accent used as text on light surfaces */
   --accent-soft: rgba(255, 106, 61, 0.12);
   --accent-ring: rgba(255, 106, 61, 0.38);
-  --heat-1: rgba(255, 106, 61, 0.10);
-  --heat-2: rgba(255, 106, 61, 0.22);
-  --heat-3: rgba(255, 106, 61, 0.38);
+  --wash: rgba(255, 106, 61, 0.08);   /* a soft accent surface (Due today, reminders) */
+  --bar: #ffb49c;                     /* activity bars with entries */
+  --heat-base: #ff6a3d;               /* calendar shading for a day with no job */
+  --heat-1: 14%;                      /* how strongly a day is shaded: 1, 2–3, 4+ entries */
+  --heat-2: 26%;
+  --heat-3: 40%;
+  --glow: rgba(255, 106, 61, 0.07);   /* the warm light at the top of the page */
   --danger: #cf3131;
   --danger-soft: rgba(207, 49, 49, 0.09);
   --danger-ink: #ffffff;
@@ -59,9 +63,14 @@
     --accent-text: #ff9a78;
     --accent-soft: rgba(255, 122, 80, 0.14);
     --accent-ring: rgba(255, 122, 80, 0.45);
-    --heat-1: rgba(255, 122, 80, 0.12);
-    --heat-2: rgba(255, 122, 80, 0.24);
-    --heat-3: rgba(255, 122, 80, 0.40);
+    /* dark surfaces stay neutral grey: orange washed over dark reads as brown */
+    --wash: #1e2025;
+    --bar: #6b7079;
+    --heat-base: #aeb3bd;
+    --heat-1: 13%;
+    --heat-2: 23%;
+    --heat-3: 34%;
+    --glow: rgba(255, 255, 255, 0.035);
     --danger: #ff7272;
     --danger-soft: rgba(255, 114, 114, 0.12);
     --danger-ink: #16171a;
@@ -89,9 +98,14 @@
   --accent-text: #ff9a78;
   --accent-soft: rgba(255, 122, 80, 0.14);
   --accent-ring: rgba(255, 122, 80, 0.45);
-  --heat-1: rgba(255, 122, 80, 0.12);
-  --heat-2: rgba(255, 122, 80, 0.24);
-  --heat-3: rgba(255, 122, 80, 0.40);
+  /* dark surfaces stay neutral grey: orange washed over dark reads as brown */
+  --wash: #1e2025;
+  --bar: #6b7079;
+  --heat-base: #aeb3bd;
+  --heat-1: 13%;
+  --heat-2: 23%;
+  --heat-3: 34%;
+  --glow: rgba(255, 255, 255, 0.035);
   --danger: #ff7272;
   --danger-soft: rgba(255, 114, 114, 0.12);
     --danger-ink: #16171a;
@@ -215,11 +229,18 @@ input::placeholder { color: var(--ink-3); }
   border: none;
   background: none;
   color: var(--ink-2);
-  padding: 7px 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 7px 18px 7px 15px;
   border-radius: 999px;
   font-weight: 600;
   font-size: 13.5px;
 }
+.tabs button .ic { color: var(--ink-3); transition: color .15s; }
+.tabs button .ic svg { width: 14px; height: 14px; }
+.tabs button.active .ic { color: var(--accent-text); }
 .tabs button:hover:not(.active) { color: var(--ink); background: color-mix(in srgb, var(--surface) 60%, transparent); }
 .tabs button.active { background: var(--surface); color: var(--ink); box-shadow: var(--shadow-md); }
 .tabs button:active { transform: scale(.97); }
@@ -320,6 +341,7 @@ input::placeholder { color: var(--ink-3); }
   min-width: 0;
   width: 100%;
   padding: 34px clamp(32px, 3vw, 64px) 110px;
+  background: radial-gradient(900px 320px at 28% -110px, var(--glow), transparent 72%) no-repeat;
 }
 
 /* ---------- side panel ---------- */
@@ -356,6 +378,8 @@ input::placeholder { color: var(--ink-3); }
   color: var(--ink);
   user-select: none;
 }
+.side h2 > .ic { margin-right: 2px; color: var(--ink-3); }
+.side h2 > .ic svg { width: 15px; height: 15px; }
 .side h2 .qcount { color: var(--ink-3); font-weight: 600; font-size: 13px; }
 .side section { flex-shrink: 0; }
 .side .grow { display: flex; flex-direction: column; }
@@ -522,6 +546,19 @@ ul.joblist .jobrow {
   text-align: left;
 }
 ul.joblist .jobrow > .ic { display: none; }
+/* a hairline under each job: its share of the busiest job's entries */
+ul.joblist .jobrow { position: relative; }
+ul.joblist .jobrow::after {
+  content: "";
+  position: absolute;
+  left: 2px;
+  right: 8px;
+  bottom: 2px;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--job, var(--accent)) 60%, transparent) var(--share, 0%), color-mix(in srgb, var(--line) 70%, transparent) var(--share, 0%));
+}
+ul.joblist li.archived .jobrow::after { opacity: .45; }
 ul.joblist .jobrow .jn { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 ul.joblist li.row:hover .jobrow, ul.joblist li.current .jobrow { color: var(--ink); }
 ul.joblist li.current .jobrow { font-weight: 650; }
@@ -608,7 +645,7 @@ ul.wishlist li:hover .wbtn, ul.wishlist li:focus-within .wbtn { display: grid; }
 
 /* backup & data */
 .backupstat { margin: -4px 4px 10px; color: var(--ink-3); font-size: 12px; }
-.backupstat.due { padding: 8px 10px; margin: -2px 0 10px; border-radius: 10px; background: var(--accent-soft); color: var(--ink); font-weight: 600; }
+.backupstat.due { padding: 8px 10px; margin: -2px 0 10px; border-radius: 10px; background: var(--wash); box-shadow: inset 3px 0 0 var(--accent); color: var(--ink); font-weight: 600; }
 .backupstat.due::before { content: "●"; margin-right: 6px; color: var(--accent); }
 .tools-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
 .tools-grid button {
@@ -759,7 +796,15 @@ body[data-view="job"] .eyebrow { color: color-mix(in oklab, var(--jobc, var(--ac
   background: var(--surface);
   border: 1px solid var(--line);
 }
-.stat:first-child { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.stat:first-child { position: relative; overflow: hidden; background: var(--accent); border-color: var(--accent); color: var(--accent-ink); box-shadow: 0 10px 24px -14px var(--accent-ring); }
+/* two soft discs, a little light on the accent tile */
+.stat:first-child::before, .stat:first-child::after { content: ""; position: absolute; border-radius: 50%; background: rgba(255, 255, 255, 0.16); pointer-events: none; }
+.stat:first-child::before { right: -26px; top: -30px; width: 96px; height: 96px; }
+.stat:first-child::after { right: 34px; bottom: -34px; width: 64px; height: 64px; background: rgba(255, 255, 255, 0.10); }
+button.stat { position: relative; font: inherit; color: inherit; text-align: left; cursor: pointer; transition: transform .15s var(--ease), box-shadow .15s, border-color .15s; }
+button.stat::after { content: "›"; position: absolute; right: 14px; top: 10px; color: var(--ink-3); font-size: 18px; line-height: 1; opacity: 0; transform: translateX(-4px); transition: opacity .15s, transform .15s var(--ease); }
+button.stat:hover { transform: translateY(-2px); border-color: var(--line-2); box-shadow: var(--shadow-md); }
+button.stat:hover::after, button.stat:focus-visible::after { opacity: 1; transform: none; }
 .stat .sn {
   font-family: var(--display);
   font-size: 30px;
@@ -784,7 +829,7 @@ body[data-view="job"] .eyebrow { color: color-mix(in oklab, var(--jobc, var(--ac
   border-radius: 4px;
   background: var(--sunk);
 }
-.actstrip button.hit { background: color-mix(in srgb, var(--accent) 55%, var(--surface)); }
+.actstrip button.hit { background: var(--bar); }
 .actstrip button.cur { background: var(--accent); }
 .actstrip button:hover { background: var(--ink); transform: translateY(-2px); }
 .view-sum .actstrip { width: 120px; height: 18px; }
@@ -865,7 +910,7 @@ body[data-view="job"] .eyebrow { color: color-mix(in oklab, var(--jobc, var(--ac
 }
 .jobwrap input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
 .jobwrap input::-webkit-calendar-picker-indicator { opacity: .45; cursor: pointer; }
-.jobwrap.set input { padding-right: 32px; font-weight: 650; background: var(--accent-soft); border-color: transparent; }
+.jobwrap.set input { padding-right: 32px; font-weight: 650; background: var(--wash); border-color: color-mix(in srgb, var(--accent) 35%, transparent); }
 .jobwrap.set input::-webkit-calendar-picker-indicator { display: none !important; }
 .jobwrap.set > .ic { color: var(--accent-text); }
 .jobclear {
@@ -1073,7 +1118,8 @@ li.editing .editrow input.edate { padding: 0 10px; min-width: 0; }
   height: 56px;
   padding: 12px;
   border-radius: 18px;
-  background: var(--accent-soft);
+  background: var(--wash);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
   color: var(--accent-text);
   animation: floaty 3.4s ease-in-out infinite alternate;
 }
@@ -1154,8 +1200,16 @@ li.editing .editrow input.edate { padding: 0 10px; min-width: 0; }
   transition: box-shadow .15s, border-color .15s;
 }
 .wday:hover .wday-main { box-shadow: var(--shadow-md); }
-.wday.vacant .wday-main { background: transparent; border-style: dashed; }
-.wday.vacant .wchip { background: transparent; }
+/* a day with nothing on it folds down to one slim row */
+.wday.vacant { align-items: center; }
+.wday.vacant .wday-main { padding: 6px 16px; background: transparent; border-style: dashed; }
+.wday.vacant .wchip { height: 40px; border-radius: 12px; background: transparent; }
+.wday.vacant .wchip .wn { font-size: 16px; }
+.wday.vacant .wchip .wd { font-size: 9.5px; }
+.wday.vacant .wday-head { align-items: center; }
+.wday.vacant .wday-head button:first-child { min-height: 24px; color: var(--ink-2); font-size: 14px; }
+.wday.vacant .none { display: none; }
+.weekview > .wday.vacant::after { top: 42px; }
 .wday.droptarget { outline: none !important; }
 .wday.droptarget .wday-main { outline: 2px dashed var(--accent); outline-offset: 2px; background: var(--accent-soft); }
 .wday-head { display: flex; align-items: baseline; gap: 10px; }
@@ -1260,9 +1314,9 @@ body[data-view="job"] .datenav .bigdate::before {
 .monthview .view-sum { margin: 0 2px 14px; }
 .mlegend { display: inline-flex; align-items: center; gap: 4px; font-size: 11.5px; }
 .mlegend i { width: 11px; height: 11px; border-radius: 3px; background: var(--sunk); }
-.mlegend i.l1 { background: var(--heat-1); }
-.mlegend i.l2 { background: var(--heat-2); }
-.mlegend i.l3 { background: var(--heat-3); }
+.mlegend i.l1 { background: color-mix(in srgb, var(--heat-base) var(--heat-1), var(--sunk)); }
+.mlegend i.l2 { background: color-mix(in srgb, var(--heat-base) var(--heat-2), var(--sunk)); }
+.mlegend i.l3 { background: color-mix(in srgb, var(--heat-base) var(--heat-3), var(--sunk)); }
 .mgrid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
 .mgrid .mhead { padding: 0 0 4px 4px; color: var(--ink-3); font-size: 11.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; user-select: none; }
 .mcell {
@@ -1283,9 +1337,11 @@ body[data-view="job"] .datenav .bigdate::before {
 }
 .mcell:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); background: var(--surface); }
 .mcell.wknd { background: color-mix(in srgb, var(--sunk) 55%, transparent); }
-.mcell.d1 { background: var(--heat-1); }
-.mcell.d2 { background: var(--heat-2); }
-.mcell.d3 { background: var(--heat-3); }
+/* shaded in the day's busiest job's colour, stronger the busier the day */
+.mcell.d1 { background: color-mix(in srgb, var(--job, var(--heat-base)) var(--heat-1), var(--sunk)); }
+.mcell.d2 { background: color-mix(in srgb, var(--job, var(--heat-base)) var(--heat-2), var(--sunk)); }
+.mcell.d3 { background: color-mix(in srgb, var(--job, var(--heat-base)) var(--heat-3), var(--sunk)); }
+.mcell.d2 .snip, .mcell.d3 .snip, .mcell.d3 .mjobs .jm { color: var(--ink); }
 .mcell.blank { background: transparent; cursor: default; }
 .mcell.blank:hover { transform: none; box-shadow: none; }
 .mcell .dnum { display: flex; align-items: center; justify-content: space-between; font-family: var(--display); font-size: 15px; font-weight: 750; color: var(--ink); font-variant-numeric: tabular-nums; }
@@ -1675,7 +1731,7 @@ ul.wishlist li.due .grip { color: var(--accent); }
   padding: 12px 14px;
   border: 1px dashed color-mix(in srgb, var(--accent) 45%, var(--line));
   border-radius: var(--r-lg);
-  background: color-mix(in srgb, var(--accent-soft) 60%, transparent);
+  background: var(--wash);
 }
 .duebar[hidden] { display: none; }
 .duehead {
@@ -1742,7 +1798,8 @@ ul.wishlist li.due .grip { color: var(--accent); }
   margin: -2px 0 8px;
   padding: 8px 10px;
   border-radius: 10px;
-  background: var(--accent-soft);
+  background: var(--wash);
+  box-shadow: inset 3px 0 0 var(--accent);
   color: var(--ink);
 }
 .autostat.paused::before, .autostat.error::before { content: "●"; margin-right: 6px; color: var(--accent); }

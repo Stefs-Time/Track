@@ -29,9 +29,9 @@
     </span>
   </div>
   <div class="tabs" id="viewTabs">
-    <button data-view="day" class="active" data-tip="One day at a time — shortcut: D">Day</button>
-    <button data-view="week" data-tip="The whole week at a glance — shortcut: W">Week</button>
-    <button data-view="month" data-tip="Calendar with entry counts — shortcut: M">Month</button>
+    <button data-view="day" class="active" data-tip="One day at a time — shortcut: D"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9h10M7 13h10M7 17h6"/></svg></span>Day</button>
+    <button data-view="week" data-tip="The whole week at a glance — shortcut: W"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16M15 4v16"/></svg></span>Week</button>
+    <button data-view="month" data-tip="Calendar with entry counts — shortcut: M"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M3 15h18M9 4v16M15 4v16"/></svg></span>Month</button>
   </div>
   <div class="head-right">
     <button class="installbtn" id="installBtn" hidden data-tip="Install Docket as an app — its own window, Start menu / dock icon, and it works offline"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg></span>Install app</button>
@@ -45,12 +45,12 @@
 
   <aside class="side side-left" aria-label="Days, jobs and recurring tasks">
     <section class="grow">
-      <h2>Recent days</h2>
+      <h2><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span>Recent days</h2>
       <ul class="daylist" id="dayList"></ul>
     </section>
 
     <section>
-      <h2>Jobs <span class="qcount" id="jobCount"></span></h2>
+      <h2><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span>Jobs <span class="qcount" id="jobCount"></span></h2>
       <div class="wish-add">
         <input type="text" id="newJobSide" placeholder="New job…" autocomplete="off" maxlength="60" aria-label="New job name">
         <button id="addJobBtn" data-tip="Add a job" aria-label="Add a job">+</button>
@@ -60,7 +60,7 @@
     </section>
 
     <section>
-      <h2>Recurring <span class="qcount" id="recCount"></span></h2>
+      <h2><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg></span>Recurring <span class="qcount" id="recCount"></span></h2>
       <div class="wish-add">
         <input type="text" id="newRec" placeholder="Happens often…" autocomplete="off" maxlength="1000" aria-label="New recurring task">
         <button id="addRecBtn" data-tip="Add a recurring task" aria-label="Add a recurring task">+</button>
@@ -75,7 +75,7 @@
     </section>
 
     <section class="tools">
-      <h2>Backup &amp; data</h2>
+      <h2><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg></span>Backup &amp; data</h2>
       <p class="backupstat" id="backupStat" role="status"></p>
       <div class="autobackup" id="autoBackup" hidden>
         <p class="autostat" id="autoStat" role="status" hidden></p>
@@ -121,8 +121,8 @@
     <div class="logzone" id="logPanel">
       <div class="stats">
         <div class="stat" data-tip="Entries logged on the open day"><span class="sn" id="statToday">0</span><span class="sl">This day</span></div>
-        <div class="stat" data-tip="Entries in the open day's week (Mon–Sun)"><span class="sn" id="statWeek">0</span><span class="sl">This week</span></div>
-        <div class="stat" data-tip="Entries in the open day's month"><span class="sn" id="statMonth">0</span><span class="sl">This month</span></div>
+        <button type="button" class="stat" id="statWeekBtn" data-tip="Entries in the open day's week (Mon–Sun) — click to open the week"><span class="sn" id="statWeek">0</span><span class="sl">This week</span></button>
+        <button type="button" class="stat" id="statMonthBtn" data-tip="Entries in the open day's month — click to open the calendar"><span class="sn" id="statMonth">0</span><span class="sl">This month</span></button>
         <div class="stat wide">
           <div class="actstrip" id="actStrip"></div>
           <span class="sl">Last 14 days</span>
@@ -146,7 +146,7 @@
       <div class="sheet" id="sheet"><ol class="items" id="itemList"></ol></div>
       <div class="empty" id="emptyMsg">
         <svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><rect x="9" y="6" width="14" height="21" rx="2.5" stroke="currentColor" stroke-width="1.6"/><rect x="12" y="3.5" width="8" height="4.5" rx="1.5" fill="currentColor" stroke="none"/><path d="M12 16l2.6 2.6 5.4-5.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        <p class="e1">Nothing logged for this day yet</p>
+        <p class="e1" id="emptyTitle">Nothing logged for this day yet</p>
         <p class="e2">Type above and press Enter — or drag something in from the Wishlist.</p>
       </div>
 
@@ -171,7 +171,7 @@
 
   <aside class="side side-right" aria-label="Wishlist">
     <section class="wishpanel">
-      <h2>Wishlist <span class="qcount" id="wishCount"></span></h2>
+      <h2><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg></span>Wishlist <span class="qcount" id="wishCount"></span></h2>
       <div class="wish-add">
         <input type="text" id="newWish" placeholder="Needs doing…" autocomplete="off" maxlength="1000" aria-label="New wishlist item">
         <button id="addWishBtn" data-tip="Add to the wishlist" aria-label="Add to the wishlist">+</button>
@@ -203,7 +203,7 @@
       <h3><span class="tick">●</span> The daily log</h3>
       <ul>
         <li>Type what you did in the box and press <kbd>Enter</kbd> — it's saved instantly.</li>
-        <li>The tiles above the log count the open day, its week and its month; the small bars chart the <b>last 14 days</b> — click a bar to jump to that day.</li>
+        <li>The tiles above the log count the open day, its week and its month — click <b>This week</b> or <b>This month</b> to open that view. The small bars chart the <b>last 14 days</b>; click a bar to jump to that day.</li>
         <li>Move between days with the <b>‹ ›</b> arrows, or <b>click the big date</b> to open a calendar.</li>
         <li>Hover an entry and click the <b>✎ pencil</b> to edit it (Save/Cancel), or <b>✕</b> to delete it — in the Day, Week and Job views alike.</li>
         <li><b>Reorder a day</b> by dragging an entry up or down — in the Day, Week or Job view. Or Tab to its handle (the number, or the coloured dot) and press <kbd>↑</kbd> <kbd>↓</kbd>. On a touch screen, use the ▲ ▼ buttons beside each entry.</li>
@@ -223,7 +223,8 @@
         <li>The Job view lists the job's <b>wishlist and recurring items</b> above its logged work — click <b>↳</b> to log one on the open day.</li>
         <li><b>Drag</b> an entry, wishlist or recurring item onto a job in the sidebar (or onto an open Job view) to link it to that job.</li>
         <li>Every job has its own <b>colour</b> — on its pills, down the edge of its entries, and on the calendar. Click the coloured dot beside a job in the sidebar to change it.</li>
-        <li>The <b>Month</b> calendar names each day's jobs, busiest first, with a bar showing how the day split between them.</li>
+        <li>The <b>Month</b> calendar shades each day in its busiest job's colour — deeper the busier the day — names the day's jobs, and shows a bar of how the day split between them.</li>
+        <li>In the <b>Jobs</b> list, the thin bar under each job shows its share of the work, measured against your busiest job.</li>
         <li>Change an entry's job with the <b>✎ pencil</b>. Rename or delete a job from the sidebar; deleting a job keeps everything that was on it.</li>
         <li><b>Finished a job?</b> Hover it and click the <b>archive</b> box. It leaves the Jobs list and the Job box's suggestions, but everything on it stays — <b>Show archived</b> under the list brings it back into view, and <b>Restore</b> returns it. Logging new work against an archived job restores it by itself.</li>
       </ul>
@@ -244,7 +245,7 @@
       <h3><span class="tick">●</span> Day · Week · Month views</h3>
       <ul>
         <li>Switch views with the <b>Day / Week / Month</b> tabs. The <b>‹ ›</b> arrows then step by day, week or month.</li>
-        <li><b>Week</b> shows the whole week's entries at a glance; <b>Month</b> is a calendar with counts per day.</li>
+        <li><b>Week</b> shows the whole week's entries at a glance, with empty days folded to a slim row (their <b>+</b> still adds to them); <b>Month</b> is a calendar with counts per day.</li>
         <li>Click any day in either view to open it. The copy buttons follow the view — in Month view, <b>Copy Month</b> gives you the full month-to-date list, ready to paste.</li>
       </ul>
 
