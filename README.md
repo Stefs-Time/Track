@@ -26,10 +26,10 @@ It comes two ways, from the same code:
 - **Month calendar.** Shaded like a heatmap by how busy each day was, with each day's jobs named, busiest first, and a bar showing how the day split.
 - **Light and dark.** Follows your system, or pin either with the theme button.
 - **Copy to clipboard.** Copy the open day, week, month or job as a dated bulleted list, or just the lines.
-- **Undo** for deletes, moves, links, imports and **Clear data** — the button, or Ctrl+Z for a minute afterwards.
+- **Undo** for deletes, moves, links, archiving, skips, imports and **Clear data** — the button, or Ctrl+Z for a minute afterwards.
 - **Import and export.** JSON is the exact backup. CSV opens in Excel. Both carry everything, including jobs, archived jobs and recurring schedules. See [docs/DATA-FORMAT.md](docs/DATA-FORMAT.md).
 - **Backup reminder.** Shows when you last exported, and nudges you when it's been a while and the log has changed.
-- **Keyboard shortcuts.** `/` search, `←` `→` move, `T` today, `D` `W` `M` views, `N` new entry, `J` job, `C` copy, `Ctrl+Z` undo, `Esc` leave a box, `?` guide.
+- **Keyboard shortcuts.** `/` search, `←` `→` move, `T` today, `D` `W` `M` views, `N` new entry, `J` job, `C` copy, `Ctrl+P` print a report, `Ctrl+Z` undo, `Esc` leave a box, `?` guide.
 - **Built-in guide.** It opens on first use, and the **?** button brings it back. Every control explains itself on hover or keyboard focus.
 
 | Job view | Month view | Dark, on a phone | A printed weekly report |
@@ -53,7 +53,7 @@ It comes two ways, from the same code:
 
 ## Accessibility
 
-Docket is built to WCAG 2.1 AA. An automated axe-core check covers every view and dialog in both themes on every test run. Everything works from the keyboard: shortcuts, Tab to any control, and ↑ ↓ to reorder. Every action that needs a drag or a hover has a non-drag, non-hover route, and touch screens get always-visible buttons in place of hover ones.
+Docket is built to WCAG 2.1 AA. An automated axe-core check covers every view and dialog in both themes on every test run. Everything works from the keyboard: shortcuts, Tab to any control, and ↑ ↓ to reorder. The first Tab offers **Skip to the log**, past the side panel. Every action that needs a drag or a hover has a non-drag, non-hover route, and touch screens get always-visible buttons in place of hover ones. Every control is at least 24 × 24 px (WCAG 2.2 target size) and the layout works down to 320 px wide without sideways scrolling; both are checked on every test run.
 
 ## Development
 

@@ -19,6 +19,7 @@
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+<a class="skiplink" href="#main">Skip to the log</a>
 <header class="mast">
   <div class="brand">
     <span class="glyph" aria-hidden="true"><svg id="brandGlyph" viewBox="0 0 32 32" fill="none"><rect x="9" y="6" width="14" height="21" rx="2.5" stroke="currentColor" stroke-width="2"/><rect x="12" y="3.5" width="8" height="4.5" rx="1.5" fill="currentColor" stroke="none"/><path d="M12 16l2.6 2.6 5.4-5.8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
@@ -97,7 +98,7 @@
     </section>
   </aside>
 
-  <main class="main">
+  <main class="main" id="main" tabindex="-1">
     <section class="hero">
       <p class="eyebrow" id="dayTitle"></p>
       <div class="datenav">
@@ -138,7 +139,7 @@
           <input type="text" id="newItem" placeholder="What did you do?" autocomplete="off" maxlength="1000" aria-label="What did you do?">
           <kbd class="enterhint">Enter ↵</kbd>
         </div>
-        <button id="addBtn" aria-label="Add entry"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>Add</button>
+        <button id="addBtn" aria-label="Add entry"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span><span class="al">Add</span></button>
       </div>
 
       <section class="duebar" id="dueBar" aria-label="Recurring tasks due today" hidden></section>
@@ -248,10 +249,10 @@
       </ul>
 
       <h3><span class="tick">●</span> Keyboard shortcuts</h3>
-      <p>They work whenever you're not typing in a box — press <kbd>Esc</kbd> to leave one:</p>
+      <p>They work whenever you're not typing in a box — press <kbd>Esc</kbd> to leave one. Using <kbd>Tab</kbd>? The first stop is <b>Skip to the log</b>, straight past the side panel.</p>
       <ul>
         <li><kbd>/</kbd> or <kbd>Ctrl</kbd> <kbd>K</kbd> — <b>search</b> every entry, job, wishlist and recurring item; <kbd>↑</kbd> <kbd>↓</kbd> then <kbd>Enter</kbd> jumps to it</li>
-        <li><kbd>Ctrl</kbd> <kbd>Z</kbd> — undo the last delete, move, link or clear, for a minute after it happens</li>
+        <li><kbd>Ctrl</kbd> <kbd>Z</kbd> — undo the last delete, move, link, archive, skip, import or clear, for a minute after it happens</li>
         <li><kbd>←</kbd> <kbd>→</kbd> — previous / next day (steps by week or month in those views)</li>
         <li><kbd>T</kbd> — jump to today &nbsp;·&nbsp; <kbd>D</kbd> <kbd>W</kbd> <kbd>M</kbd> — switch to Day, Week or Month view</li>
         <li><kbd>N</kbd> — start typing a new entry &nbsp;·&nbsp; <kbd>J</kbd> — pick the job for new entries</li>

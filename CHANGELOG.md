@@ -2,6 +2,63 @@
 
 All notable changes to Docket. Versions follow [Semantic Versioning](https://semver.org/).
 
+## [2.7.2] — 2026-11-12
+
+A user-acceptance, UI and UX audit: fixes only, no new features.
+
+### Fixed
+- **Keyboard:** the side panel came before the log in the Tab order, so the entry
+  box was about 40 Tab presses away. The first Tab now offers **Skip to the log**,
+  and the 14 activity bars are no longer Tab stops (Recent days, the arrows and the
+  date picker already reach every day).
+- **Phones:** the page opened scrolled down to the entry box, past the date and
+  totals; it now opens at the top, without grabbing focus. The **Add** button
+  shows just its **+**, so the entry box keeps room to type (on a 320 px screen it
+  read "What did yo…").
+- **Tap targets:** the ▲ ▼ reorder buttons, the Week view's job tags and the
+  month calendar icon in Recent days are now at least 24 × 24 px (WCAG 2.2).
+- **Wording:** messages and hints named days as `Thu 2026-11-12`; they now say
+  **Thu 12 Nov** (with the year when it's another year), like the rest of the app.
+- An empty month in Recent days showed a stray **·** in place of its count.
+
+### Tests
+- New `usability` suite: the skip link and Tab stops, day names in messages, the
+  phone first view, and a 24 px minimum for every control on a phone.
+
+## [2.7.1] — 2026-11-12
+
+A visual, security and functional audit: fixes only, no new features.
+
+### Fixed
+- **Impossible dates in saved data or a backup** (such as `2026-02-30`) were shown
+  as a different day than they were stored under. They're now dropped on load (the
+  original kept under `.before-repair`, as for any repair) and skipped on import.
+- **A huge file chosen for import froze the page** while it was read. Files over
+  25 MB are refused straight away with a message; real backups are a few MB.
+- Skipping a task under **Due today** in one tab left it showing in another open
+  tab until that tab redrew. Both tabs now stay in step.
+- **Turn off** auto-backup now updates the screen at once, instead of after the
+  browser finished forgetting the folder.
+- On phones, a **Due today** task with a job squeezed its name into a narrow column.
+  The task now has its own line, with its job and buttons beneath.
+
+### Tests and CI
+- **CI was failing before any test ran:** GitHub moved `ubuntu-latest` to Ubuntu
+  26.04, where Playwright 1.56 can't install its browser. CI and Release now run on
+  `ubuntu-24.04`, and the test tooling is updated to Playwright 1.63.
+- Newer Chromium crashes when a stored private-file-system folder is read back from
+  IndexedDB in a throwaway, incognito-like profile. That's a browser bug that
+  real use doesn't hit (a normal profile works). The auto-backup tests now run in a
+  normal persistent profile, like real use.
+- The accessibility scan could fail by timing: a message fading out on its own
+  timer was sometimes scanned half-transparent (this failed the 2.7 pull request
+  check once). Messages are now held still during scans, and the message bar has
+  its own fully-shown accessibility check.
+
+### Documentation
+- The guide and README list every action Undo covers, and Ctrl+P among the
+  shortcuts. Stale references in the test config and docs are corrected.
+
 ## [2.7.0] — 2026-10-27
 
 ### Added

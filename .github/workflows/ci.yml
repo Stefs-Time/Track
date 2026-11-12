@@ -10,7 +10,8 @@ permissions:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    # pinned: a new "latest" image can arrive before Playwright supports it
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4

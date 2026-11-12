@@ -2,9 +2,23 @@
 // can't click through, so it's stubbed to hand back a real folder from the
 // browser's private file system — every write, read and delete after that
 // is the real File System Access API.
+//
+// These tests run in a normal (persistent) browser profile, as people use
+// Docket. Chromium 14x crashes when a stored private-file-system folder is
+// read back from IndexedDB in a throwaway incognito-like profile — the kind
+// Playwright gives each test by default — which has nothing to do with the app.
 "use strict";
 
-const { test, expect } = require("@playwright/test");
+const { test: base, expect } = require("@playwright/test");
+
+const test = base.extend({
+  page: async ({ playwright, baseURL, viewport }, use, testInfo) => {
+    const ctx = await playwright.chromium.launchPersistentContext(testInfo.outputPath("profile"), { baseURL, viewport, serviceWorkers: "block" });
+    const page = ctx.pages()[0] || await ctx.newPage();
+    await use(page);
+    await ctx.close();
+  }
+});
 const { check, iso, seed, state } = require("./helpers");
 
 const T = iso(0);
@@ -21,7 +35,10 @@ function folder(page) {
     const dir = await (await navigator.storage.getDirectory()).getDirectoryHandle("Docket backups", { create: true });
     const out = {};
     const it = dir.values();
-    for (let r = await it.next(); !r.done; r = await it.next()) out[r.value.name] = await (await r.value.getFile()).text();
+    for (let r = await it.next(); !r.done; r = await it.next()) {
+      // the app may prune a file between listing and reading it
+      try { out[r.value.name] = await (await r.value.getFile()).text(); } catch { /* gone */ }
+    }
     return out;
   });
 }
@@ -78,6 +95,10 @@ test("back up to a folder automatically after every change", async ({ page }) =>
   await page.click("#autoOffBtn");
   check(await page.isVisible("#autoOnBtn") && !(await page.isVisible("#autoStat")), "Turn off goes back to the offer");
   check((await page.textContent("#toast")).includes("stay there"), "…and says the files stay");
+  await page.waitForFunction(() => new Promise((ok) => {
+    const o = indexedDB.open("docket", 1);
+    o.onsuccess = () => { const r = o.result.transaction("kv").objectStore("kv").get("backupDir"); r.onsuccess = () => { o.result.close(); ok(!r.result); }; };
+  }));
   await page.reload();
   check(await page.isVisible("#autoOnBtn"), "…and stays off after a reload");
   check(errors.length === 0, "no page errors " + JSON.stringify(errors));

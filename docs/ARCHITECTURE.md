@@ -115,6 +115,11 @@ by the renderer. Focus is restored explicitly afterwards (`refocusEntry`).
 - **Reordering is relative.** Moves are "put this entry before or after that
   one" (`placeEntry`), never an index. That's what makes the Job view, which
   shows only part of each day, reorder correctly.
+- **Name days as people say them.** Messages and hints use `niceDay`
+  ("Thu 12 Nov"), never the raw `YYYY-MM-DD` key.
+- **Tap targets are at least 24 × 24 px** on touch screens (WCAG 2.2), and
+  shortcuts that duplicate another route (the activity bars) stay out of the
+  Tab order. `usability.spec.js` checks both.
 - **Colours come from tokens.** Use the CSS custom properties (`--ink`,
   `--surface`, `--accent`, `--job`, …), never literal colours, so both themes
   and the job palette keep working. Muted text (`--ink-3`) is tuned to
@@ -203,7 +208,8 @@ the whole report.
 ## Two tabs, blocked storage, damaged data
 
 - **Two tabs:** when one tab saves, the browser fires `storage` in the
-  others, which reload from storage and redraw. Pending undos are dropped,
+  others, which reload from storage and redraw. The theme and today's Due
+  today skips follow the same way. Pending undos are dropped,
   because they refer to the old copies.
 - **Blocked storage:** the app starts, works for the session, shows "Not
   saved", and says so in a message. The first-run guide doesn't open,
@@ -240,12 +246,13 @@ real server in Chromium:
 | `clear-data` | Clear data, Undo, and clear → re-import round trips |
 | `design` | job colours, the theme switch |
 | `layout` | three columns on PC, the small-laptop and phone fallbacks |
-| `robustness` | blocked storage, damaged data, two tabs, stale undo |
+| `robustness` | blocked storage, damaged data and impossible dates, oversized imports, two tabs (including Due today skips), stale undo |
 | `safety` | CSV formula guard, undoing imports, the backup reminder, the error net, midnight, a speed budget at 10,000 entries |
 | `organise` | archiving and restoring jobs, printable day, week, month and job reports |
 | `recurring` | recurring schedules, the Due today strip, schedules and archived jobs through CSV and JSON |
 | `autobackup` | automatic backup to a folder: writing, pruning, remembering, pausing, turning off |
-| `a11y` | axe-core, WCAG 2.1 A/AA, every view and dialog, both themes |
+| `a11y` | axe-core, WCAG 2.1 A/AA, every view and dialog (and the message bar), both themes |
+| `usability` | the skip link and Tab stops, friendly day names in messages, phone first view, 24 px tap targets |
 | `app` | server headers, CSP and compression, installability, offline use, the standalone file |
 
 The suites read as user-acceptance scripts: one realistic flow per test,

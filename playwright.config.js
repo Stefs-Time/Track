@@ -17,7 +17,7 @@ module.exports = defineConfig({
   use: {
     baseURL: `http://localhost:${PORT}`,
     // feature suites run without the service worker so every load is the
-    // freshly built page; pwa.spec.js turns it back on to test offline use
+    // freshly built page; app.spec.js turns it back on to test offline use
     serviceWorkers: "block",
     actionTimeout: 15_000,
     trace: "retain-on-failure"
