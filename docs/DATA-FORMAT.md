@@ -126,7 +126,7 @@ rename to Docket keeps loading.
 | `track.recurring.v1` | Recurring tasks: `[{ id, text, job?, days? }]` |
 | `track.view.v1` | Last view (`day`, `week`, `month`) |
 | `track.helpseen.v1` | Whether the first-run guide has been shown |
-| `track.theme.v1` | A pinned theme (`light` / `dark`); absent means follow the system |
+| `track.theme.v1` | No longer used (the light/dark choice, before 3.0). Removed when Docket opens |
 | `track.lastbackup.v1` | The last export: `{ "at": "YYYY-MM-DD", "entries": n }`, for the backup reminder |
 | `track.persist.v1` | Whether persistent storage was requested: `asked`, `granted` or `declined` |
 | `track.skipped.v1` | Recurring tasks skipped today: `{ "day": "YYYY-MM-DD", "ids": [...] }`; ignored once the day has passed |

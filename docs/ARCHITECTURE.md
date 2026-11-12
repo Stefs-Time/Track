@@ -26,7 +26,7 @@ The source is split for editing and joined at build time:
 
 ```
 src/index.html   markup: top bar, side panel, views, dialogs
-src/styles.css   every style; design tokens at the top, light and dark
+src/styles.css   every style; design tokens at the top (one palette)
 src/app.js       every behaviour, in one strict-mode IIFE
 src/sw.js        service worker (offline support for the installed app)
 scripts/build.js inlines styles.css and app.js into index.html → dist/
@@ -59,7 +59,7 @@ The file is ordered so that each section only depends on the ones above it
 | printable reports | `buildReport` for the open day, week, month or job, and the print hooks |
 | clear data, search, help | the three dialogs |
 | keyboard shortcuts, hover hints | global key handling and the tooltip |
-| theme, installable app | light/dark, manifest and service-worker registration |
+| installable app | manifest and service-worker registration |
 | unexpected errors | the global error net: one calm message, at most every 10s |
 | a new day | follows the date past midnight while Docket is left open |
 | other tabs | keeps two open tabs in step via the `storage` event |
@@ -121,16 +121,19 @@ by the renderer. Focus is restored explicitly afterwards (`refocusEntry`).
   shortcuts that duplicate another route (the activity bars) stay out of the
   Tab order. `usability.spec.js` checks both.
 - **Colours come from tokens.** Use the CSS custom properties (`--ink`,
-  `--surface`, `--accent`, `--job`, …), never literal colours, so both themes
-  and the job palette keep working. Muted text (`--ink-3`) is tuned to
+  `--surface`, `--accent`, `--job`, …), never literal colours, so the palette
+  can be retuned in one place and the job colours keep working. Muted text (`--ink-3`) is tuned to
   pass WCAG AA on every surface; the accessibility test checks it.
-- **Dark mode stays neutral grey.** Orange washed thinly over a dark surface
-  reads as brown, so soft fills never use the accent directly. Use `--wash`
-  for a soft accent surface (Due today, reminders), `--bar` for activity
-  bars and `--heat-base` with `--heat-1/2/3` for calendar shading: each is
-  a warm tint in light mode and a grey in dark. The accent itself is for
-  solid marks, borders, text and focus rings. `design.spec.js` checks the
-  dark surfaces are not warm.
+- **One look: graphite grey.** There is a single palette and no light/dark
+  switch; `color-scheme: dark` keeps native controls (date picker,
+  scrollbars) in step, and the system's own setting changes nothing. Only
+  printed reports differ: they use their own light palette on white.
+- **Surfaces stay neutral grey.** Orange washed thinly over grey reads as
+  brown, so soft fills never use the accent directly. Use `--wash` for a
+  raised soft surface (Due today, reminders), `--bar` for activity bars
+  and `--heat-base` with `--heat-1/2/3` for calendar shading. The accent
+  itself is for solid marks, borders, text and focus rings.
+  `design.spec.js` checks the surfaces are not warm.
 - **Job colour is set once, on the container.** `tintJob(el, id)` sets
   `--job`; children read it. A Month cell carries its busiest job's colour,
   and a Jobs row also carries `--share` for its bar.
@@ -208,7 +211,7 @@ job. The Print / PDF button and `beforeprint` (Ctrl+P, the browser menu) add
 the report. `afterprint` removes the class. The button won't print an empty
 period; it says so instead.
 
-The report is styled to match the app but always on the light palette:
+The report is styled to match the app but always on its own light palette:
 paper is white, so the print block defines its own `--p-*` colours and
 switches the canvas to `color-scheme: light`. `print-color-adjust: exact`
 keeps tiles, bars and job colours from being dropped. Job colours arrive the
@@ -218,8 +221,8 @@ the whole report.
 ## Two tabs, blocked storage, damaged data
 
 - **Two tabs:** when one tab saves, the browser fires `storage` in the
-  others, which reload from storage and redraw. The theme and today's Due
-  today skips follow the same way. Pending undos are dropped,
+  others, which reload from storage and redraw. Today's Due today skips
+  follow the same way. Pending undos are dropped,
   because they refer to the old copies.
 - **Blocked storage:** the app starts, works for the session, shows "Not
   saved", and says so in a message. The first-run guide doesn't open,
@@ -256,14 +259,14 @@ real server in Chromium:
 | `jobs`, `lists-and-jobs` | jobs end to end, list items with jobs |
 | `entries`, `reorder`, `ease` | moving, editing anywhere, reordering, search, undo, quick-add |
 | `clear-data` | Clear data, Undo, and clear → re-import round trips |
-| `design` | job colours, the theme switch, the job-shaded calendar, slim empty days, clickable totals, the greeting, neutral dark surfaces |
+| `design` | job colours, the single graphite look (no theme switch), the job-shaded calendar, slim empty days, clickable totals, the greeting, neutral grey surfaces |
 | `layout` | three columns on PC, the small-laptop and phone fallbacks |
 | `robustness` | blocked storage, damaged data and impossible dates, oversized imports, two tabs (including Due today skips), stale undo |
 | `safety` | CSV formula guard, undoing imports, the backup reminder, the error net, midnight, a speed budget at 10,000 entries |
 | `organise` | archiving and restoring jobs, printable day, week, month and job reports |
 | `recurring` | recurring schedules, the Due today strip, schedules and archived jobs through CSV and JSON |
 | `autobackup` | automatic backup to a folder: writing, pruning, remembering, changing folder, pausing, turning off |
-| `a11y` | axe-core, WCAG 2.1 A/AA, every view and dialog (and the message bar), both themes |
+| `a11y` | axe-core, WCAG 2.1 A/AA, every view and dialog (and the message bar), on light and dark systems |
 | `journeys` | the totals, copying a week or month, Clear this day, moving by date, Recent days' month controls, the + buttons, the floating +, dialogs' ✕ |
 | `usability` | the skip link and Tab stops, friendly day names in messages, phone first view, 24 px tap targets |
 | `app` | server headers, CSP and compression, installability, offline use, the standalone file |

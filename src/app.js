@@ -7,7 +7,6 @@
   var REC_KEY = "track.recurring.v1";
   var VIEW_KEY = "track.view.v1";
   var JOB_KEY = "track.jobs.v1";
-  var THEME_KEY = "track.theme.v1";
   var HELP_KEY = "track.helpseen.v1";
 
   // ---------- storage ----------
@@ -21,13 +20,15 @@
     try { return localStorage.getItem(key); }
     catch (e) { storageBlocked = true; return null; }
   }
-  // Preferences (view, theme, guide seen) are conveniences: if they can't be
+  // Preferences (view, guide seen) are conveniences: if they can't be
   // stored the app simply forgets them, so failures are ignored on purpose.
   function setPref(key, value) {
     try {
       if (value === null) localStorage.removeItem(key); else localStorage.setItem(key, value);
     } catch (e) { /* a preference that can't be saved is just forgotten */ }
   }
+  // Docket had a light/dark switch until 3.0; its saved choice is no longer used.
+  setPref("track.theme.v1", null);
 
   // ---------- loading, with repair ----------
   // Saved data is validated item by item, so one damaged or hand-edited
@@ -3684,37 +3685,6 @@
   document.addEventListener("scroll", hideTip, true);
   document.addEventListener("dragstart", hideTip, true);
 
-  // ---------- theme ----------
-  // Auto follows the system; Light and Dark pin one. The <head> script
-  // applies a pinned choice before first paint; this keeps it in step.
-  var THEME_ICONS = {
-    auto: '<circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18Z" fill="currentColor"/>',
-    light: '<circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
-    dark: '<path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11Z"/>'
-  };
-  var THEME_NEXT = { auto: "light", light: "dark", dark: "auto" };
-  var THEME_LABEL = { auto: "Theme: matches your system", light: "Theme: light", dark: "Theme: dark" };
-  function currentTheme() {
-    var t = readStore(THEME_KEY);
-    return t === "light" || t === "dark" ? t : "auto";
-  }
-  function applyTheme(t) {
-    if (t === "auto") document.documentElement.removeAttribute("data-theme");
-    else document.documentElement.setAttribute("data-theme", t);
-    var b = $("themeBtn");
-    b.querySelector("svg").innerHTML = THEME_ICONS[t];
-    b.dataset.tip = THEME_LABEL[t] + " — click for " + THEME_NEXT[t];
-    b.setAttribute("aria-label", THEME_LABEL[t] + ". Switch to " + THEME_NEXT[t]);
-  }
-  $("themeBtn").addEventListener("click", function () {
-    var next = THEME_NEXT[currentTheme()];
-    setPref(THEME_KEY, next === "auto" ? null : next);
-    applyTheme(next);
-    hideTip();
-    showTip(this); // keep the hint in step with the new state
-  });
-  applyTheme(currentTheme());
-
   // ---------- installable app ----------
   // Served over http(s), Docket is a PWA: a manifest makes it installable and
   // a service worker lets it open offline. Opened as a file (file://) neither
@@ -3793,7 +3763,6 @@
   // saves, so reload from storage and redraw.
   var DATA_KEYS = [STORE_KEY, WISH_KEY, REC_KEY, JOB_KEY];
   window.addEventListener("storage", function (e) {
-    if (e.key === THEME_KEY) { applyTheme(currentTheme()); return; }
     if (e.key === SKIP_KEY) { render(); return; } // skipped in another tab: drop it from Due today here too
     if (e.key !== null && DATA_KEYS.indexOf(e.key) === -1) return;
     data = load();

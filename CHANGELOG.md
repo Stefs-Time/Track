@@ -2,6 +2,28 @@
 
 All notable changes to Docket. Versions follow [Semantic Versioning](https://semver.org/).
 
+## [3.0.0] — 2026-11-12
+
+One decisive look. Every function works as before.
+
+### Changed
+- **Docket is graphite grey, everywhere.** Light mode, dark mode and the theme
+  button are gone. There is one soft neutral grey with the orange accent and
+  the job colours, the same on every device, by day and by night, whatever
+  the system is set to. The grey is a step softer than the old dark mode, so
+  panels and cards separate more clearly and it is easier on the eyes.
+- **The floating +** on a computer is smaller and sits in the gutter beside the
+  Wishlist, so it no longer covers job labels in the Week and Month views.
+- The installed app's title bar and splash screen match the new grey.
+
+### Removed
+- The theme button and the "Light or dark" section of the guide. A saved
+  light/dark choice (`track.theme.v1`) is cleared when Docket opens; no log
+  data is touched.
+
+### Unchanged
+- Printed reports and PDFs are still on white paper in Docket's colours.
+
 ## [2.8.0] — 2026-11-12
 
 A visual refinement for everyday use. Everything works as before.

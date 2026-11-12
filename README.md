@@ -25,7 +25,7 @@ It comes two ways, from the same code:
 - **A colour per job.** Each job's colour runs through its pills, entries, calendar bars and Job view, so you can tell work apart at a glance. Click a job's dot to change it.
 - **Month calendar.** Each day is shaded in its busiest job's colour, deeper the busier it was, with the day's jobs named and a bar showing how the day split.
 - **A calm week.** Days with work show as cards; empty days fold to a slim row, so the week reads at a glance.
-- **Light and dark.** Follows your system, or pin either with the theme button. Dark mode is a true neutral grey throughout.
+- **One calm look.** A soft graphite grey with a single orange accent, the same on every device, day or night. No theme to choose or switch.
 - **Copy to clipboard.** Copy the open day, week, month or job as a dated bulleted list, or just the lines.
 - **Undo** for deletes, moves, links, archiving, skips, imports and **Clear data** — the button, or Ctrl+Z for a minute afterwards.
 - **Import and export.** JSON is the exact backup. CSV opens in Excel. Both carry everything, including jobs, archived jobs and recurring schedules. See [docs/DATA-FORMAT.md](docs/DATA-FORMAT.md).
@@ -34,9 +34,9 @@ It comes two ways, from the same code:
 - **Keyboard shortcuts.** `/` search, `←` `→` move, `T` today, `D` `W` `M` views, `N` new entry, `J` job, `C` copy, `Ctrl+P` print a report, `Ctrl+Z` undo, `Esc` leave a box, `?` guide.
 - **Built-in guide.** It opens on first use, and the **?** button brings it back. Every control explains itself on hover or keyboard focus.
 
-| Job view | Month view | Dark, on a phone | A printed weekly report |
+| Job view | Month view | On a phone | A printed weekly report |
 |---|---|---|---|
-| ![Job view](docs/screenshots/job.jpg) | ![Month view](docs/screenshots/month.jpg) | ![Phone layout in dark mode](docs/screenshots/phone-dark.jpg) | ![Weekly report, as printed](docs/screenshots/report.jpg) |
+| ![Job view](docs/screenshots/job.jpg) | ![Month view](docs/screenshots/month.jpg) | ![Phone layout](docs/screenshots/phone.jpg) | ![Weekly report, as printed](docs/screenshots/report.jpg) |
 
 ## Your data
 
@@ -55,7 +55,7 @@ It comes two ways, from the same code:
 
 ## Accessibility
 
-Docket is built to WCAG 2.1 AA. An automated axe-core check covers every view and dialog in both themes on every test run. Everything works from the keyboard: shortcuts, Tab to any control, and ↑ ↓ to reorder. The first Tab offers **Skip to the log**, past the side panel. Every action that needs a drag or a hover has a non-drag, non-hover route, and touch screens get always-visible buttons in place of hover ones. Every control is at least 24 × 24 px (WCAG 2.2 target size) and the layout works down to 320 px wide without sideways scrolling; both are checked on every test run.
+Docket is built to WCAG 2.1 AA. An automated axe-core check covers every view and dialog on light and dark systems on every test run. Everything works from the keyboard: shortcuts, Tab to any control, and ↑ ↓ to reorder. The first Tab offers **Skip to the log**, past the side panel. Every action that needs a drag or a hover has a non-drag, non-hover route, and touch screens get always-visible buttons in place of hover ones. Every control is at least 24 × 24 px (WCAG 2.2 target size) and the layout works down to 320 px wide without sideways scrolling; both are checked on every test run.
 
 ## Development
 
@@ -84,7 +84,7 @@ Local settings go in an optional `.env` (copy `.env.example`); the server reads 
 ```
 src/
   index.html             page markup, including the built-in guide
-  styles.css             all styles: design tokens, light and dark, print
+  styles.css             all styles: design tokens (one graphite palette), print
   app.js                 all behaviour (plain JS, no framework, no runtime deps)
   sw.js                  service worker (offline support)
   manifest.webmanifest   PWA manifest

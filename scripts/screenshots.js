@@ -50,8 +50,8 @@ function sampleData() {
   };
 }
 
-async function shoot(browser, name, viewport, steps, colorScheme = "light") {
-  const page = await browser.newPage({ viewport, deviceScaleFactor: 1, colorScheme });
+async function shoot(browser, name, viewport, steps) {
+  const page = await browser.newPage({ viewport, deviceScaleFactor: 1 });
   await page.addInitScript((s) => { for (const [k, v] of Object.entries(s)) localStorage.setItem(k, v); }, sampleData());
   await page.goto(APP);
   if (steps) await steps(page);
@@ -76,7 +76,8 @@ async function shoot(browser, name, viewport, steps, colorScheme = "light") {
   });
   await shoot(browser, "job.jpg", desk, (p) => p.locator("#jobList li", { hasText: "Smith House" }).locator(".jobrow").click());
   await shoot(browser, "month.jpg", desk, (p) => p.click('#viewTabs button[data-view="month"]'));
-  await shoot(browser, "phone-dark.jpg", { width: 390, height: 844 }, null, "dark");
+  await shoot(browser, "week.jpg", desk, (p) => p.click('#viewTabs button[data-view="week"]'));
+  await shoot(browser, "phone.jpg", { width: 390, height: 844 });
   // a printed weekly report, as it comes out on A4 (794px wide at 96dpi, less margins)
   await shoot(browser, "report.jpg", { width: 690, height: 900 }, async (p) => {
     await p.click('#viewTabs button[data-view="week"]');

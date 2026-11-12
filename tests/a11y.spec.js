@@ -1,4 +1,4 @@
-// Accessibility: every view and dialog, in both themes, against WCAG 2.1 A/AA
+// Accessibility: every view and dialog, on light and dark systems, against WCAG 2.1 A/AA
 // with axe-core. A regression in contrast, labelling or roles fails the build.
 "use strict";
 
@@ -29,7 +29,7 @@ const STATES = [
 ];
 
 for (const scheme of ["light", "dark"]) {
-  test.describe(`${scheme} theme`, () => {
+  test.describe(`on a ${scheme} system`, () => {
     test.use({ colorScheme: scheme, viewport: { width: 1360, height: 900 } });
 
     test("no WCAG 2.1 AA violations in any view", async ({ page }) => {
