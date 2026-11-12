@@ -348,7 +348,13 @@
   var DOW = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   var LONGDOW = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
   var MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-  function shortDow(iso) { return DOW[dateObj(iso).getDay()]; }
+  // "Thu 12 Nov" (with the year when it isn't this one): how a day is named
+  // in messages and hints, never the raw 2026-11-12.
+  function niceDay(iso) {
+    var d = dateObj(iso);
+    return DOW[d.getDay()] + " " + d.getDate() + " " + MON[d.getMonth()] +
+      (d.getFullYear() !== new Date().getFullYear() ? " " + d.getFullYear() : "");
+  }
 
   // Recurring schedules, weeks shown Monday first. Labels read naturally
   // ("Every Friday", "Weekdays") and are also what the CSV carries.
@@ -483,8 +489,12 @@
   function entryCount(iso) { return (data[iso] || []).length; }
 
   // One clickable bar per day; heights scale to the busiest day shown.
+  // A mouse and touch shortcut only: the bars stay out of the Tab order and
+  // away from screen readers, since Recent days, the arrows and the date
+  // picker reach every day already (14 tiny tab stops helped nobody).
   function fillBars(strip, days, currentIso, maxH) {
     strip.innerHTML = "";
+    strip.setAttribute("aria-hidden", "true");
     var max = 1;
     days.forEach(function (d) { max = Math.max(max, entryCount(d)); });
     days.forEach(function (d) {
@@ -492,9 +502,10 @@
       var b = document.createElement("button");
       b.className = (n > 0 ? "hit" : "") + (d === currentIso ? " cur" : "");
       b.style.height = (n > 0 ? Math.round(4 + (maxH - 4) * n / max) : 3) + "px";
-      b.dataset.tip = shortDow(d) + " " + d + " — " +
+      b.dataset.tip = niceDay(d) + " — " +
         (n === 0 ? "no entries" : n + (n === 1 ? " entry" : " entries")) + " · click to open";
       b.setAttribute("aria-label", "Open " + prettyDate(d));
+      b.tabIndex = -1;
       b.addEventListener("click", function () {
         currentDate = d;
         editingId = null;
@@ -988,7 +999,7 @@
           t.textContent = it.text;
           var b = document.createElement("button");
           b.appendChild(icon("send"));
-          b.dataset.tip = sendTip + " (" + shortDow(currentDate) + " " + currentDate + ")";
+          b.dataset.tip = sendTip + " (" + niceDay(currentDate) + ")";
           b.setAttribute("aria-label", sendTip + ": " + it.text);
           b.addEventListener("click", function () { sendQueueItem(kind, it.id, currentDate); });
           li.appendChild(g);
@@ -1425,7 +1436,7 @@
       toggle.appendChild(document.createTextNode(monthLabel(key + "-01")));
       var badge = document.createElement("span");
       badge.className = "mbadge";
-      badge.textContent = groups[key].filter(function (d) { return (data[d] || []).length > 0; }).length || "·";
+      badge.textContent = groups[key].filter(function (d) { return (data[d] || []).length > 0; }).length || "";
       toggle.appendChild(badge);
       toggle.dataset.tip = entryTotal + " entr" + (entryTotal === 1 ? "y" : "ies") + " — click to " + (open ? "fold" : "unfold") + " the month";
       toggle.addEventListener("click", function () {
@@ -1811,7 +1822,7 @@
     if (editingId === id) editingId = null;
     save();
     render();
-    toast("Moved to " + shortDow(toDay) + " " + toDay, function () {
+    toast("Moved to " + niceDay(toDay), function () {
       removeEntryById(toDay, id);
       if (!data[f.day]) data[f.day] = [];
       data[f.day].splice(Math.min(f.index, data[f.day].length), 0, f.item);
@@ -1910,13 +1921,13 @@
     if (!item) return;
     if (!data[day]) data[day] = [];
     var job = jobById(item.job) ? item.job : null;
-    if (loggedOn(day, item)) { toast("Already logged on " + shortDow(day) + " " + day); return; }
+    if (loggedOn(day, item)) { toast("Already logged on " + niceDay(day)); return; }
     var entry = { id: newId(), text: item.text };
     if (job) entry.job = job;
     data[day].push(entry);
     save();
     render();
-    toast("Logged on " + shortDow(day) + " " + day + " — kept in Recurring", function () {
+    toast("Logged on " + niceDay(day) + " — kept in Recurring", function () {
       removeEntryById(day, entry.id);
       save();
       render();
@@ -2019,7 +2030,7 @@
     saveWishlist();
     save();
     render();
-    toast("Moved to " + shortDow(day) + " " + day, function () {
+    toast("Moved to " + niceDay(day), function () {
       removeEntryById(day, entry.id);
       wishlist.splice(Math.min(i, wishlist.length), 0, item);
       saveWishlist();
@@ -2247,7 +2258,7 @@
       var send = document.createElement("button");
       send.className = "wbtn send";
       send.appendChild(icon("send"));
-      send.dataset.tip = cfg.sendTitle + " (" + shortDow(currentDate) + " " + currentDate + ")";
+      send.dataset.tip = cfg.sendTitle + " (" + niceDay(currentDate) + ")";
       send.setAttribute("aria-label", cfg.sendTitle);
       send.addEventListener("click", function () { sendQueueItem(kind, item.id, currentDate); });
 
@@ -3802,7 +3813,9 @@
 
   if (!storageBlocked && !readStore(HELP_KEY)) {
     openHelp(); // first run: show the guide
-  } else {
+  } else if (!window.matchMedia("(pointer: coarse)").matches) {
+    // ready to type on a computer; on a touch screen the page opens at the
+    // top instead of jumping down to the box (and no keyboard pops up)
     $("newItem").focus();
   }
 })();

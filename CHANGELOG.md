@@ -2,6 +2,29 @@
 
 All notable changes to Docket. Versions follow [Semantic Versioning](https://semver.org/).
 
+## [2.7.2] — 2026-11-12
+
+A user-acceptance, UI and UX audit: fixes only, no new features.
+
+### Fixed
+- **Keyboard:** the side panel came before the log in the Tab order, so the entry
+  box was about 40 Tab presses away. The first Tab now offers **Skip to the log**,
+  and the 14 activity bars are no longer Tab stops (Recent days, the arrows and the
+  date picker already reach every day).
+- **Phones:** the page opened scrolled down to the entry box, past the date and
+  totals; it now opens at the top, without grabbing focus. The **Add** button
+  shows just its **+**, so the entry box keeps room to type (on a 320 px screen it
+  read "What did yo…").
+- **Tap targets:** the ▲ ▼ reorder buttons, the Week view's job tags and the
+  month calendar icon in Recent days are now at least 24 × 24 px (WCAG 2.2).
+- **Wording:** messages and hints named days as `Thu 2026-11-12`; they now say
+  **Thu 12 Nov** (with the year when it's another year), like the rest of the app.
+- An empty month in Recent days showed a stray **·** in place of its count.
+
+### Tests
+- New `usability` suite: the skip link and Tab stops, day names in messages, the
+  phone first view, and a 24 px minimum for every control on a phone.
+
 ## [2.7.1] — 2026-11-12
 
 A visual, security and functional audit: fixes only, no new features.

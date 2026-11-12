@@ -53,7 +53,7 @@ It comes two ways, from the same code:
 
 ## Accessibility
 
-Docket is built to WCAG 2.1 AA. An automated axe-core check covers every view and dialog in both themes on every test run. Everything works from the keyboard: shortcuts, Tab to any control, and ↑ ↓ to reorder. Every action that needs a drag or a hover has a non-drag, non-hover route, and touch screens get always-visible buttons in place of hover ones.
+Docket is built to WCAG 2.1 AA. An automated axe-core check covers every view and dialog in both themes on every test run. Everything works from the keyboard: shortcuts, Tab to any control, and ↑ ↓ to reorder. The first Tab offers **Skip to the log**, past the side panel. Every action that needs a drag or a hover has a non-drag, non-hover route, and touch screens get always-visible buttons in place of hover ones. Every control is at least 24 × 24 px (WCAG 2.2 target size) and the layout works down to 320 px wide without sideways scrolling; both are checked on every test run.
 
 ## Development
 

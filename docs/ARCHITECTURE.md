@@ -115,6 +115,11 @@ by the renderer. Focus is restored explicitly afterwards (`refocusEntry`).
 - **Reordering is relative.** Moves are "put this entry before or after that
   one" (`placeEntry`), never an index. That's what makes the Job view, which
   shows only part of each day, reorder correctly.
+- **Name days as people say them.** Messages and hints use `niceDay`
+  ("Thu 12 Nov"), never the raw `YYYY-MM-DD` key.
+- **Tap targets are at least 24 × 24 px** on touch screens (WCAG 2.2), and
+  shortcuts that duplicate another route (the activity bars) stay out of the
+  Tab order. `usability.spec.js` checks both.
 - **Colours come from tokens.** Use the CSS custom properties (`--ink`,
   `--surface`, `--accent`, `--job`, …), never literal colours, so both themes
   and the job palette keep working. Muted text (`--ink-3`) is tuned to
@@ -246,7 +251,8 @@ real server in Chromium:
 | `organise` | archiving and restoring jobs, printable day, week, month and job reports |
 | `recurring` | recurring schedules, the Due today strip, schedules and archived jobs through CSV and JSON |
 | `autobackup` | automatic backup to a folder: writing, pruning, remembering, pausing, turning off |
-| `a11y` | axe-core, WCAG 2.1 A/AA, every view and dialog, both themes |
+| `a11y` | axe-core, WCAG 2.1 A/AA, every view and dialog (and the message bar), both themes |
+| `usability` | the skip link and Tab stops, friendly day names in messages, phone first view, 24 px tap targets |
 | `app` | server headers, CSP and compression, installability, offline use, the standalone file |
 
 The suites read as user-acceptance scripts: one realistic flow per test,
