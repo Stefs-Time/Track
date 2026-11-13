@@ -2,6 +2,22 @@
 
 All notable changes to Docket. Versions follow [Semantic Versioning](https://semver.org/).
 
+## [3.2.0] — 2026-11-13
+
+Printed reports match the app.
+
+### Changed
+- **Print / PDF reports are aurora glass**, like the screen: the dark backdrop
+  and its pools of colour run to the edge of every page, with frosted day
+  cards, the gradient accent on the first total, and the job colours. This
+  replaces the white-paper report for the day, week, month and job.
+- Every page of a long report keeps its own top and bottom margin.
+- The guide's printing section says to leave *Background graphics* ticked.
+
+### Note
+- The dark report is made for *Save as PDF*. Sent to a real printer it uses a
+  lot of ink.
+
 ## [3.1.0] — 2026-11-13
 
 Glass. Every function works as before.

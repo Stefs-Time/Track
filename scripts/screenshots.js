@@ -84,7 +84,6 @@ async function shoot(browser, name, viewport, steps) {
     await p.evaluate(() => { window.print = () => {}; });
     await p.click("#printBtn");
     await p.emulateMedia({ media: "print" });
-    await p.addStyleTag({ content: "body.print-report { padding: 32px 36px; }" }); // stand-in for the page margins
   });
   await browser.close();
 })();

@@ -127,11 +127,15 @@ test("print a job as a report that looks like the app", async ({ page }) => {
   check(JSON.stringify(await r.locator(".rp-todo li").allTextContents()) === JSON.stringify(["Order paint"]), "what's still to do is listed");
   check(await r.locator(".rp-split").count() === 0, "no By job split on a job's own report");
 
-  // on paper, only the report shows — on white, whatever the theme
+  // printed, only the report shows — in the app's own glass look, edge to edge
   await page.emulateMedia({ media: "print", colorScheme: "dark" });
   check(await r.isVisible(), "the report prints");
   check(!(await page.isVisible(".app")) && !(await page.isVisible(".mast")), "the app itself doesn't");
-  check(await page.evaluate(() => getComputedStyle(document.body).backgroundColor) === "rgb(255, 255, 255)", "on a white page, even in dark mode");
+  check(await page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor) === "rgb(16, 18, 26)", "on the app's dark backdrop");
+  check((await page.evaluate(() => getComputedStyle(document.body, "::before").backgroundImage)).includes("radial-gradient"), "…with the aurora behind it");
+  check(Number((await r.locator(".rp-dbody").first().evaluate((el) => getComputedStyle(el).backgroundColor)).match(/[\d.]+/g)[3]) < 0.3, "day cards are glass, like the app's");
+  check(await r.locator(".rp-frame thead .rp-margin").count() === 1 && await r.locator(".rp-frame tfoot .rp-margin").count() === 1, "every page gets its own top and bottom margin");
+  check(await page.evaluate(() => getComputedStyle(document.documentElement).printColorAdjust) === "exact", "the backdrop is printed, not dropped");
   check(await r.locator(".rp-stat").first().evaluate((el) => getComputedStyle(el).printColorAdjust) === "exact", "colours are printed, not dropped");
   await page.evaluate(() => window.dispatchEvent(new Event("afterprint")));
   await page.emulateMedia({ media: "screen", colorScheme: "light" });

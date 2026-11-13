@@ -3113,6 +3113,17 @@
       var dd = dateObj(iso);
       return dd.getDate() + " " + MON[dd.getMonth()] + " " + dd.getFullYear();
     }
+    // The report prints edge to edge (the backdrop reaches the paper's edge),
+    // so the page itself has no margins. A table's header and footer repeat
+    // on every printed page: empty ones here are each page's top and bottom
+    // margin, and the whole report sits in the one cell between them.
+    var frame = el("table", "rp-frame");
+    frame.setAttribute("role", "presentation");
+    frame.appendChild(el("thead")).appendChild(el("tr")).appendChild(el("td", "rp-margin"));
+    frame.appendChild(el("tfoot")).appendChild(el("tr")).appendChild(el("td", "rp-margin"));
+    var page = frame.appendChild(el("tbody")).appendChild(el("tr")).appendChild(el("td"));
+    out.appendChild(frame);
+    out = page;
     function entriesOn(d) {
       return (data[d] || []).filter(function (it) { return !job || it.job === job.id; });
     }
