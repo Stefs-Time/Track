@@ -2,6 +2,33 @@
 
 All notable changes to Docket. Versions follow [Semantic Versioning](https://semver.org/).
 
+## [3.1.0] — 2026-11-13
+
+Glass. Every function works as before.
+
+### Changed
+- **Docket is glass.** Panels and cards are frosted and translucent, floating
+  over a deep aurora of cool blue, violet and teal. Each pane catches the light
+  along its top edge.
+- **The accent glows.** Orange is now an orange-to-pink gradient with a soft
+  glow on the Add button, the This day tile, today's marker and the floating +.
+  The entry box lights up while you type in it.
+- **Dialogs** are dense frosted glass over a blurred, dimmed page.
+- Job colours glow slightly on entries and in the Jobs list; job labels are a
+  touch brighter so they stay readable on glass.
+- A scrolling side list now fades out at the bottom instead of ending in a band.
+
+### Added
+- **Reduce transparency is respected.** A device set to reduce transparency
+  gets the same layout on solid surfaces, with no blur and no aurora.
+- A test that measures text contrast from real pixels, since panels are now
+  see-through: every piece of text, in every view, on a computer and a phone,
+  against WCAG AA.
+
+### Fixed
+- Two tests looked for the cursor a moment too early and could fail by luck
+  of timing; they now wait for it.
+
 ## [3.0.0] — 2026-11-12
 
 One decisive look. Every function works as before.

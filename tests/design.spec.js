@@ -1,4 +1,5 @@
-// The "Graphite" design's behaviour: a colour per job, and one look everywhere.
+// The design's behaviour: a colour per job, and one look everywhere.
+// The glass itself (frost, contrast over the aurora) is in glass.spec.js.
 "use strict";
 
 const fs = require("node:fs");
@@ -69,15 +70,15 @@ test("every job gets its own colour, shown everywhere and kept in backups", asyn
 
 // One look everywhere: no light/dark switch, and the system setting changes nothing.
 for (const scheme of ["light", "dark"]) {
-  test.describe("one graphite look, on a " + scheme + " system", () => {
+  test.describe("one look, on a " + scheme + " system", () => {
     test.use({ colorScheme: scheme });
 
-    test("the same grey, with no theme switch and no leftover setting", async ({ page }) => {
+    test("the same glass look, with no theme switch and no leftover setting", async ({ page }) => {
       // someone who had pinned the old light theme
       await seed(page, { "track.theme.v1": "light" });
       await page.goto("/");
-      const bg = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
-      check(bg === rgb("#1e2024"), "the page is graphite grey (" + bg + ")");
+      const bg = await page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor);
+      check(bg === rgb("#10121a"), "the page has the deep base under the aurora (" + bg + ")");
       check(await page.locator("#themeBtn").count() === 0, "there is no theme button");
       check(await page.evaluate(() => !document.documentElement.hasAttribute("data-theme")), "no theme is pinned on the page");
       check(await page.evaluate(() => localStorage.getItem("track.theme.v1")) === null, "the old theme setting is tidied away");

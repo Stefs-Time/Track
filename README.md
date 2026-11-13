@@ -25,7 +25,7 @@ It comes two ways, from the same code:
 - **A colour per job.** Each job's colour runs through its pills, entries, calendar bars and Job view, so you can tell work apart at a glance. Click a job's dot to change it.
 - **Month calendar.** Each day is shaded in its busiest job's colour, deeper the busier it was, with the day's jobs named and a bar showing how the day split.
 - **A calm week.** Days with work show as cards; empty days fold to a slim row, so the week reads at a glance.
-- **One calm look.** A soft graphite grey with a single orange accent, the same on every device, day or night. No theme to choose or switch.
+- **Glass.** Frosted, translucent panels floating over a deep aurora of cool colour, with one orange accent. The same on every device, day or night, with no theme to choose. Devices set to *reduce transparency* get the same layout on solid surfaces.
 - **Copy to clipboard.** Copy the open day, week, month or job as a dated bulleted list, or just the lines.
 - **Undo** for deletes, moves, links, archiving, skips, imports and **Clear data** — the button, or Ctrl+Z for a minute afterwards.
 - **Import and export.** JSON is the exact backup. CSV opens in Excel. Both carry everything, including jobs, archived jobs and recurring schedules. See [docs/DATA-FORMAT.md](docs/DATA-FORMAT.md).
@@ -84,7 +84,7 @@ Local settings go in an optional `.env` (copy `.env.example`); the server reads 
 ```
 src/
   index.html             page markup, including the built-in guide
-  styles.css             all styles: design tokens (one graphite palette), print
+  styles.css             all styles: design tokens, the glass, print
   app.js                 all behaviour (plain JS, no framework, no runtime deps)
   sw.js                  service worker (offline support)
   manifest.webmanifest   PWA manifest
