@@ -63,4 +63,18 @@ async function settle(page) {
   await page.evaluate(() => Promise.all(document.getAnimations().map((a) => a.finished.catch(() => {}))));
 }
 
-module.exports = { check, iso, seed, state, importFile, settle };
+/**
+ * Whether the cursor ends up in an element matching `selector`. Docket puts
+ * the cursor in a box it has just drawn a moment later (the box has to be on
+ * the page first), so this waits briefly rather than looking once.
+ */
+async function focusLands(page, selector) {
+  try {
+    await page.waitForFunction((sel) => document.activeElement && document.activeElement.matches(sel), selector, { timeout: 2000 });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+module.exports = { check, iso, seed, state, importFile, settle, focusLands };

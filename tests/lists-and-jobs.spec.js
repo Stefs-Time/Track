@@ -3,7 +3,7 @@
 
 const { test } = require("@playwright/test");
 const fs = require("node:fs");
-const { check, iso, importFile } = require("./helpers");
+const { check, iso, importFile, focusLands } = require("./helpers");
 
 test.use({ viewport: { width: 1360, height: 900 } });
 
@@ -53,7 +53,7 @@ test('Wishlist and Recurring items carry jobs end to end', async ({ page }) => {
   const legacy = page.locator('#wishList li', { hasText: 'Legacy wish' });
   await legacy.hover(); await legacy.locator('.wbtn.edit').click();
   check(await page.isVisible('#wishList li.qediting'), 'pencil opens editor');
-  check(await page.evaluate(() => document.activeElement.closest('li.qediting') !== null), 'editor focused');
+  check(await focusLands(page, 'li.qediting input'), 'editor focused');
   await page.fill('#wishList li.qediting .jobwrap input', 'Smith House');
   await page.fill('#wishList li.qediting > input', 'Legacy wish (edited)');
   await page.press('#wishList li.qediting > input', 'Enter');

@@ -3,7 +3,7 @@
 "use strict";
 
 const { test, devices } = require("@playwright/test");
-const { check, iso, seed, state, settle } = require("./helpers");
+const { check, iso, seed, state, settle, focusLands } = require("./helpers");
 
 const T = iso(0);
 const dow = (new Date().getDay() + 6) % 7; // 0 = Monday
@@ -114,14 +114,14 @@ test("Ctrl+Z, Esc, quick-add in the Week view, and the floating +", async ({ pag
   await page.click('#viewTabs button[data-view="week"]');
   await page.locator(`.wday[data-day="${W}"] .wadd`).click();
   const box = page.locator(`.wday[data-day="${W}"] .waddrow input`);
-  check(await box.evaluate((el) => el === document.activeElement), "the card's add box opens with the cursor in it");
+  check(await focusLands(page, `.wday[data-day="${W}"] .waddrow input`), "the card's add box opens with the cursor in it");
   check((await box.getAttribute("placeholder")).includes("Office fit-out"), "it says which job it will use");
   await box.fill("Quick call with client");
   await box.press("Enter");
   let s = await state(page);
   const added = s.tasks[W].find((e) => e.text === "Quick call with client");
   check(added && added.job === "j2", "added to that day, on the job from the Job box");
-  check(await page.locator(`.wday[data-day="${W}"] .waddrow input`).evaluate((el) => el === document.activeElement), "the box stays open for the next one");
+  check(await focusLands(page, `.wday[data-day="${W}"] .waddrow input`), "the box stays open for the next one");
   await page.keyboard.press("Escape");
   check(await page.locator(".waddrow").count() === 0, "Esc closes it");
 });

@@ -124,16 +124,31 @@ by the renderer. Focus is restored explicitly afterwards (`refocusEntry`).
   `--surface`, `--accent`, `--job`, …), never literal colours, so the palette
   can be retuned in one place and the job colours keep working. Muted text (`--ink-3`) is tuned to
   pass WCAG AA on every surface; the accessibility test checks it.
-- **One look: graphite grey.** There is a single palette and no light/dark
+- **One look: aurora glass.** There is a single palette and no light/dark
   switch; `color-scheme: dark` keeps native controls (date picker,
   scrollbars) in step, and the system's own setting changes nothing. Only
   printed reports differ: they use their own light palette on white.
-- **Surfaces stay neutral grey.** Orange washed thinly over grey reads as
-  brown, so soft fills never use the accent directly. Use `--wash` for a
-  raised soft surface (Due today, reminders), `--bar` for activity bars
-  and `--heat-base` with `--heat-1/2/3` for calendar shading. The accent
-  itself is for solid marks, borders, text and focus rings.
-  `design.spec.js` checks the surfaces are not warm.
+- **How the glass is built.** The aurora is one fixed layer (`body::before`,
+  four radial gradients, no animation). Surfaces are translucent white
+  (`--panel`, `--surface`, `--sunk`), and only whole panes carry
+  `backdrop-filter` — the top bar, side panels, main-column cards, dialogs
+  and messages, all listed in the "Glass" block at the end of `styles.css`.
+  Rows inside a pane are never blurred, so a long list costs nothing extra.
+  Anything that floats over content (dialogs) uses the dense `--solid`.
+  Under `prefers-reduced-transparency: reduce` the tokens become opaque and
+  the aurora and blur are switched off.
+- **Text must stay readable on glass.** axe-core can only reason about flat
+  colours, so `glass.spec.js` measures contrast from a screenshot: every
+  piece of text against the pixels really behind it, on a computer and a
+  phone, in each view. Changing the aurora, a surface alpha or a text
+  colour is safe as long as that test passes.
+- **Soft fills stay neutral.** Orange washed thinly over a dark surface
+  reads as brown, so soft fills never use the accent directly, and the
+  aurora uses cool hues only. Use `--wash` for a raised soft surface (Due
+  today, reminders), `--bar` for activity bars and `--heat-base` with
+  `--heat-1/2/3` for calendar shading. The accent itself is for solid
+  marks (as a gradient, `--accent` to `--accent-2`), borders, text and
+  focus rings. `design.spec.js` checks the soft surfaces are not warm.
 - **Job colour is set once, on the container.** `tintJob(el, id)` sets
   `--job`; children read it. A Month cell carries its busiest job's colour,
   and a Jobs row also carries `--share` for its bar.
@@ -259,7 +274,8 @@ real server in Chromium:
 | `jobs`, `lists-and-jobs` | jobs end to end, list items with jobs |
 | `entries`, `reorder`, `ease` | moving, editing anywhere, reordering, search, undo, quick-add |
 | `clear-data` | Clear data, Undo, and clear → re-import round trips |
-| `design` | job colours, the single graphite look (no theme switch), the job-shaded calendar, slim empty days, clickable totals, the greeting, neutral grey surfaces |
+| `design` | job colours, the single look (no theme switch), the job-shaded calendar, slim empty days, clickable totals, the greeting, neutral soft surfaces |
+| `glass` | frosted panes over the aurora, text contrast measured from real pixels (computer and phone, every view), solid surfaces under reduce-transparency |
 | `layout` | three columns on PC, the small-laptop and phone fallbacks |
 | `robustness` | blocked storage, damaged data and impossible dates, oversized imports, two tabs (including Due today skips), stale undo |
 | `safety` | CSV formula guard, undoing imports, the backup reminder, the error net, midnight, a speed budget at 10,000 entries |
