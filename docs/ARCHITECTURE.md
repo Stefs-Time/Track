@@ -126,8 +126,8 @@ by the renderer. Focus is restored explicitly afterwards (`refocusEntry`).
   pass WCAG AA on every surface; the accessibility test checks it.
 - **One look: aurora glass.** There is a single palette and no light/dark
   switch; `color-scheme: dark` keeps native controls (date picker,
-  scrollbars) in step, and the system's own setting changes nothing. Only
-  printed reports differ: they use their own light palette on white.
+  scrollbars) in step, and the system's own setting changes nothing. Printed
+  reports use the same look, edge to edge.
 - **How the glass is built.** The aurora is one fixed layer (`body::before`,
   four radial gradients, no animation). Surfaces are translucent white
   (`--panel`, `--surface`, `--sunk`), and only whole panes carry
@@ -226,10 +226,23 @@ job. The Print / PDF button and `beforeprint` (Ctrl+P, the browser menu) add
 the report. `afterprint` removes the class. The button won't print an empty
 period; it says so instead.
 
-The report is styled to match the app but always on its own light palette:
-paper is white, so the print block defines its own `--p-*` colours and
-switches the canvas to `color-scheme: light`. `print-color-adjust: exact`
-keeps tiles, bars and job colours from being dropped. Job colours arrive the
+The report is the app's aurora glass on the page, edge to edge:
+
+- `@page { margin: 0 }` lets the dark base (on `html`) and the aurora (the
+  same fixed `body::before` layer, which repeats on every printed page)
+  reach the paper's edge.
+- With no page margins, the report supplies its own. `buildReport` puts
+  everything in one cell of a table (`.rp-frame`) whose empty `<thead>` and
+  `<tfoot>` repeat on each page: they are every page's top and bottom
+  margin. Side margins are padding on `body`.
+- Paper can't blur, so the print block's glass is plain translucent white
+  (`--p-glass`); over smooth gradients it looks the same. The block has its
+  own `--p-*` tokens in points, mirroring the screen tokens.
+- `print-color-adjust: exact` on the root, body and report keeps the
+  backdrop, tiles, bars and job colours from being dropped.
+
+This is heavy on ink if sent to a real printer; it is designed for Save as
+PDF. Job colours arrive the
 same way as on screen, as `--job` set by `tintJob`; a job's report sets it on
 the whole report.
 

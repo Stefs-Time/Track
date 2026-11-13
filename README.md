@@ -17,7 +17,7 @@ It comes two ways, from the same code:
 - **Wishlist and Recurring.** Queue things to do, or keep often-repeated tasks. Both can carry a job, and logging one (↳ or drag) carries the job onto the entry.
 - **Recurring tasks on a schedule.** Tick the days a task is due (a Friday timesheet, weekday site checks) and it's offered under **Due today** at the top of today's log: one click logs it, ✕ skips it for the day.
 - **Archive finished jobs.** They leave the Jobs list and the job boxes, but keep all their work. **Show archived** finds them; logging new work on one brings it back.
-- **Print / PDF reports.** Print the open day, week, month or job (the button, or Ctrl+P) as a report in Docket's own look: totals, a By-job split, every entry by day in its job's colour, and for a job, what's still to do. Save as PDF to email it with an invoice.
+- **Print / PDF reports.** Print the open day, week, month or job (the button, or Ctrl+P) as a report in Docket's own glass look, edge to edge: totals, a By-job split, every entry by day in its job's colour, and for a job, what's still to do. Save as PDF to email it with an invoice.
 - **Search everything.** `/` or Ctrl+K finds any entry, job, wishlist or recurring item — by words, job or date — and jumps straight to it.
 - **Reorder anywhere.** Drag entries up or down in the Day, Week or Job view, or use ↑ ↓ on the keyboard; touch screens get ▲ ▼ buttons. Copies and exports follow your order.
 - **Quick add from the week.** The + on any Week card logs straight onto that day.

@@ -1927,26 +1927,43 @@ ul.wishlist li.due .grip { color: var(--accent); }
 }
 
 /* ==========================================================================
-   Printable reports (Print / PDF, or Ctrl+P) — the app's look on paper.
-   Always its own light palette: the screen is dark glass, paper is white.
+   Printable reports (Print / PDF, or Ctrl+P) — the app's look, on the page.
+   The same aurora glass as the screen, edge to edge: the page has no margin
+   of its own, so the dark backdrop reaches the paper's edge, and the report
+   brings its own margins (repeated at the top and bottom of every page).
+   Paper can't blur, so the glass here is plain translucent white — over the
+   aurora's smooth gradients it looks the same.
    ========================================================================== */
 .printreport { display: none; }
 @media print {
-  @page { size: A4; margin: 14mm 14mm 16mm; }
-  /* paper is white: light canvas, and so white page margins */
-  :root:has(body.print-report) { color-scheme: light; background: #fff !important; }
-  body.print-report::before { display: none; }
-  body.print-report { background: #fff !important; }
+  @page { size: A4; margin: 0; }
+  :root:has(body.print-report) { background: #10121a !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body.print-report { background: transparent !important; padding: 0 14mm; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  /* the aurora, once per page (a fixed layer repeats on every printed page) */
+  body.print-report::before {
+    background:
+      radial-gradient(70% 46% at 78% 2%, rgba(96, 104, 255, 0.42), transparent 70%),
+      radial-gradient(56% 40% at 4% 0%, rgba(46, 150, 255, 0.24), transparent 70%),
+      radial-gradient(62% 42% at 12% 100%, rgba(20, 200, 180, 0.26), transparent 70%),
+      radial-gradient(60% 42% at 96% 98%, rgba(180, 90, 255, 0.34), transparent 70%);
+  }
   body.print-report > :not(.printreport) { display: none !important; }
   body.print-report .printreport { display: block; }
+  /* each page's top and bottom margin: see buildReport() */
+  .printreport .rp-frame { width: 100%; border-collapse: collapse; table-layout: fixed; }
+  .printreport .rp-frame td { padding: 0; }
+  .printreport .rp-frame .rp-margin { height: 14mm; }
   .printreport {
-    --p-ink: #1d1b18;
-    --p-ink-2: #4a453f;
-    --p-ink-3: #6f685f;
-    --p-line: #e6e0d5;
-    --p-sunk: #f6f4ef;
-    --p-accent: #ff6a3d;
-    --p-accent-text: #bf3f14;
+    --p-ink: #f6f7fa;
+    --p-ink-2: #d9dbe2;
+    --p-ink-3: #c0c4ce;
+    --p-line: rgba(255, 255, 255, 0.14);
+    --p-glass: rgba(255, 255, 255, 0.07);
+    --p-sunk: rgba(255, 255, 255, 0.09);
+    --p-accent: #ff7a50;
+    --p-accent-2: #ff5c8a;
+    --p-accent-ink: #1d1b18;
+    --p-accent-text: #ffb59c;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
     color: var(--p-ink);
@@ -1956,35 +1973,35 @@ ul.wishlist li.due .grip { color: var(--accent); }
   /* heading */
   .printreport .rp-head { display: flex; align-items: center; justify-content: space-between; padding-bottom: 10pt; margin-bottom: 16pt; border-bottom: 1pt solid var(--p-line); }
   .printreport .rp-brand { display: flex; align-items: center; gap: 8pt; }
-  .printreport .rp-glyph { display: grid; place-items: center; width: 24pt; height: 24pt; border-radius: 7pt; background: var(--p-accent); color: var(--p-ink); transform: rotate(-4deg); }
+  .printreport .rp-glyph { display: grid; place-items: center; width: 24pt; height: 24pt; border-radius: 7pt; background: linear-gradient(135deg, var(--p-accent), var(--p-accent-2)); color: var(--p-accent-ink); transform: rotate(-4deg); }
   .printreport .rp-glyph svg { width: 15pt; height: 15pt; display: block; }
   .printreport .rp-name { font-family: var(--display); font-size: 14pt; font-weight: 800; letter-spacing: -.02em; }
   .printreport .rp-kind { display: inline-flex; align-items: center; gap: 6pt; color: var(--p-accent-text); font-size: 8pt; font-weight: 750; letter-spacing: .12em; text-transform: uppercase; }
-  .printreport .rp-kind::before { content: ""; width: 6pt; height: 6pt; border-radius: 2pt; background: var(--p-accent); }
+  .printreport .rp-kind::before { content: ""; width: 6pt; height: 6pt; border-radius: 2pt; background: linear-gradient(135deg, var(--p-accent), var(--p-accent-2)); }
   .printreport .rp-title { display: flex; align-items: center; gap: 10pt; margin: 0; font-family: var(--display); font-size: 25pt; font-weight: 800; line-height: 1.12; letter-spacing: -.02em; }
-  .printreport .rp-title .rp-dot { flex-shrink: 0; width: 15pt; height: 15pt; border-radius: 5pt; background: var(--job); box-shadow: 0 0 0 3.5pt color-mix(in srgb, var(--job) 20%, transparent); }
+  .printreport .rp-title .rp-dot { flex-shrink: 0; width: 15pt; height: 15pt; border-radius: 5pt; background: var(--job); box-shadow: 0 0 0 3.5pt color-mix(in srgb, var(--job) 28%, transparent); }
   .printreport .rp-sub { margin: 4pt 0 0; color: var(--p-ink-2); font-size: 10.5pt; font-weight: 600; }
 
   /* stat tiles: the first one in the accent, like the app */
   .printreport .rp-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8pt; margin: 16pt 0; }
-  .printreport .rp-stat { display: flex; flex-direction: column; gap: 2pt; padding: 10pt 12pt; border: 1pt solid var(--p-line); border-radius: 10pt; background: #fff; }
-  .printreport .rp-stat:first-child { border-color: var(--p-accent); background: var(--p-accent); }
-  .printreport.is-job .rp-stat:first-child { border-color: var(--job); background: color-mix(in srgb, var(--job) 16%, #fff); }
+  .printreport .rp-stat { display: flex; flex-direction: column; gap: 2pt; padding: 10pt 12pt; border: 1pt solid var(--p-line); border-radius: 10pt; background: var(--p-glass); }
+  .printreport .rp-stat:first-child { border-color: transparent; background: linear-gradient(135deg, var(--p-accent), var(--p-accent-2)); color: var(--p-accent-ink); }
+  .printreport.is-job .rp-stat:first-child { border-color: var(--job); background: color-mix(in srgb, var(--job) 26%, var(--p-glass)); color: var(--p-ink); }
   .printreport.is-job .rp-head { border-bottom-color: var(--job); }
   .printreport .rp-sn { font-family: var(--display); font-size: 20pt; font-weight: 800; line-height: 1; }
   .printreport .rp-sl { color: var(--p-ink-2); font-size: 8.5pt; font-weight: 650; }
-  .printreport .rp-stat:first-child .rp-sl { color: var(--p-ink); }
+  .printreport .rp-stat:first-child .rp-sl { color: inherit; }
 
   /* the split between jobs */
   .printreport .rp-h { margin: 0 0 6pt; color: var(--p-ink-3); font-size: 8pt; font-weight: 750; letter-spacing: .1em; text-transform: uppercase; }
-  .printreport .rp-split { margin: 0 0 16pt; padding: 10pt 12pt; border-radius: 10pt; background: var(--p-sunk); break-inside: avoid; }
+  .printreport .rp-split { margin: 0 0 16pt; padding: 10pt 12pt; border: 1pt solid var(--p-line); border-radius: 10pt; background: var(--p-glass); break-inside: avoid; }
   .printreport .rp-srow { display: grid; grid-template-columns: 8pt minmax(0, 38%) 1fr 22pt; align-items: center; gap: 8pt; min-height: 17pt; font-size: 9.5pt; }
   .printreport .rp-srow .rp-dot { width: 8pt; height: 8pt; border-radius: 3pt; background: var(--job, var(--p-ink-3)); }
-  .printreport .rp-srow.none .rp-dot { background: var(--p-line); }
+  .printreport .rp-srow.none .rp-dot { background: rgba(255, 255, 255, 0.35); }
   .printreport .rp-sname { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
-  .printreport .rp-track { height: 5pt; border-radius: 3pt; background: #fff; overflow: hidden; }
+  .printreport .rp-track { height: 5pt; border-radius: 3pt; background: var(--p-sunk); overflow: hidden; }
   .printreport .rp-fill { display: block; height: 100%; border-radius: 3pt; background: var(--job, var(--p-ink-3)); }
-  .printreport .rp-srow.none .rp-fill { background: #cfc8bc; }
+  .printreport .rp-srow.none .rp-fill { background: rgba(255, 255, 255, 0.45); }
   .printreport .rp-scount { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
 
   /* a day: its date chip, then a card of entries */
@@ -1992,14 +2009,14 @@ ul.wishlist li.due .grip { color: var(--accent); }
   .printreport .rp-chip { flex-shrink: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 34pt; height: 38pt; border-radius: 9pt; background: var(--p-sunk); border: 1pt solid var(--p-line); }
   .printreport .rp-cm { color: var(--p-ink-3); font-size: 6.5pt; font-weight: 750; letter-spacing: .1em; text-transform: uppercase; }
   .printreport .rp-cd { font-family: var(--display); font-size: 15pt; font-weight: 800; line-height: 1.05; }
-  .printreport .rp-dbody { flex: 1; min-width: 0; padding: 8pt 12pt 6pt; border: 1pt solid var(--p-line); border-radius: 10pt; background: #fff; }
+  .printreport .rp-dbody { flex: 1; min-width: 0; padding: 8pt 12pt 6pt; border: 1pt solid var(--p-line); border-radius: 10pt; background: var(--p-glass); }
   .printreport .rp-dh { display: flex; align-items: baseline; gap: 7pt; margin: 0 0 4pt; font-family: var(--display); font-size: 11.5pt; font-weight: 750; }
   .printreport .rp-dsub { color: var(--p-ink-3); font-family: var(--font); font-size: 8.5pt; font-weight: 600; }
   .printreport .rp-n { margin-left: auto; min-width: 15pt; padding: 1pt 5pt; border-radius: 99pt; background: var(--p-sunk); color: var(--p-ink-2); font-family: var(--font); font-size: 8pt; font-weight: 700; text-align: center; }
   .printreport .rp-list { list-style: none; margin: 0; padding: 0; }
-  .printreport .rp-list li { position: relative; display: flex; align-items: center; gap: 8pt; padding: 4.5pt 0 4.5pt 11pt; border-top: 1pt solid var(--p-sunk); }
+  .printreport .rp-list li { position: relative; display: flex; align-items: center; gap: 8pt; padding: 4.5pt 0 4.5pt 11pt; border-top: 1pt solid var(--p-line); }
   .printreport .rp-list li:first-child { border-top: none; }
-  .printreport .rp-list li::before { content: ""; position: absolute; left: 0; top: 5pt; bottom: 5pt; width: 3pt; border-radius: 2pt; background: var(--p-line); }
+  .printreport .rp-list li::before { content: ""; position: absolute; left: 0; top: 5pt; bottom: 5pt; width: 3pt; border-radius: 2pt; background: rgba(255, 255, 255, 0.22); }
   .printreport .rp-list li.has-job::before { background: var(--job); }
   .printreport .rp-t { flex: 1; min-width: 0; word-break: break-word; }
   .printreport .rp-pill {
@@ -2010,8 +2027,8 @@ ul.wishlist li.due .grip { color: var(--accent); }
     max-width: 40%;
     padding: 1.5pt 7pt 1.5pt 6pt;
     border-radius: 99pt;
-    background: color-mix(in srgb, var(--job) 15%, #fff);
-    color: color-mix(in oklab, var(--job) 52%, var(--p-ink));
+    background: color-mix(in srgb, var(--job) 20%, transparent);
+    color: color-mix(in oklab, var(--job) 44%, var(--p-ink));
     font-size: 8pt;
     font-weight: 700;
     white-space: nowrap;
@@ -2022,7 +2039,7 @@ ul.wishlist li.due .grip { color: var(--accent); }
   .printreport .rp-empty { margin: 20pt 0; color: var(--p-ink-3); text-align: center; }
 
   /* what's still to do on a job */
-  .printreport .rp-todo { margin-top: 14pt; padding: 10pt 12pt; border: 1pt dashed color-mix(in srgb, var(--p-accent) 50%, var(--p-line)); border-radius: 10pt; background: color-mix(in srgb, var(--p-accent) 6%, #fff); break-inside: avoid; }
+  .printreport .rp-todo { margin-top: 14pt; padding: 10pt 12pt; border: 1pt dashed color-mix(in srgb, var(--p-accent) 60%, transparent); border-radius: 10pt; background: var(--p-glass); break-inside: avoid; }
   .printreport .rp-todo ul { margin: 0; padding-left: 13pt; }
   .printreport .rp-todo li { margin: 2pt 0; }
   .printreport .rp-todo li::marker { color: var(--p-accent); }
