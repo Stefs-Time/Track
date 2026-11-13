@@ -108,6 +108,7 @@
         <button id="copyPlain" data-tip="Just the lines, one per line — no date heading"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg></span>Copy Items Only</button>
         <button id="logJobBtn" style="display:none" data-tip="Set this as the job and start logging on the open day — shortcut: N"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span>Log Work on This Job</button>
         <button id="printBtn" data-tip="Print this view as a tidy report, or save it as a PDF — shortcut: Ctrl+P"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></span>Print / PDF</button>
+        <button id="reportBtn" data-tip="Pull out any dates and any job — to print, copy or open in Excel. Shortcut: R"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 17v-3M12 17v-5M15 17v-2"/></svg></span>Reports</button>
         <button id="todayBtn" data-tip="Back to today — shortcut: T"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M12 14h.01"/></svg></span>Jump to Today</button>
       </div>
     </section>
@@ -160,7 +161,7 @@
       <div class="mgrid" id="monthGrid"></div>
     </div>
 
-    <div class="keys" aria-hidden="true"><span><kbd>/</kbd> search</span><span><kbd>←</kbd><kbd>→</kbd> move</span><span><kbd>T</kbd> today</span><span><kbd>D</kbd><kbd>W</kbd><kbd>M</kbd> views</span><span><kbd>N</kbd> new entry</span><span><kbd>J</kbd> job</span><span><kbd>C</kbd> copy</span><span><kbd>Ctrl</kbd><kbd>Z</kbd> undo</span><span><kbd>Esc</kbd> leave a box</span><span><kbd>?</kbd> guide</span></div>
+    <div class="keys" aria-hidden="true"><span><kbd>/</kbd> search</span><span><kbd>←</kbd><kbd>→</kbd> move</span><span><kbd>T</kbd> today</span><span><kbd>D</kbd><kbd>W</kbd><kbd>M</kbd> views</span><span><kbd>N</kbd> new entry</span><span><kbd>J</kbd> job</span><span><kbd>C</kbd> copy</span><span><kbd>R</kbd> reports</span><span><kbd>Ctrl</kbd><kbd>Z</kbd> undo</span><span><kbd>Esc</kbd> leave a box</span><span><kbd>?</kbd> guide</span></div>
   </main>
 
   <aside class="side side-right" aria-label="Wishlist">
@@ -233,7 +234,22 @@
       <ul>
         <li><b>Print / PDF</b> (or <kbd>Ctrl</kbd> <kbd>P</kbd>) prints whatever is open as a tidy report in Docket's colours — the <b>day</b>, <b>week</b>, <b>month</b> or <b>job</b>.</li>
         <li>Each report has its totals, a <b>By job</b> split showing where the time went, and every entry by day with its job's colour. A job's report ends with what's still to do on it.</li>
-        <li>Choose <i>Save as PDF</i> in the print dialog to keep it or attach it to an email or invoice. Reports look like Docket itself: dark glass, edge to edge. Leave <i>Background graphics</i> ticked in the print dialog.</li>
+        <li>Choose <i>Save as PDF</i> in the print dialog to keep it or attach it to an email or invoice. Leave <i>Background graphics</i> ticked in the print dialog.</li>
+        <li>Two styles, chosen under <b>Reports</b>: <b>Glass</b> is Docket's dark look, best saved as a PDF; <b>Paper</b> is white and ink-friendly, best for a printer. Docket remembers your choice.</li>
+      </ul>
+
+      <h3><span class="tick">●</span> Reports — for the paperwork</h3>
+      <ul>
+        <li><b>Reports</b> (or <kbd>R</kbd>) pulls out any stretch of the log: pick <b>Last week</b>, <b>Last month</b>, <b>This year</b>, or your own <b>From</b> and <b>To</b> dates.</li>
+        <li>Choose <b>All jobs</b>, one job (archived ones too), or <b>Entries with no job</b>. The dialog counts what you'll get before you commit.</li>
+        <li>Then <b>Print / PDF</b> it, <b>Copy</b> it as text for an email, or save <b>Excel (CSV)</b> — one row per entry with its date, day, task and job, ready to sort, filter or total.</li>
+        <li>Reports never change the log. (For a full backup you can import again, use <b>Export JSON</b> or <b>Export CSV</b> in the side panel.)</li>
+      </ul>
+
+      <h3><span class="tick">●</span> Paste a whole list</h3>
+      <ul>
+        <li>Copy several lines from an email, a notes app or a spreadsheet column and paste them into the empty entry box: each line becomes its own entry on the open day, on the job in the Job box.</li>
+        <li>Bullets and numbering (<kbd>-</kbd> <kbd>•</kbd> <kbd>1.</kbd>) are dropped. It works in the Wishlist and Recurring boxes too, and <b>Undo</b> takes the whole paste back.</li>
       </ul>
 
       <h3><span class="tick">●</span> Day · Week · Month views</h3>
@@ -338,6 +354,48 @@ Archived,,Garden shed</pre>
     <div class="modal-foot">
       <button class="ghostbtn" id="clearCancel">Cancel</button>
       <button class="dangerbtn" id="clearGo">Clear selected</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="reportOverlay">
+  <div class="modal modal-sm" role="dialog" aria-modal="true" aria-labelledby="reportTitle" aria-describedby="reportDesc">
+    <div class="modal-head">
+      <h2 id="reportTitle">Reports</h2>
+      <button class="close" id="reportClose" data-tip="Close — Esc works too" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body">
+      <p id="reportDesc" style="margin-top:12px">Pull out any stretch of the log — for an invoice, a timesheet or month-end — then print it, copy it or open it in Excel.</p>
+      <div class="rform">
+        <label for="repPeriod">Period</label>
+        <select id="repPeriod">
+          <option value="today">Today</option>
+          <option value="thisweek">This week</option>
+          <option value="lastweek">Last week</option>
+          <option value="thismonth">This month</option>
+          <option value="lastmonth">Last month</option>
+          <option value="thisyear">This year</option>
+          <option value="all">Everything</option>
+          <option value="custom">Custom dates</option>
+        </select>
+        <label for="repFrom">From</label>
+        <input type="date" id="repFrom">
+        <label for="repTo">To</label>
+        <input type="date" id="repTo">
+        <label for="repJob">Job</label>
+        <select id="repJob"></select>
+      </div>
+      <p class="rsum" id="repSum" aria-live="polite"></p>
+      <fieldset class="rstyle">
+        <legend>Print style <span>— used by every Print / PDF</span></legend>
+        <label class="copt"><input type="radio" name="repStyle" id="repGlass"><span class="ct"><b>Glass</b><span>Docket's dark look — best saved as a PDF</span></span></label>
+        <label class="copt"><input type="radio" name="repStyle" id="repPaper"><span class="ct"><b>Paper</b><span>White and ink-friendly — best for a printer</span></span></label>
+      </fieldset>
+    </div>
+    <div class="modal-foot">
+      <button class="ghostbtn" id="repCopy" data-tip="Copy as text: a heading for each day, with its entries — ready to paste into an email">Copy</button>
+      <button class="ghostbtn" id="repCsv" data-tip="Save a sheet with one row per entry: date, day, task, job">Excel (CSV)</button>
+      <button id="repPrint">Print / PDF</button>
     </div>
   </div>
 </div>

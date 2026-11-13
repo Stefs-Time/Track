@@ -241,10 +241,40 @@ The report is the app's aurora glass on the page, edge to edge:
 - `print-color-adjust: exact` on the root, body and report keeps the
   backdrop, tiles, bars and job colours from being dropped.
 
-This is heavy on ink if sent to a real printer; it is designed for Save as
-PDF. Job colours arrive the
+That glass report is heavy on ink, so there is a second style, **Paper**:
+`buildReport` adds `.paper` to the report and `preparePrint` adds
+`print-paper` to the body, and one block at the end of the print CSS swaps
+the `--p-*` tokens for a light palette on white with no backdrop. The
+choice is a stored preference (`track.printstyle.v1`), set in the Reports
+dialog and used by every print.
+
+`buildReport(spec)` prints the open view when called with nothing. Given a
+spec from the Reports dialog (`{ from, to, job }`, where `job` is an id, `""`
+for all jobs or `"none"`), it prints that stretch instead. `window.print()`
+fires `beforeprint`, which rebuilds the report, so the dialog parks its spec
+in `printSpec` until `afterprint` clears it — otherwise the open view would
+replace the chosen report at the last moment. Job colours arrive the
 same way as on screen, as `--job` set by `tintJob`; a job's report sets it on
 the whole report.
+
+## Reports and pasted lists
+
+Both exist for whoever does the paperwork, and neither changes the model.
+
+- **Reports** (`openReport`, `reportSpec`, `reportEntries`) is a dialog
+  over the same data: a period (presets from `periodRange`, or custom
+  dates — typed backwards still works), and a job filter. `syncReport`
+  counts the result live and disables the actions when it is empty. The
+  three outputs are the printed report above, `reportAsText` (copy) and
+  `reportAsCSV` — a plain sheet, `Date,Day,Task,Job`, one row per entry,
+  with the same quoting and formula-neutralising as the backup CSV. It is
+  not a backup, is never imported, and does not reset the backup reminder.
+- **Pasting a list** (`pastedLines`, `pasteMany`): a paste of two or more
+  non-empty lines into an *empty* entry, Wishlist or Recurring box adds one
+  item per line (list markers stripped, tabs joined with " · ", capped at
+  200), saved once, with a single Undo. Anything else is left to the
+  browser. The job is only looked up once the paste is known to be a list,
+  so an ordinary paste can never create a job.
 
 ## Two tabs, blocked storage, damaged data
 
@@ -292,6 +322,7 @@ real server in Chromium:
 | `layout` | three columns on PC, the small-laptop and phone fallbacks |
 | `robustness` | blocked storage, damaged data and impossible dates, oversized imports, two tabs (including Due today skips), stale undo |
 | `safety` | CSV formula guard, undoing imports, the backup reminder, the error net, midnight, a speed budget at 10,000 entries |
+| `backoffice` | Reports: periods, job filters, copy, the Excel sheet, printing a chosen report in Glass or Paper; pasting a list into the entry, Wishlist and Recurring boxes |
 | `organise` | archiving and restoring jobs, printable day, week, month and job reports |
 | `recurring` | recurring schedules, the Due today strip, schedules and archived jobs through CSV and JSON |
 | `autobackup` | automatic backup to a folder: writing, pruning, remembering, changing folder, pausing, turning off |

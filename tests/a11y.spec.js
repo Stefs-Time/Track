@@ -16,6 +16,8 @@ const STATES = [
   ["auto-backup on", async (p) => { await p.keyboard.press("Escape"); await p.click("#autoOnBtn"); await p.waitForSelector("#autoStat.on"); }],
   ["guide", async (p) => p.click("#helpBtn")],
   ["Clear data dialog", async (p) => { await p.keyboard.press("Escape"); await p.click("#clearAllBtn"); }],
+  ["Reports dialog", async (p) => { await p.keyboard.press("Escape"); await p.click("#reportBtn"); }],
+  ["Reports, nothing in the period", async (p) => { await p.fill("#repFrom", "2001-01-01"); await p.fill("#repTo", "2001-01-02"); }],
   ["search", async (p) => { await p.keyboard.press("Escape"); await p.click("#searchBtn"); await p.fill("#searchInput", "smith"); }],
   // the message bar, held fully shown (on its own it fades on a timer)
   ["message", async (p) => {

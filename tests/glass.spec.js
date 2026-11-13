@@ -93,6 +93,7 @@ const VIEWS = [
   ["Month", async (p) => { await p.evaluate(() => scrollTo(0, 0)); await p.click('#viewTabs button[data-view="month"]'); }],
   ["guide", async (p) => p.click("#helpBtn")],
   ["Clear data", async (p) => { await p.keyboard.press("Escape"); await p.click("#clearAllBtn"); }],
+  ["Reports", async (p) => { await p.keyboard.press("Escape"); await p.click("#reportBtn"); }],
   ["search", async (p) => { await p.keyboard.press("Escape"); await p.click("#searchBtn"); await p.fill("#searchInput", "blinds"); }]
 ];
 

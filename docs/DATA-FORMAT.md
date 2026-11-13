@@ -113,6 +113,21 @@ Archived,,Garden shed
 - Duplicates follow the same rules as the JSON import above. Rows with an
   unreadable date or no task are skipped and counted in the import message.
 
+## Report sheet (Reports → Excel (CSV))
+
+A report's sheet is for reading in a spreadsheet, not for importing back. It
+holds only the chosen dates and job:
+
+```csv
+Date,Day,Task,Job
+2026-10-01,Thursday,Measured up,Smith House
+2026-10-01,Thursday,"Admin, banking",
+```
+
+It is UTF-8 with a BOM, CRLF line endings, quoted and formula-neutralised
+the same way as the backup CSV. The file is named
+`docket-report-FROM-to-TO.csv`.
+
 ## Storage keys
 
 The keys keep the app's original `track.` prefix so data saved before the
@@ -128,6 +143,7 @@ rename to Docket keeps loading.
 | `track.helpseen.v1` | Whether the first-run guide has been shown |
 | `track.theme.v1` | No longer used (the light/dark choice, before 3.0). Removed when Docket opens |
 | `track.lastbackup.v1` | The last export: `{ "at": "YYYY-MM-DD", "entries": n }`, for the backup reminder |
+| `track.printstyle.v1` | `paper` when the ink-friendly print style is chosen; absent means Glass |
 | `track.persist.v1` | Whether persistent storage was requested: `asked`, `granted` or `declined` |
 | `track.skipped.v1` | Recurring tasks skipped today: `{ "day": "YYYY-MM-DD", "ids": [...] }`; ignored once the day has passed |
 | IndexedDB `docket` → `kv` → `backupDir` | The folder chosen for automatic backups (a browser folder handle; it can't live in `localStorage`) |

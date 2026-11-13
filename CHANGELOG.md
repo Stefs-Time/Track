@@ -2,6 +2,26 @@
 
 All notable changes to Docket. Versions follow [Semantic Versioning](https://semver.org/).
 
+## [3.3.0] — 2026-11-13
+
+For whoever does the paperwork.
+
+### Added
+- **Reports.** A new **Reports** button (or `R`) pulls out any stretch of the
+  log: Today, This week, Last week, This month, Last month, This year,
+  Everything, or your own From and To dates — for all jobs, one job (archived
+  ones included) or entries with no job. It counts what you'll get, then
+  prints it, copies it as text, or saves a sheet for Excel with one row per
+  entry (date, day, task, job). Reports never change the log.
+- **Paper print style.** Alongside the dark Glass report there is a white,
+  ink-friendly Paper style for real printers. Choose it under Reports; every
+  Print / PDF uses it until you switch back.
+- **Paste a whole list.** Several lines pasted into the empty entry box become
+  one entry each, on the job in the Job box. Bullets and numbering are
+  dropped, a spreadsheet row's cells are joined, and one Undo takes the whole
+  paste back. The Wishlist and Recurring boxes do the same. At most 200 lines
+  are added at once.
+
 ## [3.2.0] — 2026-11-13
 
 Printed reports match the app.
