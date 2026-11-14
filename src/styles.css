@@ -1433,6 +1433,38 @@ body[data-view="job"] .datenav .bigdate::before {
 .copt .ct { display: flex; flex-direction: column; line-height: 1.35; min-width: 0; }
 .copt .ct b { color: var(--ink); font-weight: 650; font-size: 14px; }
 .copt .ct span { color: var(--ink-3); font-size: 12px; }
+/* Reports dialog */
+.rform { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 8px 14px; margin: 14px 0 4px; }
+.rform label { color: var(--ink-2); font-size: 13px; font-weight: 650; }
+.rform select, .rform input {
+  width: 100%;
+  min-width: 0;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 14px;
+}
+.rform select:hover, .rform input:hover { border-color: var(--line-2); }
+.rform select:focus-visible, .rform input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.rform select option { background: #1c1e2a; color: var(--ink); }
+/* neutral fills with an accent edge: orange washed over dark glass reads as brown */
+.rsum { margin: 14px 0 0; padding: 10px 14px; border-radius: 12px; background: var(--sunk); box-shadow: inset 3px 0 0 var(--accent); color: var(--ink); font-size: 13.5px; font-weight: 600; }
+.rsum.none { box-shadow: none; color: var(--ink-2); font-weight: 500; }
+.rstyle { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 16px 0 0; padding: 0; border: none; min-width: 0; }
+.rstyle legend { padding: 0 0 6px; color: var(--ink-2); font-size: 13px; font-weight: 650; }
+.rstyle legend span { color: var(--ink-3); font-weight: 500; }
+.rstyle .copt { align-items: flex-start; padding: 10px 12px; gap: 10px; }
+.rstyle .copt input { margin-top: 2px; accent-color: var(--accent); }
+.rstyle .copt:has(input:checked) { border-color: var(--accent); background: var(--sunk); }
+@media (max-width: 520px) {
+  .rstyle { grid-template-columns: 1fr; }
+  #reportOverlay .modal-foot { flex-wrap: wrap; }
+  #reportOverlay .modal-foot button { flex: 1 1 auto; padding: 0 14px; }
+}
 .clearwarn { margin: 10px 2px 0; min-height: 1em; color: var(--ink-3); font-size: 12.5px; }
 .backupnote { display: flex; align-items: center; gap: 12px; margin-top: 14px; padding: 12px 14px; border-radius: 12px; background: var(--sunk); font-size: 13px; }
 .backupnote > span { flex: 1; }
@@ -2045,4 +2077,30 @@ ul.wishlist li.due .grip { color: var(--accent); }
   .printreport .rp-todo li::marker { color: var(--p-accent); }
 
   .printreport .rp-foot { margin-top: 18pt; padding-top: 8pt; border-top: 1pt solid var(--p-line); color: var(--p-ink-3); font-size: 8pt; text-align: center; }
+  /* ---- Paper: the same report, white and ink-friendly (Reports → Print style) ---- */
+  :root:has(body.print-paper) { color-scheme: light; background: #fff !important; }
+  body.print-paper::before { display: none; }
+  .printreport.paper {
+    --p-ink: #1d1b18;
+    --p-ink-2: #4a453f;
+    --p-ink-3: #6f685f;
+    --p-line: #e6e0d5;
+    --p-glass: #fff;
+    --p-sunk: #f6f4ef;
+    --p-accent: #ff6a3d;
+    --p-accent-2: #ff6a3d;
+    --p-accent-text: #bf3f14;
+  }
+  .printreport.paper .rp-stat:first-child { border-color: var(--p-accent); }
+  .printreport.paper.is-job .rp-stat:first-child { border-color: var(--job); background: color-mix(in srgb, var(--job) 16%, #fff); }
+  .printreport.paper .rp-split { border-color: transparent; background: var(--p-sunk); }
+  .printreport.paper .rp-track { background: #fff; }
+  .printreport.paper .rp-srow.none .rp-dot { background: var(--p-line); }
+  .printreport.paper .rp-srow.none .rp-fill { background: #cfc8bc; }
+  .printreport.paper .rp-chip { background: var(--p-sunk); }
+  .printreport.paper .rp-list li { border-top-color: var(--p-sunk); }
+  .printreport.paper .rp-list li::before { background: var(--p-line); }
+  .printreport.paper .rp-list li.has-job::before { background: var(--job); }
+  .printreport.paper .rp-pill { background: color-mix(in srgb, var(--job) 15%, #fff); color: color-mix(in oklab, var(--job) 52%, var(--p-ink)); }
+  .printreport.paper .rp-todo { border-color: color-mix(in srgb, var(--p-accent) 50%, var(--p-line)); background: color-mix(in srgb, var(--p-accent) 6%, #fff); }
 }

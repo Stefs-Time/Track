@@ -2336,6 +2336,63 @@
     input.focus();
   }
 
+  // ---------- paste a list ----------
+  // Pasting several lines (from an email, a notes app, a spreadsheet column)
+  // into an empty box adds one item per line instead of one long run-on.
+  var PASTE_MAX = 200;
+  function pastedLines(e) {
+    if (e.target.value.trim() !== "") return null; // adding to what's typed: paste as usual
+    var text = (e.clipboardData && e.clipboardData.getData("text")) || "";
+    var lines = text.split(/\r?\n/).map(function (l) {
+      // drop list markers ("- ", "• ", "3. ", "[ ] "); a spreadsheet row's cells join up
+      return l.replace(/\t+/g, " · ").replace(/^\s*(?:[-*•–—]\s+|\d{1,3}[.)]\s+|\[[ xX]?\]\s+)/, "").trim().slice(0, 1000);
+    }).filter(function (l) { return l !== ""; });
+    return lines.length > 1 ? lines : null;
+  }
+  function pasteMany(e, noun, add, saved, undo) {
+    var lines = pastedLines(e);
+    if (!lines) return;
+    e.preventDefault();
+    var extra = Math.max(0, lines.length - PASTE_MAX);
+    var ids = lines.slice(0, PASTE_MAX).map(add);
+    saved();
+    render();
+    toast("Added " + ids.length + " " + noun + " from your paste" + (extra ? " — the first " + PASTE_MAX + "; " + extra + " more were left out" : ""), function () {
+      undo(ids);
+      saved();
+      render();
+    });
+  }
+  $("newItem").addEventListener("paste", function (e) {
+    var day = currentDate;
+    var jid; // looked up on the first line, so an ordinary paste never creates a job
+    pasteMany(e, "entries", function (text) {
+      var entry = { id: newId(), text: text };
+      if (jid === undefined) jid = useJob($("newJob").value) || null;
+      if (jid) entry.job = jid;
+      if (!data[day]) data[day] = [];
+      data[day].push(entry);
+      return entry.id;
+    }, save, function (ids) {
+      if (data[day]) data[day] = data[day].filter(function (it) { return ids.indexOf(it.id) === -1; });
+    });
+  });
+  ["w", "r"].forEach(function (kind) {
+    $(QUEUE[kind].input).addEventListener("paste", function (e) {
+      var jid;
+      pasteMany(e, kind === "w" ? "wishlist items" : "recurring tasks", function (text) {
+        var item = { id: newId(), text: text };
+        if (jid === undefined) jid = useJob(jobBoxes[kind].input.value) || null;
+        if (jid) item.job = jid;
+        queueList(kind).push(item);
+        return item.id;
+      }, function () { saveQueue(kind); }, function (ids) {
+        var list = queueList(kind);
+        for (var i = list.length - 1; i >= 0; i--) if (ids.indexOf(list[i].id) !== -1) list.splice(i, 1);
+      });
+    });
+  });
+
   function removeItem(id) {
     var f = findEntry(id);
     if (!f) return;
@@ -3094,14 +3151,20 @@
   // week, month or job — instead of the screen. It's built in #printReport
   // from text nodes only, and the print stylesheet dresses it like the app:
   // the light palette, the Docket mark, stat tiles and each job's colour.
-  var REPORT_KIND = { day: "Daily log", week: "Weekly report", month: "Monthly report", job: "Job report" };
-  function buildReport() {
+  // Given a spec from the Reports dialog ({ from, to, job }) it prints that
+  // stretch instead: any dates, for every job, one job, or entries with none.
+  var REPORT_KIND = { day: "Daily log", week: "Weekly report", month: "Monthly report", job: "Job report", range: "Report" };
+  var PRINT_STYLE_KEY = "track.printstyle.v1";
+  function printStyle() { return readStore(PRINT_STYLE_KEY) === "paper" ? "paper" : "glass"; }
+  function buildReport(spec) {
     var out = $("printReport");
     out.innerHTML = "";
-    out.className = "printreport";
+    out.className = "printreport" + (printStyle() === "paper" ? " paper" : "");
     out.style.removeProperty("--job");
-    var job = view === "job" ? jobById(currentJob) : null;
-    if (view === "job" && !job) return 0;
+    var kind = spec ? "range" : view; // a spec is its own kind of report
+    var noJobOnly = !!spec && spec.job === "none";
+    var job = spec ? (noJobOnly ? null : jobById(spec.job)) : kind === "job" ? jobById(currentJob) : null;
+    if (kind === "job" && !job) return 0;
     if (job) { out.classList.add("is-job"); tintJob(out, job.id); } // the job's colour runs through its report
     function el(tag, cls, text) {
       var e = document.createElement(tag);
@@ -3125,9 +3188,10 @@
     out.appendChild(frame);
     out = page;
     function entriesOn(d) {
-      return (data[d] || []).filter(function (it) { return !job || it.job === job.id; });
+      return (data[d] || []).filter(function (it) { return noJobOnly ? !jobById(it.job) : !job || it.job === job.id; });
     }
-    var days = job ? ((jobStats()[job.id] || { days: [] }).days.slice().sort()) : viewDays();
+    var days = spec ? daysBetween(spec.from, spec.to)
+      : job ? ((jobStats()[job.id] || { days: [] }).days.slice().sort()) : viewDays();
     var worked = days.filter(function (d) { return entriesOn(d).length > 0; });
     var n = worked.reduce(function (sum, d) { return sum + entriesOn(d).length; }, 0);
 
@@ -3141,16 +3205,18 @@
     brand.appendChild(mark);
     brand.appendChild(el("span", "rp-name", "Docket"));
     head.appendChild(brand);
-    head.appendChild(el("span", "rp-kind", REPORT_KIND[view]));
+    head.appendChild(el("span", "rp-kind", REPORT_KIND[kind]));
     out.appendChild(head);
 
     var title = el("h1", "rp-title");
     if (job) title.appendChild(el("span", "rp-dot"));
     title.appendChild(document.createTextNode(job ? job.text
-      : view === "week" ? weekLabel(currentDate)
-      : view === "month" ? monthLabel(currentDate) : prettyDate(currentDate)));
+      : spec ? rangeLabel(spec.from, spec.to)
+      : kind === "week" ? weekLabel(currentDate)
+      : kind === "month" ? monthLabel(currentDate) : prettyDate(currentDate)));
     out.appendChild(title);
-    var sub = job ? (worked.length ? (worked[0] === worked[worked.length - 1] ? prettyDate(worked[0])
+    var sub = spec ? (job ? rangeLabel(spec.from, spec.to) : noJobOnly ? "Entries with no job" : "")
+      : job ? (worked.length ? (worked[0] === worked[worked.length - 1] ? prettyDate(worked[0])
         : prettyDate(worked[0]) + " – " + prettyDate(worked[worked.length - 1])) : "Nothing logged yet") : "";
     if (sub) out.appendChild(el("p", "rp-sub", sub));
 
@@ -3163,7 +3229,7 @@
       stats.appendChild(t);
     }
     tile(n, n === 1 ? "Entry" : "Entries");
-    if (view !== "day") tile(worked.length, worked.length === 1 ? "Day worked" : "Days worked");
+    if (kind !== "day") tile(worked.length, worked.length === 1 ? "Day worked" : "Days worked");
     var perJob = {}, noJob = 0;
     worked.forEach(function (d) {
       entriesOn(d).forEach(function (it) {
@@ -3202,7 +3268,7 @@
     }
 
     // every day with work, as a card with its date chip
-    if (!worked.length) out.appendChild(el("p", "rp-empty", job ? "Nothing logged against this job yet." : "Nothing logged."));
+    if (!worked.length) out.appendChild(el("p", "rp-empty", spec ? "Nothing logged in this period." : job ? "Nothing logged against this job yet." : "Nothing logged."));
     worked.forEach(function (d) {
       var dd = dateObj(d), list = entriesOn(d);
       var card = el("section", "rp-day");
@@ -3244,18 +3310,180 @@
     return n;
   }
   // Ctrl+P (or the browser's own Print) prints the open view's report too.
+  var printSpec = null; // the Reports dialog's choice, while it is being printed
   function preparePrint() {
-    buildReport();
+    buildReport(printSpec);
     document.body.classList.add("print-report");
+    document.body.classList.toggle("print-paper", printStyle() === "paper");
   }
   window.addEventListener("beforeprint", preparePrint);
-  window.addEventListener("afterprint", function () { document.body.classList.remove("print-report"); });
+  window.addEventListener("afterprint", function () {
+    document.body.classList.remove("print-report", "print-paper");
+    printSpec = null;
+  });
   $("printBtn").addEventListener("click", function () {
     if (buildReport() === 0 && !(view === "job" && wishlist.some(function (it) { return it.job === currentJob; }))) {
       var noun = view === "job" ? "job" : view;
       toast("Nothing to print — this " + noun + " has no entries");
       return;
     }
+    preparePrint();
+    window.print();
+  });
+
+  // ---------- reports ----------
+  // For whoever does the paperwork: pull any stretch of the log — every job,
+  // one job, or entries with none — and print it, copy it, or open it in
+  // Excel. Nothing here changes the log.
+  var reportOpener = null;
+  var reportPick = { period: "thismonth", job: "" };
+  /** The days with entries from `from` to `to` inclusive, oldest first. */
+  function daysBetween(from, to) {
+    return Object.keys(data).filter(function (d) { return d >= from && d <= to && data[d].length > 0; }).sort();
+  }
+  /** "1 – 31 Oct 2026", "28 Oct – 3 Nov 2026", "20 Dec 2025 – 4 Jan 2026"; one day reads in full. */
+  function rangeLabel(from, to) {
+    if (from === to) return prettyDate(from);
+    var a = dateObj(from), b = dateObj(to);
+    var sameYear = a.getFullYear() === b.getFullYear(), sameMonth = sameYear && a.getMonth() === b.getMonth();
+    return a.getDate() + (sameMonth ? "" : " " + MON[a.getMonth()]) + (sameYear ? "" : " " + a.getFullYear()) +
+      " – " + b.getDate() + " " + MON[b.getMonth()] + " " + b.getFullYear();
+  }
+  function periodRange(period) {
+    var t = todayISO(), d = dateObj(t), y = d.getFullYear(), m = d.getMonth();
+    switch (period) {
+      case "today": return [t, t];
+      case "thisweek": return [weekStart(t), shiftDay(weekStart(t), 6)];
+      case "lastweek": return [shiftDay(weekStart(t), -7), shiftDay(weekStart(t), -1)];
+      case "lastmonth": return [isoOf(new Date(y, m - 1, 1)), isoOf(new Date(y, m, 0))];
+      case "thisyear": return [isoOf(new Date(y, 0, 1)), isoOf(new Date(y, 11, 31))];
+      case "all":
+        var all = Object.keys(data).sort();
+        return all.length ? [all[0], all[all.length - 1]] : [t, t];
+      default: return [isoOf(new Date(y, m, 1)), isoOf(new Date(y, m + 1, 0))]; // this month
+    }
+  }
+  /** What the dialog currently asks for, or null while a date is missing. */
+  function reportSpec() {
+    var from = $("repFrom").value, to = $("repTo").value;
+    if (!isRealDay(from) || !isRealDay(to)) return null;
+    if (from > to) { var swap = from; from = to; to = swap; }
+    return { from: from, to: to, job: $("repJob").value };
+  }
+  function reportEntries(spec) {
+    var rows = [];
+    daysBetween(spec.from, spec.to).forEach(function (d) {
+      data[d].forEach(function (it) {
+        var has = !!jobById(it.job);
+        if (spec.job === "none" ? !has : !spec.job || it.job === spec.job) rows.push({ day: d, it: it });
+      });
+    });
+    return rows;
+  }
+  function reportJobName(spec) {
+    return spec.job === "none" ? "No job" : spec.job ? jobById(spec.job).text : "";
+  }
+  function syncReport() {
+    var spec = reportSpec();
+    var rows = spec ? reportEntries(spec) : [];
+    var days = {}, perJob = {};
+    rows.forEach(function (r) { days[r.day] = 1; if (jobById(r.it.job)) perJob[r.it.job] = 1; });
+    var sum = $("repSum");
+    sum.classList.toggle("none", rows.length === 0);
+    if (!spec) sum.textContent = "Choose a From and a To date.";
+    else if (!rows.length) sum.textContent = "Nothing logged in this period" + (spec.job ? " for this choice of job." : ".");
+    else {
+      sum.textContent = plural(rows.length, "entry", "entries") + " across " + plural(Object.keys(days).length, "day", "days") +
+        (spec.job ? "" : " · " + plural(Object.keys(perJob).length, "job", "jobs")) + " · " + rangeLabel(spec.from, spec.to);
+    }
+    ["repCopy", "repCsv", "repPrint"].forEach(function (id) { $(id).disabled = rows.length === 0; });
+  }
+  function setReportPeriod(period) {
+    reportPick.period = period;
+    $("repPeriod").value = period;
+    if (period !== "custom") {
+      var r = periodRange(period);
+      $("repFrom").value = r[0];
+      $("repTo").value = r[1];
+    }
+    syncReport();
+  }
+  function openReport() {
+    reportOpener = document.activeElement;
+    var sel = $("repJob");
+    sel.innerHTML = "";
+    function opt(value, text) {
+      var o = document.createElement("option");
+      o.value = value;
+      o.textContent = text;
+      sel.appendChild(o);
+    }
+    opt("", "All jobs");
+    jobs.slice().sort(function (a, b) { return (a.archived ? 1 : 0) - (b.archived ? 1 : 0) || a.text.localeCompare(b.text); })
+      .forEach(function (j) { opt(j.id, j.text + (j.archived ? " (archived)" : "")); });
+    opt("none", "Entries with no job");
+    // open on the job being looked at, if there is one
+    sel.value = view === "job" && jobById(currentJob) ? currentJob : jobById(reportPick.job) || reportPick.job === "none" ? reportPick.job : "";
+    $(printStyle() === "paper" ? "repPaper" : "repGlass").checked = true;
+    setReportPeriod(reportPick.period === "custom" && isRealDay($("repFrom").value) && isRealDay($("repTo").value) ? "custom" : reportPick.period === "custom" ? "thismonth" : reportPick.period);
+    $("reportOverlay").classList.add("open");
+    $("repPeriod").focus();
+  }
+  function closeReport() {
+    $("reportOverlay").classList.remove("open");
+    var back = reportOpener && document.contains(reportOpener) && reportOpener.offsetParent !== null ? reportOpener : $("reportBtn");
+    reportOpener = null;
+    if (back) back.focus();
+  }
+  function reportAsText(spec) {
+    var byDay = {}, order = [];
+    reportEntries(spec).forEach(function (r) {
+      if (!byDay[r.day]) { byDay[r.day] = []; order.push(r.day); }
+      var j = spec.job ? "" : jobName(r.it);
+      byDay[r.day].push("- " + r.it.text + (j ? " (" + j + ")" : ""));
+    });
+    var name = reportJobName(spec);
+    return (name ? name + " — " : "") + rangeLabel(spec.from, spec.to) + "\n\n" +
+      order.map(function (d) { return prettyDate(d) + "\n\n" + byDay[d].join("\n"); }).join("\n\n");
+  }
+  // A plain sheet for Excel: one row per entry. Unlike Export CSV (a backup
+  // of everything, which can be imported again) this is just the chosen rows.
+  function reportAsCSV(spec) {
+    var lines = ["Date,Day,Task,Job"];
+    reportEntries(spec).forEach(function (r) {
+      lines.push(r.day + "," + LONGDOW[dateObj(r.day).getDay()] + "," + csvQuote(csvSafe(r.it.text)) + "," + csvQuote(csvSafe(jobName(r.it))));
+    });
+    return "\uFEFF" + lines.join("\r\n"); // BOM so Excel opens it as UTF-8
+  }
+  $("reportBtn").addEventListener("click", openReport);
+  $("reportClose").addEventListener("click", closeReport);
+  $("reportOverlay").addEventListener("click", function (e) { if (e.target === this) closeReport(); });
+  $("repPeriod").addEventListener("change", function () { setReportPeriod(this.value); });
+  ["repFrom", "repTo"].forEach(function (id) {
+    $(id).addEventListener("change", function () { setReportPeriod("custom"); });
+  });
+  $("repJob").addEventListener("change", function () { reportPick.job = this.value; syncReport(); });
+  ["repGlass", "repPaper"].forEach(function (id) {
+    $(id).addEventListener("change", function () { setPref(PRINT_STYLE_KEY, $("repPaper").checked ? "paper" : null); });
+  });
+  $("repCopy").addEventListener("click", function () {
+    var spec = reportSpec();
+    if (!spec) return;
+    copyText(reportAsText(spec), "Report copied to clipboard");
+    closeReport();
+  });
+  $("repCsv").addEventListener("click", function () {
+    var spec = reportSpec();
+    if (!spec) return;
+    downloadFile("docket-report-" + spec.from + (spec.to === spec.from ? "" : "-to-" + spec.to) + ".csv", reportAsCSV(spec), "text/csv");
+    toast("Report saved — it opens in Excel");
+    closeReport();
+  });
+  $("repPrint").addEventListener("click", function () {
+    var spec = reportSpec();
+    if (!spec) return;
+    closeReport();
+    printSpec = spec;
     preparePrint();
     window.print();
   });
@@ -3600,6 +3828,7 @@
   }
   $("helpOverlay").addEventListener("keydown", trapFocus);
   $("clearOverlay").addEventListener("keydown", trapFocus);
+  $("reportOverlay").addEventListener("keydown", trapFocus);
   $("helpBtn").addEventListener("click", openHelp);
   $("helpClose").addEventListener("click", closeHelp);
   $("helpDone").addEventListener("click", closeHelp);
@@ -3614,6 +3843,10 @@
     if ($("clearOverlay").classList.contains("open")) {
       if (e.key === "Escape") closeClear();
       return; // no shortcuts behind an open dialog
+    }
+    if ($("reportOverlay").classList.contains("open")) {
+      if (e.key === "Escape") closeReport();
+      return;
     }
     if ($("searchOverlay").classList.contains("open")) return; // search handles its own keys
     var a = document.activeElement;
@@ -3648,6 +3881,7 @@
         $("newJob").select();
         break;
       case "c": case "C": copyView(true); break;
+      case "r": case "R": e.preventDefault(); openReport(); break;
       case "?": openHelp(); break;
     }
   });

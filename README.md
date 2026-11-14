@@ -18,6 +18,9 @@ It comes two ways, from the same code:
 - **Recurring tasks on a schedule.** Tick the days a task is due (a Friday timesheet, weekday site checks) and it's offered under **Due today** at the top of today's log: one click logs it, ✕ skips it for the day.
 - **Archive finished jobs.** They leave the Jobs list and the job boxes, but keep all their work. **Show archived** finds them; logging new work on one brings it back.
 - **Print / PDF reports.** Print the open day, week, month or job (the button, or Ctrl+P) as a report in Docket's own glass look, edge to edge: totals, a By-job split, every entry by day in its job's colour, and for a job, what's still to do. Save as PDF to email it with an invoice.
+- **Reports for the paperwork.** **Reports** (or `R`) pulls out any stretch of the log — last week, last month, this year or your own dates — for every job, one job, or entries with none. Print it, copy it as text, or save it as a sheet for Excel with one row per entry.
+- **Two print styles.** *Glass* is Docket's dark look, best saved as a PDF. *Paper* is white and ink-friendly, best for a printer. Docket remembers which you use.
+- **Paste a whole list.** Paste several lines into the empty entry box and each becomes its own entry, on the job in the Job box. Bullets and numbering are dropped, and Undo takes the whole paste back. Works in the Wishlist and Recurring boxes too.
 - **Search everything.** `/` or Ctrl+K finds any entry, job, wishlist or recurring item — by words, job or date — and jumps straight to it.
 - **Reorder anywhere.** Drag entries up or down in the Day, Week or Job view, or use ↑ ↓ on the keyboard; touch screens get ▲ ▼ buttons. Copies and exports follow your order.
 - **Quick add from the week.** The + on any Week card logs straight onto that day.
@@ -31,7 +34,7 @@ It comes two ways, from the same code:
 - **Import and export.** JSON is the exact backup. CSV opens in Excel. Both carry everything, including jobs, archived jobs and recurring schedules. See [docs/DATA-FORMAT.md](docs/DATA-FORMAT.md).
 - **Backup reminder.** Shows when you last exported, and nudges you when it's been a while and the log has changed.
 - **Automatic backup to a folder** (Chrome and Edge on a computer). Pick a folder once and every change is saved there as a dated JSON backup, keeping the newest 30.
-- **Keyboard shortcuts.** `/` search, `←` `→` move, `T` today, `D` `W` `M` views, `N` new entry, `J` job, `C` copy, `Ctrl+P` print a report, `Ctrl+Z` undo, `Esc` leave a box, `?` guide.
+- **Keyboard shortcuts.** `/` search, `←` `→` move, `T` today, `D` `W` `M` views, `N` new entry, `J` job, `C` copy, `R` reports, `Ctrl+P` print a report, `Ctrl+Z` undo, `Esc` leave a box, `?` guide.
 - **Built-in guide.** It opens on first use, and the **?** button brings it back. Every control explains itself on hover or keyboard focus.
 
 | Job view | Month view | On a phone | A printed weekly report |
