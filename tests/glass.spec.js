@@ -94,6 +94,8 @@ const VIEWS = [
   ["guide", async (p) => p.click("#helpBtn")],
   ["Clear data", async (p) => { await p.keyboard.press("Escape"); await p.click("#clearAllBtn"); }],
   ["Reports", async (p) => { await p.keyboard.press("Escape"); await p.click("#reportBtn"); }],
+  ["Docket at a glance", async (p) => { await p.keyboard.press("Escape"); await p.click("#overviewBtn"); }],
+  ["Docket at a glance, roadmap", async (p) => p.evaluate(() => { const b = document.querySelector(".ovbody"); b.scrollTop = b.scrollHeight; })],
   ["search", async (p) => { await p.keyboard.press("Escape"); await p.click("#searchBtn"); await p.fill("#searchInput", "blinds"); }]
 ];
 

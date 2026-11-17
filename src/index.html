@@ -32,6 +32,7 @@
     <button class="installbtn" id="installBtn" hidden data-tip="Install Docket as an app — its own window, Start menu / dock icon, and it works offline"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg></span>Install app</button>
     <div class="saved-pill" id="savedPill" data-tip="Everything saves to this browser automatically — keep an occasional Export as a backup"><span class="dot">●</span> Auto-saved locally</div>
     <button class="searchbtn" id="searchBtn" type="button" data-tip="Find any entry, job or list item — shortcut: / or Ctrl+K" aria-label="Search"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></span><span class="sl">Search</span><kbd>/</kbd></button>
+    <button class="helpbtn ovbtn" id="overviewBtn" type="button" data-tip="Docket at a glance — what it does today, what's coming next, and a PDF to share" aria-label="Docket at a glance: features and roadmap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg></button>
     <button class="helpbtn" id="helpBtn" data-tip="How Docket works — shortcut: ?" aria-label="How Docket works">?</button>
   </div>
 </header>
@@ -322,10 +323,16 @@ Archived,,Garden shed</pre>
         <li><b>Moving between the two?</b> Each keeps its own data. <b>Export JSON</b> in the one you're leaving, then <b>Import JSON</b> in the other.</li>
       </ul>
 
+      <h3><span class="tick">●</span> Docket at a glance</h3>
+      <ul>
+        <li>The <b>✦</b> button (top right) opens a short overview of everything Docket does, and what's planned next. <b>Download PDF</b> saves it to keep, print or send to someone.</li>
+      </ul>
+
       <div class="note"><b>Tip:</b> reopen this guide any time with the <b>?</b> button, top right.</div>
     </div>
     <div class="modal-foot">
       <span class="appver" id="appVersion"></span>
+      <button class="ghostbtn" id="helpOverview" type="button" data-tip="Every feature and the roadmap, on a few pages — download it as a PDF">Features &amp; roadmap</button>
       <button id="helpDone">Got it</button>
     </div>
   </div>
@@ -399,6 +406,182 @@ Archived,,Garden shed</pre>
     </div>
   </div>
 </div>
+
+<!-- overview:start — "Docket at a glance": features and roadmap. The same markup is
+     shown in the app and printed to src/overview/Docket-Overview.pdf by `npm run overview`. -->
+<div class="overlay" id="overviewOverlay">
+  <div class="modal ovmodal" role="dialog" aria-modal="true" aria-labelledby="ovTitle">
+    <div class="modal-head ovhead">
+      <h2 id="ovTitle">Docket at a glance</h2>
+      <button class="ovdl" id="ovDownload" type="button" data-tip="Save this overview as a PDF — to keep, print or send"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg></span>Download PDF</button>
+      <button class="close" id="ovClose" data-tip="Close — Esc works too" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body ovbody" tabindex="0" aria-label="Docket at a glance: features and roadmap">
+      <div class="overview" id="overview">
+
+        <!-- 1 · cover -->
+        <section class="ov-page ov-cover" aria-label="Docket: your workday, on the record">
+          <div class="ov-top">
+            <span class="ov-brand"><span class="ov-glyph"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="9" y="6" width="14" height="21" rx="2.5"/><rect x="12" y="3.5" width="8" height="4.5" rx="1.5" class="fill"/><path d="M12 16l2.6 2.6 5.4-5.8"/></svg></span>Docket</span>
+            <span class="ov-kicker">Product overview · <span class="ov-ver"></span></span>
+          </div>
+          <p class="ov-eyebrow">The daily work log</p>
+          <h1 class="ov-h1">Your workday, <em>on the record.</em></h1>
+          <p class="ov-lead">Docket turns what you did today into a clean, searchable record — logged in seconds, grouped by job, and ready to hand over as a report, a spreadsheet or a polished PDF. No sign-up. No account. Just open it and start.</p>
+
+          <div class="ov-hero" role="img" aria-label="Docket's Day view: today's totals, the entry box and four entries tagged with their jobs">
+            <div class="ov-win" aria-hidden="true">
+              <div class="ov-winbar"><i></i><i></i><i></i><span class="ov-wtabs"><b>Day</b><span>Week</span><span>Month</span></span></div>
+              <div class="ov-wbody">
+                <p class="ov-wdate">Today — Thursday</p>
+                <div class="ov-wstats"><span class="hot"><b>4</b>This day</span><span><b>11</b>This week</span><span><b>15</b>This month</span><span class="bars"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="cur"></i></span></div>
+                <div class="ov-wadd"><span class="job">Smith House</span><span class="ph">What did you do?</span><span class="add">+ Add</span></div>
+                <ul class="ov-wlist">
+                  <li style="--c:#3e7bfa"><span>Installed blinds, lounge</span><em>Smith House</em></li>
+                  <li style="--c:#3e7bfa"><span>Measured kitchen windows</span><em>Smith House</em></li>
+                  <li style="--c:#12a37f"><span>Quoted new office fit-out</span><em>Office fit-out</em></li>
+                  <li><span>Admin and emails</span></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <ul class="ov-proof">
+            <li><span class="ov-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg></span><b>Seconds to log</b><span>Type it, press Enter — saved.</span></li>
+            <li><span class="ov-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span><b>Private by design</b><span>Your log stays on your device.</span></li>
+            <li><span class="ov-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.6a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0M2 9a15 15 0 0 1 20 0M12 20h.01"/></svg></span><b>Works offline</b><span>On site, on the road, anywhere.</span></li>
+            <li><span class="ov-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg></span><b>Any device</b><span>Phone, tablet or computer.</span></li>
+          </ul>
+        </section>
+
+        <!-- 2 · capture and see -->
+        <section class="ov-page" aria-labelledby="ovCapture">
+          <p class="ov-eyebrow">What's in Docket today</p>
+          <h2 class="ov-h2">Built for the way work <em>really happens.</em></h2>
+          <p class="ov-lead sm">Everything you need to keep a proper record of your day — and nothing that slows you down.</p>
+
+          <div class="ov-group" style="--sec:#ff7a50">
+            <h3 class="ov-h3" id="ovCapture"><span>Capture</span>Get it down before you forget it</h3>
+            <ul class="ov-feats">
+              <li><span class="ov-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></span><b>Log in a keystroke</b><span>Type what you did and press Enter. It saves instantly and automatically.</span></li>
+              <li><span class="ov-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span><b>Jobs in colour</b><span>Group work by client, site or project. Each job keeps its colour in every view.</span></li>
+              <li><span class="ov-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2M12 11h4M12 16h4M8 11h.01M8 16h.01"/></svg></span><b>Paste a whole list</b><span>Notes from an email or a spreadsheet? Every line becomes its own entry.</span></li>
+              <li><span class="ov-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m17 2 4 4-4 4M3 11v-1a4 4 0 0 1 4-4h14M7 22l-4-4 4-4M21 13v1a4 4 0 0 1-4 4H3"/></svg></span><b>Recurring, on schedule</b><span>Friday timesheet? Weekday site check? It waits at the top of the right day.</span></li>
+              <li><span class="ov-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg></span><b>A wishlist for later</b><span>Park what still needs doing, then drop it onto the day it gets done.</span></li>
+              <li><span class="ov-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="3" width="20" height="5" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8M10 12h4"/></svg></span><b>Archive finished jobs</b><span>Clear them out of the way. Their history stays, ready if work picks up.</span></li>
+            </ul>
+          </div>
+
+          <div class="ov-group" style="--sec:#7c8bff">
+            <h3 class="ov-h3"><span>See</span>Your week, your month, your jobs — at a glance</h3>
+            <ul class="ov-feats">
+              <li><span class="ov-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span><b>Day, Week, Month</b><span>One key to switch. Empty days fold away so the busy ones stand out.</span></li>
+              <li><span class="ov-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span><b>A calendar shaded by job</b><span>Each day takes its busiest job's colour. See where the month went.</span></li>
+              <li><span class="ov-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg></span><b>Every job in one place</b><span>All the work on a job, its totals, and what's still to do.</span></li>
+              <li><span class="ov-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></span><b>Search everything</b><span>Any entry, job or list item, by word or date — and straight to it.</span></li>
+              <li><span class="ov-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v18h18M7 16v-3M12 16V8M17 16v-6"/></svg></span><b>Your last 14 days</b><span>A glanceable activity strip. Click any day to go there.</span></li>
+              <li><span class="ov-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 15 5 5 5-5M7 9l5-5 5 5"/></svg></span><b>Reorder anything</b><span>Drag entries into order, or move them to another day in one go.</span></li>
+            </ul>
+          </div>
+
+          <ol class="ov-steps" aria-label="How it works">
+            <li><b>Open it</b>In any browser, or as an installed app. Nothing to sign up for.</li>
+            <li><b>Log as you go</b>A line per thing you did, on the job it belongs to.</li>
+            <li><b>Hand it over</b>A report, a sheet or a PDF for any week, month or job.</li>
+          </ol>
+        </section>
+
+        <!-- 3 · share and keep safe -->
+        <section class="ov-page" aria-labelledby="ovShare">
+          <div class="ov-group" style="--sec:#2ccfb3">
+            <h3 class="ov-h3" id="ovShare"><span>Share</span>From log to paperwork in one click</h3>
+            <ul class="ov-feats">
+              <li><span class="ov-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 17v-3M12 17v-5M15 17v-2"/></svg></span><b>Reports for any period</b><span>Last week, last month, this year or your own dates — every job, or just one.</span></li>
+              <li><span class="ov-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></span><b>Print &amp; PDF, two ways</b><span>Glass for a striking PDF. Paper for the office printer.</span></li>
+              <li><span class="ov-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg></span><b>Straight into Excel</b><span>One row per entry — date, day, task, job — ready to sort, filter and total.</span></li>
+              <li><span class="ov-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span><b>Copy, ready to paste</b><span>A dated, bulleted summary for an email, a timesheet or an invoice.</span></li>
+            </ul>
+          </div>
+
+          <div class="ov-group" style="--sec:#55d692">
+            <h3 class="ov-h3"><span>Keep safe</span>Your data, your device, your rules</h3>
+            <ul class="ov-feats">
+              <li><span class="ov-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span><b>Private by design</b><span>No account, no tracking, no cloud. Your log lives on your device.</span></li>
+              <li><span class="ov-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9L10 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2zM12 10v6M9 13l3 3 3-3"/></svg></span><b>Automatic backups</b><span>Pick a folder once. A dated backup lands there after every change.</span></li>
+              <li><span class="ov-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></svg></span><b>Undo everything</b><span>Deleted the wrong thing? Undo it — even a minute later.</span></li>
+              <li><span class="ov-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg></span><b>Backups you can open</b><span>An exact JSON copy, or a CSV for Excel. Import either one back.</span></li>
+            </ul>
+          </div>
+
+          <div class="ov-built">
+            <h3 class="ov-h3 plain">Built properly</h3>
+            <ul>
+              <li><span class="ov-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M6 9h.01M10 9h.01M14 9h.01M18 9h.01M6 13h.01M18 13h.01M8 16h8"/></svg></span><b>Keyboard-first</b><span>A shortcut for every everyday action</span></li>
+              <li><span class="ov-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="4.5" r="1.5"/><path d="M5 8l7 1.5L19 8M12 9.5V15l-3 6M12 15l3 6"/></svg></span><b>Accessible</b><span>Built to WCAG 2.1 AA, checked on every release</span></li>
+              <li><span class="ov-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M8 21h8M12 18v3"/></svg></span><b>Installs as an app</b><span>Its own window and icon, and it works offline</span></li>
+              <li><span class="ov-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg></span><b>Fast at any size</b><span>Tested with 10,000 entries — still instant</span></li>
+            </ul>
+          </div>
+
+          <ul class="ov-numbers" aria-label="Docket in numbers">
+            <li><b>0</b><span>sign-ups or accounts</span></li>
+            <li><b>0</b><span>servers that see your log</span></li>
+            <li><b>30</b><span>automatic backups kept</span></li>
+            <li><b>1</b><span>file runs it anywhere</span></li>
+          </ul>
+        </section>
+
+        <!-- 4 · roadmap -->
+        <section class="ov-page ov-road" aria-labelledby="ovRoad">
+          <p class="ov-eyebrow">Roadmap</p>
+          <h2 class="ov-h2" id="ovRoad">Where Docket is <em>heading next.</em></h2>
+          <p class="ov-lead sm">Docket grows with the people who use it. Here's what's planned — shaped by what you ask for.</p>
+
+          <div class="ov-cols">
+            <div class="ov-col now">
+              <h3><span class="ov-stage">Now</span>Being designed</h3>
+              <ul>
+                <li><span class="ov-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span><b>Hours &amp; rates</b><span>Add time and a rate to any entry, with totals per job, week and month.</span></li>
+                <li><span class="ov-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 2v20l3-2 3 2 3-2 3 2 3-2 2 2V2l-2 2-3-2-3 2-3-2-3 2-3-2Z"/><path d="M8 9h8M8 13h6"/></svg></span><b>Invoice-ready reports</b><span>Turn a job's hours into a totalled report you can send the client.</span></li>
+                <li><span class="ov-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span><b>Job details</b><span>Client, site address and contact, kept with each job.</span></li>
+              </ul>
+            </div>
+            <div class="ov-col next">
+              <h3><span class="ov-stage">Next</span>Coming after</h3>
+              <ul>
+                <li><span class="ov-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h3l2-3h6l2 3h3a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2z"/><circle cx="12" cy="13" r="4"/></svg></span><b>Photos on entries</b><span>Snap the work on site and keep it with the day.</span></li>
+                <li><span class="ov-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></span><b>Reminders</b><span>A nudge when a recurring task is due.</span></li>
+                <li><span class="ov-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span><b>Quick phrases</b><span>Save the entries you type every week; add them in one tap.</span></li>
+                <li><span class="ov-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L2 12V2h10l8.6 8.6a2 2 0 0 1 0 2.8zM7 7h.01"/></svg></span><b>Tags &amp; filters</b><span>Slice the log by type of work, across every job.</span></li>
+              </ul>
+            </div>
+            <div class="ov-col later">
+              <h3><span class="ov-stage">Later</span>On the horizon</h3>
+              <ul>
+                <li><span class="ov-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 0 1-15.5 6.3L3 16M3 12a9 9 0 0 1 15.5-6.3L21 8M21 3v5h-5M3 21v-5h5"/></svg></span><b>Sync across devices</b><span>Optional and end-to-end encrypted: one log on phone and computer.</span></li>
+                <li><span class="ov-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="4"/><path d="M1 21a8 8 0 0 1 16 0M17 4a4 4 0 0 1 0 8M23 21a8 8 0 0 0-5-7.4"/></svg></span><b>Team mode</b><span>Share jobs with a crew and see everyone's work in one place.</span></li>
+                <li><span class="ov-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg></span><b>Accounting exports</b><span>Send hours straight to Xero, QuickBooks or Sage.</span></li>
+                <li><span class="ov-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4"/></svg></span><b>Voice entry</b><span>Say what you did; Docket writes it down.</span></li>
+              </ul>
+            </div>
+          </div>
+          <p class="ov-fine">A roadmap is a plan, not a promise: what comes first may change as we learn what helps most.</p>
+
+          <div class="ov-cta">
+            <span class="ov-glyph big"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="9" y="6" width="14" height="21" rx="2.5"/><rect x="12" y="3.5" width="8" height="4.5" rx="1.5" class="fill"/><path d="M12 16l2.6 2.6 5.4-5.8"/></svg></span>
+            <div>
+              <p class="ov-ctah">Start today. Your first entry takes under a minute.</p>
+              <p>Open Docket in any browser and install it as an app — or keep the single-file version on your desktop. No sign-up, no account, nothing to set up.</p>
+            </div>
+          </div>
+          <p class="ov-foot">Docket <span class="ov-ver"></span> · Your workday, on the record.</p>
+        </section>
+
+      </div>
+    </div>
+  </div>
+</div>
+<!-- overview:end -->
 
 <div class="overlay search" id="searchOverlay">
   <div class="modal searchbox" role="dialog" aria-modal="true" aria-label="Search">

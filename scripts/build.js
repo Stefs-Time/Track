@@ -13,6 +13,8 @@
  *   dist/sw.js                 service worker, stamped with a build id so a
  *                              new release replaces the old offline cache
  *   dist/icons/*               app icons
+ *   dist/Docket-Overview.pdf   "Docket at a glance" — features and roadmap,
+ *                              made by `npm run overview` (src/overview/)
  *   dist/*.br, dist/*.gz       precompressed copies of the text files, which
  *                              server.js sends to browsers that accept them
  *
@@ -29,6 +31,7 @@ const ROOT = path.resolve(__dirname, "..");
 const SRC = path.join(ROOT, "src");
 const DIST = path.join(ROOT, "dist");
 const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, "package.json"), "utf8"));
+const overview = require("./overview-source");
 
 function read(file) {
   return fs.readFileSync(path.join(SRC, file), "utf8");
@@ -95,6 +98,16 @@ function build() {
   if (fs.existsSync(path.join(SRC, "sw.js"))) {
     const buildId = pkg.version + "-" + crypto.createHash("sha256").update(html).digest("hex").slice(0, 10);
     fs.writeFileSync(path.join(DIST, "sw.js"), read("sw.js").split("__BUILD_ID__").join(buildId));
+  }
+
+  // the features-and-roadmap PDF: shipped as made, with a nudge if it's stale
+  if (fs.existsSync(overview.PDF)) {
+    fs.copyFileSync(overview.PDF, path.join(DIST, path.basename(overview.PDF)));
+    if (overview.recordedHash() !== overview.overviewHash()) {
+      console.warn("build: Docket at a glance has changed since its PDF was made — run `npm run overview`");
+    }
+  } else {
+    console.warn("build: no Docket at a glance PDF yet — run `npm run overview`");
   }
 
   const brSize = precompress();

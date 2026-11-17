@@ -29,7 +29,7 @@ module.exports = [
   },
   {
     // page.evaluate() / addInitScript() callbacks run in the browser
-    files: ["tests/**/*.js", "scripts/screenshots.js", "scripts/icons.js"],
+    files: ["tests/**/*.js", "scripts/screenshots.js", "scripts/icons.js", "scripts/overview.js"],
     languageOptions: { globals: { ...globals.browser } }
   }
 ];

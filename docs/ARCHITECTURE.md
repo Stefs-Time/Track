@@ -257,6 +257,39 @@ replace the chosen report at the last moment. Job colours arrive the
 same way as on screen, as `--job` set by `tintJob`; a job's report sets it on
 the whole report.
 
+## Docket at a glance (features and roadmap)
+
+A designed, four-page overview — cover, two pages of features, roadmap —
+for showing someone what Docket does. Its markup is one block in
+`index.html` and its styles one block in `styles.css`, each between
+`overview:start` and `overview:end` markers, so it can be found and changed
+in one place.
+
+- **On screen** it's a dialog (`#overviewOverlay`); the pages are cards that
+  reflow to one column on a phone.
+- **On paper** (`body.print-overview`, set by `preparePrint` whenever the
+  dialog is open) each `.ov-page` is exactly one A4 sheet, edge to edge, with
+  its own aurora background. Animations are switched off in print, because
+  printing restarts them and the dialog's fade-in would print invisible.
+  Gradient-filled headline words print in a solid accent, as some PDF
+  viewers draw a hairline box around gradient-clipped text.
+- **The PDF** is made ahead of time, not in the browser: `npm run overview`
+  opens the built app, prints the pages with Chromium and writes
+  `src/overview/Docket-Overview.pdf`, refusing if any page's content runs off
+  its sheet. The build copies it to `dist/`; the server sends it with
+  `no-cache`, since its name stays the same across releases.
+- **Download PDF** fetches that file and saves it. When there's nothing to
+  fetch — opened as a file, or offline before it was ever downloaded — it
+  prints the pages instead, and the print dialog's *Save as PDF* makes the
+  same thing.
+- **Keeping it current.** `scripts/overview-source.js` hashes the two marked
+  blocks and the version. `npm run overview` records the hash in
+  `src/overview/source.sha256`; the build warns, and `overview.spec.js`
+  fails, when they differ. The version is in the hash because the cover
+  shows it, so every release re-makes the PDF.
+
+The roadmap's words also live in `docs/ROADMAP.md`; change both together.
+
 ## Reports and pasted lists
 
 Both exist for whoever does the paperwork, and neither changes the model.
@@ -322,6 +355,7 @@ real server in Chromium:
 | `layout` | three columns on PC, the small-laptop and phone fallbacks |
 | `robustness` | blocked storage, damaged data and impossible dates, oversized imports, two tabs (including Due today skips), stale undo |
 | `safety` | CSV formula guard, undoing imports, the backup reminder, the error net, midnight, a speed budget at 10,000 entries |
+| `overview` | Docket at a glance: opening it, its pages, downloading the PDF, the print fallback, one A4 page per section, and that the PDF is up to date |
 | `backoffice` | Reports: periods, job filters, copy, the Excel sheet, printing a chosen report in Glass or Paper; pasting a list into the entry, Wishlist and Recurring boxes |
 | `organise` | archiving and restoring jobs, printable day, week, month and job reports |
 | `recurring` | recurring schedules, the Due today strip, schedules and archived jobs through CSV and JSON |
