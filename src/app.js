@@ -3314,7 +3314,7 @@
   function preparePrint() {
     // printing with Docket at a glance open prints the overview's pages
     if ($("overviewOverlay").classList.contains("open")) {
-      document.body.classList.add("print-overview");
+      prepareOverviewPrint();
       return;
     }
     buildReport(printSpec);
@@ -3513,9 +3513,32 @@
     overviewOpener = null;
     if (back) back.focus();
   }
+  // Each page must fit its A4 sheet whatever fonts this computer has: lay
+  // the pages out at A4 size, and zoom down the contents of any page that
+  // runs over (styles.css, "A4 pages"). Measured synchronously, so the A4
+  // layout is never painted.
+  function fitOverviewPages() {
+    var ov = $("overview");
+    ov.classList.add("ov-measure");
+    [].forEach.call(ov.querySelectorAll(".ov-page"), function (p) {
+      p.style.removeProperty("--fit");
+      var cs = getComputedStyle(p);
+      var pad = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
+      var fit = 1;
+      for (var i = 0; i < 4 && p.scrollHeight > p.clientHeight + 1; i++) {
+        fit *= 0.99 * (p.clientHeight - pad) / (p.scrollHeight - pad);
+        p.style.setProperty("--fit", fit.toFixed(3));
+      }
+    });
+    ov.classList.remove("ov-measure");
+  }
+  function prepareOverviewPrint() {
+    fitOverviewPages();
+    document.body.classList.add("print-overview");
+  }
   function printOverview() {
     toast("Choose “Save as PDF” as the printer to keep a copy");
-    document.body.classList.add("print-overview");
+    prepareOverviewPrint();
     window.print();
   }
   function downloadOverview() {

@@ -96,3 +96,19 @@ test("the single file prints it, one A4 page per section, nothing cut off", asyn
   await page.evaluate(() => window.dispatchEvent(new Event("afterprint")));
   await page.emulateMedia({ media: "screen" });
 });
+
+test("a wider font still fits every page: its contents shrink to the sheet", async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem("track.helpseen.v1", "1"));
+  await page.goto(FILE_APP);
+  // DejaVu Sans, common on Linux, sets text noticeably wider than the fonts the PDF is made with
+  await page.addStyleTag({ content: ':root { --font: "DejaVu Sans", sans-serif; --display: "DejaVu Sans", sans-serif; }' });
+  await page.click("#overviewBtn");
+  await page.evaluate(() => window.dispatchEvent(new Event("beforeprint")));
+  await page.emulateMedia({ media: "print" });
+  const pages = await page.$$eval(".ov-page", (els) => els.map((e) => [e.scrollHeight - e.clientHeight, e.style.getPropertyValue("--fit") || "1"]));
+  check(pages.every(([extra]) => extra <= 1), "nothing runs off a page: " + JSON.stringify(pages));
+  check(pages.every(([, fit]) => Number(fit) >= 0.85), "…and nothing had to shrink much to fit: " + JSON.stringify(pages));
+  await page.evaluate(() => window.dispatchEvent(new Event("afterprint")));
+  await page.emulateMedia({ media: "screen" });
+  check(!(await page.evaluate(() => document.querySelector(".overview").classList.contains("ov-measure"))), "the A4 measuring layout never stays on screen");
+});

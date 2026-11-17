@@ -273,6 +273,13 @@ in one place.
   printing restarts them and the dialog's fade-in would print invisible.
   Gradient-filled headline words print in a solid accent, as some PDF
   viewers draw a hairline box around gradient-clipped text.
+- **Fitting each sheet.** Fonts differ between computers, and a wider one
+  (DejaVu Sans, common on Linux) pushes a page's content past its sheet.
+  Before printing, `fitOverviewPages` adds `.ov-measure`, which lays the
+  pages out at A4 size, and gives any page that runs over a `--fit` zoom
+  for its contents; the class comes off in the same task, so it is never
+  painted. The phone reflow is a container query on `.overview` (not a
+  media query), so measuring at A4 width works on a phone too.
 - **The PDF** is made ahead of time, not in the browser: `npm run overview`
   opens the built app, prints the pages with Chromium and writes
   `src/overview/Docket-Overview.pdf`, refusing if any page's content runs off

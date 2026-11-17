@@ -32,7 +32,7 @@ const APP = pathToFileURL(path.resolve(__dirname, "..", "dist", "Docket.html")).
   await page.click("#overviewBtn");
   await page.evaluate(async () => {
     document.title = "Docket at a glance — features and roadmap";
-    document.body.classList.add("print-overview");
+    window.dispatchEvent(new Event("beforeprint")); // as printing does: fits each page to its sheet
     await document.fonts.ready;
   });
   await page.emulateMedia({ media: "print" });

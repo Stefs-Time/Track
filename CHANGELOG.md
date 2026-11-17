@@ -16,6 +16,9 @@ All notable changes to Docket. Versions follow [Semantic Versioning](https://sem
   feature is built.
 - `npm run overview` re-makes the PDF; a test fails if the overview changes
   and the PDF isn't re-made.
+- Printed from the app, each page of the overview shrinks its contents just
+  enough to fit its A4 sheet when the computer's fonts are wider than the
+  ones the PDF was made with, instead of running off the bottom.
 
 ## [3.3.0] — 2026-11-13
 
