@@ -18,6 +18,7 @@ const STATES = [
   ["Clear data dialog", async (p) => { await p.keyboard.press("Escape"); await p.click("#clearAllBtn"); }],
   ["Reports dialog", async (p) => { await p.keyboard.press("Escape"); await p.click("#reportBtn"); }],
   ["Reports, nothing in the period", async (p) => { await p.fill("#repFrom", "2001-01-01"); await p.fill("#repTo", "2001-01-02"); }],
+  ["Docket at a glance", async (p) => { await p.keyboard.press("Escape"); await p.click("#overviewBtn"); }],
   ["search", async (p) => { await p.keyboard.press("Escape"); await p.click("#searchBtn"); await p.fill("#searchInput", "smith"); }],
   // the message bar, held fully shown (on its own it fades on a timer)
   ["message", async (p) => {

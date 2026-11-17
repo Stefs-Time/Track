@@ -21,6 +21,7 @@ It comes two ways, from the same code:
 - **Reports for the paperwork.** **Reports** (or `R`) pulls out any stretch of the log — last week, last month, this year or your own dates — for every job, one job, or entries with none. Print it, copy it as text, or save it as a sheet for Excel with one row per entry.
 - **Two print styles.** *Glass* is Docket's dark look, best saved as a PDF. *Paper* is white and ink-friendly, best for a printer. Docket remembers which you use.
 - **Paste a whole list.** Paste several lines into the empty entry box and each becomes its own entry, on the job in the Job box. Bullets and numbering are dropped, and Undo takes the whole paste back. Works in the Wishlist and Recurring boxes too.
+- **Docket at a glance.** The ✦ button opens a short, designed overview of every feature and the roadmap. **Download PDF** saves it to keep, print or send to a client or colleague. See [docs/ROADMAP.md](docs/ROADMAP.md).
 - **Search everything.** `/` or Ctrl+K finds any entry, job, wishlist or recurring item — by words, job or date — and jumps straight to it.
 - **Reorder anywhere.** Drag entries up or down in the Day, Week or Job view, or use ↑ ↓ on the keyboard; touch screens get ▲ ▼ buttons. Copies and exports follow your order.
 - **Quick add from the week.** The + on any Week card logs straight onto that day.
@@ -78,6 +79,7 @@ npm run dev                       # rebuilds on change and serves http://localho
 | `npm test` | Builds, then runs every Playwright suite: features, user journeys, accessibility, the server |
 | `npm run check` | ESLint plus syntax checks of the browser scripts |
 | `npm run screenshots` | Regenerates the images in `docs/screenshots/` |
+| `npm run overview` | Re-makes the Docket at a glance PDF (`src/overview/`) from its pages in the app |
 | `npm run icons` | Renders the PNG app icons from `src/icons/icon.svg` |
 
 Local settings go in an optional `.env` (copy `.env.example`); the server reads it on start.
@@ -92,15 +94,19 @@ src/
   sw.js                  service worker (offline support)
   manifest.webmanifest   PWA manifest
   icons/                 app icons (icon.svg is the source)
+  overview/              Docket at a glance as a PDF, made by `npm run overview`
 scripts/
   build.js               inlines CSS + JS into one file, precompresses → dist/
   dev.js                 build-watch + server, cross-platform
   screenshots.js         regenerates docs/screenshots/
+  overview.js            prints Docket at a glance to src/overview/
+  overview-source.js     what the overview PDF is made from, and its hash
   icons.js               renders the PNG icons from icons/icon.svg
 tests/                   Playwright suites (see docs/ARCHITECTURE.md for what each covers)
 docs/
   ARCHITECTURE.md        how the code fits together, and the rules every change follows
   DATA-FORMAT.md         the JSON and CSV formats, storage keys, validation
+  ROADMAP.md             what's planned next
   screenshots/           images used in this README
 .github/workflows/       CI on every push and pull request; Release on version tags
 server.js                Express server for hosting the app
@@ -147,8 +153,8 @@ The build precompresses the page (brotli and gzip), so it downloads at about a f
 ## Releasing
 
 1. Bump `version` in `package.json` (then `npm install --package-lock-only` to match the lockfile) and add a section to `CHANGELOG.md`.
-2. If the look changed, run `npm run screenshots`.
+2. Run `npm run overview` (the overview's cover shows the version, so a test fails until it is re-made). If the look changed, run `npm run screenshots` too.
 3. Commit, then tag and push the same version: `git tag vX.Y.Z && git push origin vX.Y.Z`.
-4. The **Release** workflow checks the tag matches `package.json`, runs the tests, and publishes a GitHub Release with `Docket.html` attached, ready to download.
+4. The **Release** workflow checks the tag matches `package.json`, runs the tests, and publishes a GitHub Release with `Docket.html` and `Docket-Overview.pdf` attached, ready to download.
 
 **CI** runs on every push and pull request: a dependency audit of what ships (`npm audit --omit=dev`, failing on high severity), lint, then the full test suite. Each run uploads the built `Docket.html`, and the test report when something fails. CI and Release run on a pinned `ubuntu-24.04`, because a new `ubuntu-latest` image can arrive before Playwright supports it.

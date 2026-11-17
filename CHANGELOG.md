@@ -2,6 +2,24 @@
 
 All notable changes to Docket. Versions follow [Semantic Versioning](https://semver.org/).
 
+## [3.4.0] — 2026-11-17
+
+### Added
+- **Docket at a glance.** A new ✦ button (top right, and *Features & roadmap*
+  in the guide) opens a designed overview of Docket: a cover, every feature
+  grouped into Capture, See, Share and Keep safe, and the roadmap — Now, Next
+  and Later. It's made for showing Docket to a client, a colleague or a boss.
+- **Download PDF** saves the overview as a four-page A4 PDF in Docket's glass
+  look. The single-file version, which has no server to fetch it from, prints
+  the same pages instead (choose *Save as PDF*).
+- `docs/ROADMAP.md`: the roadmap, with what needs settling before each
+  feature is built.
+- `npm run overview` re-makes the PDF; a test fails if the overview changes
+  and the PDF isn't re-made.
+- Printed from the app, each page of the overview shrinks its contents just
+  enough to fit its A4 sheet when the computer's fonts are wider than the
+  ones the PDF was made with, instead of running off the bottom.
+
 ## [3.3.0] — 2026-11-13
 
 For whoever does the paperwork.

@@ -3312,13 +3312,18 @@
   // Ctrl+P (or the browser's own Print) prints the open view's report too.
   var printSpec = null; // the Reports dialog's choice, while it is being printed
   function preparePrint() {
+    // printing with Docket at a glance open prints the overview's pages
+    if ($("overviewOverlay").classList.contains("open")) {
+      prepareOverviewPrint();
+      return;
+    }
     buildReport(printSpec);
     document.body.classList.add("print-report");
     document.body.classList.toggle("print-paper", printStyle() === "paper");
   }
   window.addEventListener("beforeprint", preparePrint);
   window.addEventListener("afterprint", function () {
-    document.body.classList.remove("print-report", "print-paper");
+    document.body.classList.remove("print-report", "print-paper", "print-overview");
     printSpec = null;
   });
   $("printBtn").addEventListener("click", function () {
@@ -3487,6 +3492,79 @@
     preparePrint();
     window.print();
   });
+
+  // ---------- Docket at a glance ----------
+  // A few designed pages: every feature, and the roadmap. Download PDF saves
+  // the ready-made PDF the server ships beside the page
+  // (src/overview/Docket-Overview.pdf, printed from these same pages by
+  // `npm run overview`). Opened as a file, or offline before it was ever
+  // fetched, there's nothing to download — so the pages are printed instead,
+  // and the print dialog's Save as PDF makes the same file.
+  var OVERVIEW_FILE = "Docket-Overview.pdf";
+  var overviewOpener = null;
+  function openOverview() {
+    overviewOpener = document.activeElement;
+    $("overviewOverlay").classList.add("open");
+    $("ovDownload").focus();
+  }
+  function closeOverview() {
+    $("overviewOverlay").classList.remove("open");
+    var back = overviewOpener && document.contains(overviewOpener) && overviewOpener.offsetParent !== null ? overviewOpener : $("overviewBtn");
+    overviewOpener = null;
+    if (back) back.focus();
+  }
+  // Each page must fit its A4 sheet whatever fonts this computer has: lay
+  // the pages out at A4 size, and zoom down the contents of any page that
+  // runs over (styles.css, "A4 pages"). Measured synchronously, so the A4
+  // layout is never painted.
+  function fitOverviewPages() {
+    var ov = $("overview");
+    ov.classList.add("ov-measure");
+    [].forEach.call(ov.querySelectorAll(".ov-page"), function (p) {
+      p.style.removeProperty("--fit");
+      var cs = getComputedStyle(p);
+      var pad = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
+      var fit = 1;
+      for (var i = 0; i < 4 && p.scrollHeight > p.clientHeight + 1; i++) {
+        fit *= 0.99 * (p.clientHeight - pad) / (p.scrollHeight - pad);
+        p.style.setProperty("--fit", fit.toFixed(3));
+      }
+    });
+    ov.classList.remove("ov-measure");
+  }
+  function prepareOverviewPrint() {
+    fitOverviewPages();
+    document.body.classList.add("print-overview");
+  }
+  function printOverview() {
+    toast("Choose “Save as PDF” as the printer to keep a copy");
+    prepareOverviewPrint();
+    window.print();
+  }
+  function downloadOverview() {
+    if (location.protocol !== "http:" && location.protocol !== "https:") { printOverview(); return; }
+    var btn = $("ovDownload");
+    btn.disabled = true;
+    fetch(OVERVIEW_FILE).then(function (res) {
+      if (!res.ok || (res.headers.get("Content-Type") || "").indexOf("pdf") === -1) throw new Error("no overview PDF");
+      return res.blob();
+    }).then(function (blob) {
+      downloadFile(OVERVIEW_FILE, blob, "application/pdf");
+      toast("Docket at a glance downloaded");
+    }).catch(function () {
+      printOverview();
+    }).then(function () {
+      btn.disabled = false;
+    });
+  }
+  $("overviewBtn").addEventListener("click", openOverview);
+  $("helpOverview").addEventListener("click", function () {
+    closeHelp();
+    openOverview();
+  });
+  $("ovClose").addEventListener("click", closeOverview);
+  $("ovDownload").addEventListener("click", downloadOverview);
+  $("overviewOverlay").addEventListener("click", function (e) { if (e.target === this) closeOverview(); });
 
   // ---------- clear data ----------
   // Wipes the chosen stores so a backup can be re-imported onto a clean
@@ -3829,6 +3907,7 @@
   $("helpOverlay").addEventListener("keydown", trapFocus);
   $("clearOverlay").addEventListener("keydown", trapFocus);
   $("reportOverlay").addEventListener("keydown", trapFocus);
+  $("overviewOverlay").addEventListener("keydown", trapFocus);
   $("helpBtn").addEventListener("click", openHelp);
   $("helpClose").addEventListener("click", closeHelp);
   $("helpDone").addEventListener("click", closeHelp);
@@ -3846,6 +3925,10 @@
     }
     if ($("reportOverlay").classList.contains("open")) {
       if (e.key === "Escape") closeReport();
+      return;
+    }
+    if ($("overviewOverlay").classList.contains("open")) {
+      if (e.key === "Escape") closeOverview();
       return;
     }
     if ($("searchOverlay").classList.contains("open")) return; // search handles its own keys
@@ -3937,6 +4020,7 @@
   // stays free of console errors.
   var APP_VERSION = "__APP_VERSION__";
   $("appVersion").textContent = "Docket " + APP_VERSION;
+  [].forEach.call(document.querySelectorAll(".ov-ver"), function (el) { el.textContent = "v" + APP_VERSION; });
   var served = location.protocol === "https:" || location.protocol === "http:";
   if (served) {
     var mf = document.createElement("link");

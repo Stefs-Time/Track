@@ -1,5 +1,5 @@
 # Push a tag like v2.0.0 (matching package.json) to publish a GitHub Release
-# with the standalone Docket.html attached as the download.
+# with the standalone Docket.html and the Docket at a glance PDF attached.
 name: Release
 
 on:
@@ -34,4 +34,4 @@ jobs:
       - name: Publish release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "$GITHUB_REF_NAME" dist/Docket.html --title "Docket $GITHUB_REF_NAME" --generate-notes
+        run: gh release create "$GITHUB_REF_NAME" dist/Docket.html dist/Docket-Overview.pdf --title "Docket $GITHUB_REF_NAME" --generate-notes

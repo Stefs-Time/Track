@@ -89,8 +89,9 @@ function applyHeaders(res, file) {
   const name = path.basename(file);
   if (name.endsWith(".html")) {
     res.set({ "Content-Security-Policy": pageCsp(), "Cache-Control": "no-cache" });
-  } else if (name === "sw.js" || name === "manifest.webmanifest") {
-    // the browser must always check these, or updates never land
+  } else if (name === "sw.js" || name === "manifest.webmanifest" || name.endsWith(".pdf")) {
+    // the browser must always check these, or updates never land (the
+    // overview PDF keeps its name from release to release)
     res.set("Cache-Control", "no-cache");
   } else {
     res.set("Cache-Control", "public, max-age=604800");
